@@ -334,6 +334,7 @@ angular.module('sceneList').component('sceneList', {
                         pageNumberForInfScroll = 0;
 
                     }
+                    self.totalItems = 0;
                     $scope.$emit('list:filtered');
                     didSectionListWrapperLoad = true;
 
