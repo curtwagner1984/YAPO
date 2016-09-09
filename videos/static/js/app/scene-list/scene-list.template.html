@@ -192,9 +192,18 @@
     </div>
     -->
 
+    <md-virtual-repeat-container id="vertical-container">
+      <div md-virtual-repeat="item in $ctrl.infiniteScenes" class="repeated-item" flex="">
+        {{item.name}}
+      </div>
+    </md-virtual-repeat-container>
+
 
     <div class="top md-whiteframe-z1"
          infinite-scroll="$ctrl.infNextPage()"
+
+
+         infinite-scroll-listen-for-event="list:filtered"
 
          infinite-scroll-disabled="$ctrl.working"
          infinite-scroll-distance="3">

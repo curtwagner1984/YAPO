@@ -148,11 +148,20 @@ angular.module('sceneList').component('sceneList', {
             var pageNumberForInfScroll = 0;
 
             self.infNextPage = function () {
+
+                console.log("self.totalItems are " + self.totalItems);
+                console.log("self.infiniteScenes are " + self.infiniteScenes.length);
                 
                 if (self.working){
                     console.log("Inf scroll tried to load, but another call was already in progress...");
                     return;
                 }
+
+                if (self.totalItems < self.infiniteScenes.length){
+                    console.log("Reached the end of result query...");
+                    return;
+                }
+
                 self.working = true;
                 
                 self.nextPage(pageNumberForInfScroll);
@@ -224,7 +233,8 @@ angular.module('sceneList').component('sceneList', {
 
             if (self.treeFolder != undefined) {
                 self.folder = self.treeFolder;
-                self.nextPage(0);
+                pageNumberForInfScroll = 0;
+                // self.nextPage(0);
             }
 
             $scope.$on("paginationChange", function (event, pageInfo) {
@@ -245,7 +255,8 @@ angular.module('sceneList').component('sceneList', {
             $scope.$on("actorLoaded", function (event, actor) {
 
                 self.actor = actor;
-                self.nextPage(0);
+                // self.nextPage(0);
+                pageNumberForInfScroll = 0;
 
 
                 actorLoaded = true;
@@ -258,7 +269,8 @@ angular.module('sceneList').component('sceneList', {
             $scope.$on("playlistLoaded", function (event, playlist) {
 
                 self.playlist = playlist;
-                self.nextPage(0);
+                pageNumberForInfScroll = 0;
+                // self.nextPage(0);
 
 
                 self.playlistLoaded = true;
@@ -271,7 +283,8 @@ angular.module('sceneList').component('sceneList', {
 
             $scope.$on("sceneTagLoaded", function (event, sceneTag) {
                 self.sceneTag = sceneTag;
-                self.nextPage(0);
+                // self.nextPage(0);
+                pageNumberForInfScroll = 0;
                 sceneTagLoaded = true;
             });
 
@@ -281,7 +294,8 @@ angular.module('sceneList').component('sceneList', {
 
             $scope.$on("websiteLoaded", function (event, website) {
                 self.website = website;
-                self.nextPage(0);
+                // self.nextPage(0);
+                pageNumberForInfScroll = 0;
                 websiteLoaded = true
             });
 
@@ -298,7 +312,8 @@ angular.module('sceneList').component('sceneList', {
                 self.recursive = folder['recursive'];
                 // alert(folder['recursive']);
                 // self.scenes = [];
-                self.nextPage(0);
+                // self.nextPage(0);
+                pageNumberForInfScroll = 0;
                 folderLoaded = true;
             });
 
@@ -315,8 +330,11 @@ angular.module('sceneList').component('sceneList', {
 
                     if (sortOrder.mainPage == undefined || sortOrder.mainPage == true) {
 
-                        self.nextPage(0);
+                        // self.nextPage(0);
+                        pageNumberForInfScroll = 0;
+
                     }
+                    $scope.$emit('list:filtered');
                     didSectionListWrapperLoad = true;
 
                 }
@@ -638,7 +656,8 @@ angular.module('sceneList').component('sceneList', {
                     self.infiniteScenes = [];
                     self.searchTerm = searchTerm['searchTerm'];
                     self.searchField = searchTerm['searchField'];
-                    self.nextPage(0);
+                    // self.nextPage(0);
+                    pageNumberForInfScroll = 0;
                 }
 
             });
@@ -650,7 +669,8 @@ angular.module('sceneList').component('sceneList', {
                     self.scenes = [];
                     self.infiniteScenes = [];
                     self.runnerUp = runnerUp['runnerUp'];
-                    self.nextPage(0);
+                    // self.nextPage(0);
+                    pageNumberForInfScroll = 0;
                 }
 
             });
