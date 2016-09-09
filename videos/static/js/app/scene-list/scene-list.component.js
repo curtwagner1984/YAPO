@@ -15,8 +15,8 @@ angular.module('sceneList').component('sceneList', {
         mainPage: '=',
         treeFolder: '='
     },
-    controller: ['$scope', 'Scene', 'helperService', 'scopeWatchService', 'pagerService', 'Actor', 'Website', 'SceneTag', '$http', '$rootScope',
-        function SceneListController($scope, Scene, helperService, scopeWatchService, pagerService, Actor, Website, SceneTag, $http, $rootScope) {
+    controller: ['$scope', 'Scene', 'helperService', 'scopeWatchService', 'pagerService', 'Actor', 'Website', 'SceneTag', '$http', '$rootScope', '$q',
+        function SceneListController($scope, Scene, helperService, scopeWatchService, pagerService, Actor, Website, SceneTag, $http, $rootScope, $q) {
 
             var self = this;
             var actorLoaded = false;
@@ -24,8 +24,17 @@ angular.module('sceneList').component('sceneList', {
             var websiteLoaded = false;
             var folderLoaded = false;
             var didSectionListWrapperLoad = false;
+            self.gotPromise = false;
+            self.working =false;
+            $scope.gotPromiseSceneList = false;
+
+            self.isSomethingLoaded = function () {
+                return actorLoaded || sceneTagLoaded || websiteLoaded || folderLoaded || didSectionListWrapperLoad
+            };
+
             self.playlistLoaded = false;
 
+            self.sceneArray = [];
             self.sceneArray = [];
 
             self.scenesToAdd = [];
@@ -136,6 +145,21 @@ angular.module('sceneList').component('sceneList', {
 
             };
 
+            var pageNumberForInfScroll = 0;
+
+            self.infNextPage = function () {
+                
+                if (self.working){
+                    console.log("Inf scroll tried to load, but another call was already in progress...");
+                    return;
+                }
+                self.working = true;
+                
+                self.nextPage(pageNumberForInfScroll);
+                pageNumberForInfScroll++;
+                
+            };
+
             self.nextPage = function (currentPage) {
                 // self.sceneArrayClear();
                 console.log("scene-list: nextPage function triggered!");
@@ -169,11 +193,22 @@ angular.module('sceneList').component('sceneList', {
                         pageInfo: res[1]
                     };
 
-                    scopeWatchService.paginationInit(paginationInfo);
+                    // scopeWatchService.paginationInit(paginationInfo);
+
+                    self.totalItems = parseInt(paginationInfo.pageInfo.replace(/.*<(\d+)>; rel="count".*/, '$1'));
+
 
                     self.scenes = helperService.resourceToArray(res[0]);
 
+                    self.numberOfItemsReturned = self.scenes.length;
+                    self.infiniteScenes = self.infiniteScenes.concat(self.scenes);
+
                     self.sceneArraystore();
+                    self.gotPromise = true;
+                    self.gotPromiseForInfScroll = true;
+                    $scope.gotPromiseSceneList = true;
+                    
+                    self.working = false
 
 
                 });
@@ -205,26 +240,6 @@ angular.module('sceneList').component('sceneList', {
             // this script is loaded so we miss it and don't load any scenes.
             // This workaround fire an event that checks if an actor was loaded if it was it then fire the
             // actorLoaded event that we can catch.
-
-            $scope.$on("sortOrderChanged", function (event, sortOrder) {
-                if (sortOrder['sectionType'] == 'SceneList') {
-                    console.log("Sort Order Changed!");
-                    self.scenes = [];
-                    self.sortBy = sortOrder['sortBy'];
-
-                    if (sortOrder.mainPage == undefined || sortOrder.mainPage == true) {
-
-                        self.nextPage(0);
-                    }
-                    didSectionListWrapperLoad = true;
-
-                }
-
-            });
-
-            if (!didSectionListWrapperLoad) {
-                scopeWatchService.didSectionListWrapperLoaded('SceneList')
-            }
 
 
             $scope.$on("actorLoaded", function (event, actor) {
@@ -278,6 +293,7 @@ angular.module('sceneList').component('sceneList', {
             $scope.$on("folderOpened", function (event, folder) {
                 console.log("scene-list: folderOpened broadcast was caught");
                 self.scenes = [];
+                self.infiniteScenes = [];
                 self.folder = folder['dir'];
                 self.recursive = folder['recursive'];
                 // alert(folder['recursive']);
@@ -288,6 +304,27 @@ angular.module('sceneList').component('sceneList', {
 
             if (!folderLoaded) {
                 scopeWatchService.didFolderLoad('a');
+            }
+
+            $scope.$on("sortOrderChanged", function (event, sortOrder) {
+                if (sortOrder['sectionType'] == 'SceneList') {
+                    console.log("Sort Order Changed!");
+                    self.scenes = [];
+                    self.infiniteScenes = [];
+                    self.sortBy = sortOrder['sortBy'];
+
+                    if (sortOrder.mainPage == undefined || sortOrder.mainPage == true) {
+
+                        self.nextPage(0);
+                    }
+                    didSectionListWrapperLoad = true;
+
+                }
+
+            });
+
+            if (!didSectionListWrapperLoad) {
+                scopeWatchService.didSectionListWrapperLoaded('SceneList')
             }
 
 
@@ -360,11 +397,11 @@ angular.module('sceneList').component('sceneList', {
 
                 var message = "";
 
-                if (originalPermDelete){    //If delete from disk
-                           message = "Are you really sure you want to delete the selected scene(s) from DISK?";
-                 } else {
-                          message = "Are you sure you want to remove the selected scene(s) from the DB?";
-                 }
+                if (originalPermDelete) {    //If delete from disk
+                    message = "Are you really sure you want to delete the selected scene(s) from DISK?";
+                } else {
+                    message = "Are you sure you want to remove the selected scene(s) from the DB?";
+                }
                 if (confirm(message)) self.removeItem(originalScene, originalItemToRemove, originalTypeOfItemToRemove, originalPermDelete);
 
             };
@@ -598,6 +635,7 @@ angular.module('sceneList').component('sceneList', {
 
                 if (searchTerm['sectionType'] == 'SceneList') {
                     self.scenes = [];
+                    self.infiniteScenes = [];
                     self.searchTerm = searchTerm['searchTerm'];
                     self.searchField = searchTerm['searchField'];
                     self.nextPage(0);
@@ -610,6 +648,7 @@ angular.module('sceneList').component('sceneList', {
                 if (runnerUp['sectionType'] == 'SceneList') {
                     console.log("Sort Order Changed!");
                     self.scenes = [];
+                    self.infiniteScenes = [];
                     self.runnerUp = runnerUp['runnerUp'];
                     self.nextPage(0);
                 }
@@ -671,11 +710,10 @@ angular.module('sceneList').component('sceneList', {
                 if (self.folder != undefined) {
                     folderId = self.folder.id
                 }
-                
-                if (self.playlist != undefined){
+
+                if (self.playlist != undefined) {
                     playlistId = self.playlist.id
                 }
-                
 
 
                 return $http.get('play-scene/', {
@@ -723,7 +761,98 @@ angular.module('sceneList').component('sceneList', {
                 }
 
 
-            }
+            };
+
+            self.infiniteScenes = [];
+
+
+            // In this example, we set up our model using a plain object.
+            // Using a class works too. All that matters is that we implement
+            // getItemAtIndex and getLength.
+            this.infiniteItems = {
+                numLoaded_: 0,
+                toLoad_: 0,
+                counter_: 1,
+                finished_: false,
+                // infiniteScenes_: [],
+
+
+                // Required.
+                getItemAtIndex: function (index) {
+                    if (index > this.numLoaded_ && !this.finished_) {
+                        this.fetchMoreItems_(index);
+                        return null;
+                    }
+
+                    if (self.totalItems == -6 || self.totalItems <= this.numLoaded_) {
+                        this.finished_ = true;
+                    }
+
+
+
+                    if (self.infiniteScenes[index] != undefined) {
+                        return self.infiniteScenes[index];
+                    } else {
+                        // return null;
+                    }
+
+
+                },
+
+                // Required.
+                // For infinite scroll behavior, we always return a slightly higher
+                // number than the previously loaded items.
+                getLength: function () {
+                    return this.numLoaded_ + 10;
+                },
+
+                fetchMoreItems_: function (index) {
+                    // For demo purposes, we simulate loading more items with a timed
+                    // promise. In real code, this function would likely contain an
+                    // $http request.
+
+                    if (this.toLoad_ < index && !this.finished_) {
+                        this.toLoad_ += 10;
+                        $scope.gotPromiseSceneList = false;
+                        self.nextPage(this.counter_);
+                        this.counter_ += 1;
+
+
+
+
+
+
+                        // while(!gotPromise){
+                        //
+                        // }
+                        // console.log("Got Promise");
+
+                        // $http.get('/api/scene/', {
+                        //     params: {
+                        //         offset: this.numLoaded_,
+                        //         limit: this.toLoad_
+                        //
+                        //     }
+                        //
+                        // }).then(function (response) {
+                        //
+                        //     for (var x = 0 ; x < response.data.length; x++){
+                        //         this.infiniteScenes_.push(response.data[x])
+                        //     }
+                        //
+                        //     // alert(angular.toJson(response));
+                        //     // self.response = response.data.vlc_path;
+                        //     // self.pathToVLC = response.data.vlc_path;
+                        //     // alert("Got response from server: " + self.pathToFolderToAdd);
+                        // }, function errorCallback(response) {
+                        //     alert("Something went wrong!" + angular.toJson(response));
+                        // });
+
+                        this.numLoaded_ = this.toLoad_;
+
+                    }
+                }
+            };
 
 
         }

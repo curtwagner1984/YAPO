@@ -217,7 +217,7 @@ class SceneListSerializer(serializers.ModelSerializer):
         # fields = ['id', 'name', 'path_to_file', 'path_to_dir', 'date_added', 'date_fav', 'date_runner_up', 'play_count',
         #           'is_fav', 'is_runner_up', 'rating', 'description', 'thumbnail', 'scene_tags', 'actors', 'websites' ]
         fields = ['id', 'name', 'actors', 'scene_tags', 'websites', 'thumbnail', 'folders_in_tree', 'is_runner_up',
-                  'rating', 'path_to_file']
+                  'rating', 'path_to_file', 'date_added']
 
         # fields = ['id', 'name']
 

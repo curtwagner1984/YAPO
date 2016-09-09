@@ -17,7 +17,215 @@
         Select None
     </button>
 
+    <!--
+    <div ng-if="$ctrl.gotPromise" class="virtualRepeatdemoInfiniteScroll">
+        <md-content layout="column">
+            <md-virtual-repeat-container md-auto-shrink="true" id="vertical-container">
 
+                <div md-virtual-repeat="scene in $ctrl.infiniteItems" md-on-demand="" class="repeated-item" flex="">
+                    <table>
+                        <td>
+                    <a href="/#!/scene/{{ scene.id }}">
+                        <img ng-src="{{ scene.thumbnail }}" class="thumb-wide"
+                             alt="{{ scene.name }}"
+                        />
+                    </a>
+                </td>
+                <td>
+                    <h4>
+            <span>
+                <md-checkbox ng-if="$ctrl.tagMultiple" ng-model="scene.selected"
+                             ng-click="$ctrl.sceneSelectToggle(scene)" aria-label="Checkbox 1">
+                </md-checkbox>
+
+                {{$index + 1}})
+                <a href="/#!/scene/{{ scene.id }}">  {{ scene.name }}</a>
+
+                            <span class="glyphicon glyphicon-play-circle on-hover-red-cursor-pointer"
+                                  uib-popover-html="'Play scene.'"
+                                  popover-trigger="mouseenter" popover-placement="right"
+                                  ng-click="$ctrl.playScene(scene)"
+
+
+                            ></span>
+
+                <label class="switch"
+                       uib-popover-html="'Toggle Runner Up.'"
+                       popover-trigger="mouseenter" popover-placement="top">
+                <input type="checkbox" ng-model="scene.is_runner_up" ng-change="$ctrl.sceneRunnerUpToggle(scene)">
+                <div class="slider round"></div>
+                </label>
+
+                </span>
+
+                    <span ng-click="$ctrl.confirmRemove(scene,scene,'delete',false)"
+                          class="glyphicon glyphicon-trash on-hover-red-cursor-pointer"
+                          uib-popover-html="'<strong>Remove</strong> scene(s) from the database!'"
+                          popover-trigger="mouseenter">
+
+                            </span>
+
+                    <span ng-if="$ctrl.tagMultiple" ng-click="$ctrl.confirmRemove(scene,scene,'delete',true)"
+                          class="glyphicon glyphicon-fire on-hover-red-cursor-pointer"
+                          uib-popover-html="'<h2><font color=&quot;red&quot;>CAUTION!</h2></font><strong>Will delete
+                           the scene(s) files from disk!</strong><i> Will only work if at least one
+                          item is checked, this is to avoid accidental deletion.'"
+                          popover-trigger="mouseenter">
+
+                    </span>
+                        <button
+
+                                class="btn btn-success btn-xs"
+                                popover-trigger="outsideClick"
+                                uib-popover-template="'static/partials/popover-templates/popover-playlist.template.html'"
+                                popover-append-to-body="true"
+                                popover-placement="top"
+                                type="button" class="btn btn-success">
+                                    <span
+                                            popover-trigger="mouseenter"
+                                            uib-popover-html="'Add Scene to a playlist.'"
+                                            popover-append-to-body="true"
+                                            popover-placement="top"
+
+                                            class="glyphicon glyphicon-plus"></span>
+                        </button>
+
+                        <span ng-click="$ctrl.removeSceneFromPlaylist(scene)">
+                            <button
+                                    ng-if="$ctrl.playlistLoaded"
+
+                                    class="btn btn-danger btn-xs"
+                                    popover-trigger="mouseenter"
+                                    uib-popover-html="'Remove Scene From current playlist.'"
+                                    popover-append-to-body="true"
+                                    popover-placement="top"
+                                    type="button" class="btn btn-danger">
+                                    <span
+
+                                            class="glyphicon glyphicon-minus"></span>
+
+                        </button>
+                        </span>
+
+
+                    </h4>
+
+
+
+
+
+
+                        <span>
+                            <uib-rating ng-model="scene.rating" max="10" read-only="isReadonly"
+                                        on-hover="hoveringOver(value)"
+                                        on-leave="overStar = null" titles="['one','two','three']"
+                                        aria-labelledby="default-rating"
+                                        ng-click="$ctrl.sceneRatingPatch(scene)"></uib-rating>
+                            <br>
+                            Websites:
+                                <button class="btn btn-success btn-xs"
+                                        popover-trigger="outsideClick"
+                                        uib-popover-template="'static/partials/popover-templates/popover-website.template.html'"
+                                        popover-append-to-body="true"
+                                        popover-placement="right"
+                                        type="button" class="btn btn-success">
+                                    <span
+
+                                            class="glyphicon glyphicon-plus"></span>
+                                </button>
+                            <br>
+
+                            <span ng-repeat="site in scene.websites"> <a
+                                    href="/#!/website/{{ site.id }}">  {{ site.name }}</a> <span
+                                    class="glyphicon glyphicon-remove"
+                                    ng-click="$ctrl.removeItem(scene,site,'websites',false)"></span> {{$last ? '' : ', '}} </span>
+
+                            </span>
+
+                    <br>
+                        <span>Tags:
+                            <button class="btn btn-success btn-xs"
+                                    popover-trigger="outsideClick"
+                                    uib-popover-template="'static/partials/popover-templates/popover-tag.template.html'"
+                                    popover-append-to-body="true"
+                                    popover-placement="right"
+                                    type="button" class="btn btn-success"
+                            >
+                                    <span
+
+                                            class="glyphicon glyphicon-plus"></span>
+                                </button>
+                            <br>
+                            <span ng-repeat="tag in scene.scene_tags"> <a
+                                    href="/#!/scene-tag/{{ tag.id }}">  {{ tag.name }}</a> <span
+                                    class="glyphicon glyphicon-remove"
+                                    ng-click="$ctrl.removeItem(scene,tag,'scene_tags',false)"></span> {{$last ? '' : ', '}} </span>
+                            </span>
+                    <br>
+                        <span>Performers:
+                             <button class="btn btn-success btn-xs"
+                                     popover-trigger="outsideClick"
+                                     uib-popover-template="'static/partials/popover-templates/popover-actor.template.html'"
+                                     popover-append-to-body="true"
+                                     popover-placement="right"
+                                     type="button">
+                                    <span
+
+                                            class="glyphicon glyphicon-plus"></span>
+                                </button>
+                            <br>
+                            <span ng-repeat="actor in scene.actors">  <a
+                                    href="/#!/actor/{{ actor.id }}">  {{ actor.name }}</a> <span
+                                    class="glyphicon glyphicon-remove"
+                                    ng-click="$ctrl.removeItem(scene,actor,'actors',false)"></span> {{$last ? '' : ', '}} </span>
+                            </span>
+
+
+                </td>
+
+                        </table>
+
+                </div>
+
+            </md-virtual-repeat-container>
+        </md-content>
+    </div>
+    -->
+
+
+    <div class="top md-whiteframe-z1"
+         infinite-scroll="$ctrl.infNextPage()"
+
+         infinite-scroll-disabled="$ctrl.working"
+         infinite-scroll-distance="3">
+        <md-list flex>
+
+            <md-list-item ng-repeat="scene in $ctrl.infiniteScenes" layout-padding layout-align="start center">
+                <div flex="10" class="rank" layout="row" layout-align="center center"><span>{{$index + 1}}</span></div>
+                <div flex="35" flex-gt-sm="25" class="image" layout="column" layout-align="center start">
+                    <a href="/#!/scene/{{ scene.id }}">
+                        <img src="{{ scene.thumbnail }}" style="width: 200px"/>
+                    </a>
+
+                </div>
+                <div flex layout-gt-sm="row" class="detail">
+                <div flex-gt-sm="50" layout="column">
+                    <div class="name header">{{scene.name}}</div>
+                    <div class="date content">{{scene.date_added | date:'dd MMMM yyyy':'z'}}</div>
+                </div>
+                <div flex-gt-gm="50" layout="column">
+                    <div class="rating content">Rating: {{scene.rating}}</div>
+
+                </div>
+            </div>
+
+            </md-list-item>
+        </md-list>
+
+    </div>
+
+
+    <!--
     <div id=big-scroll-item>
         <table>
             <tr ng-repeat="scene in $ctrl.scenes">
@@ -31,8 +239,10 @@
                 <td>
                     <h4>
             <span>
-                <input ng-if="$ctrl.tagMultiple" type="checkbox" ng-model="scene.selected"
-                       ng-click="$ctrl.sceneSelectToggle(scene)">
+                <md-checkbox ng-if="$ctrl.tagMultiple" ng-model="scene.selected"
+                             ng-click="$ctrl.sceneSelectToggle(scene)" aria-label="Checkbox 1">
+                </md-checkbox>
+
                 {{$index + 1}})
                 <a href="/#!/scene/{{ scene.id }}">  {{ scene.name }}</a>
 
@@ -180,8 +390,9 @@
             </tr>
         </table>
     </div>
-
+-->
 </div>
+
 <div class="col-md-12" id="big-scroll-item" ng-if="$ctrl.gridView">
     <div class="row-fluid" id="scene-list-grid">
         <div class="col-md-3" ng-repeat="scene in $ctrl.scenes">

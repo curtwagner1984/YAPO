@@ -132,6 +132,8 @@ angular.module('navBar', []).component('navBar', {
 
                 return scene
             };
+            
+            
 
 
         }]

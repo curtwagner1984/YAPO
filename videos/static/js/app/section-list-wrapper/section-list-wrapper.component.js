@@ -68,10 +68,10 @@ angular.module('sectionListWrapper').component('sectionListWrapper', {
                 self.routParam = $routeParams.parentId;
 
                 self.sectionTypefunc = function (typeToCheck) {
-                    console.log("sectionTypefunc triggered " + self.sectionType);
+                    // console.log("sectionTypefunc triggered " + self.sectionType);
 
                     if (self.sectionType == typeToCheck) {
-                        console.log("self.sectionType == typeToCheck is" + (self.sectionType == typeToCheck))
+                        // console.log("self.sectionType == typeToCheck is" + (self.sectionType == typeToCheck))
                     }
 
                     return self.sectionType == typeToCheck;

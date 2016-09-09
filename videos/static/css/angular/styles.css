@@ -324,3 +324,32 @@ input:checked + .slider:before {
 .video-box {
     float: right;
 }
+
+/*Angualr material test*/
+
+.virtualRepeatdemoInfiniteScroll #vertical-container {
+  height: 600px;
+  width: 100%;
+  max-width: 1600px; }
+
+.virtualRepeatdemoInfiniteScroll .repeated-item {
+  /*border-bottom: 1px solid #ddd;*/
+  /*box-sizing: border-box;*/
+  /*height: 40px;*/
+  /*padding-top: 10px; */
+}
+
+.virtualRepeatdemoInfiniteScroll md-content {
+  margin: 16px; }
+
+.virtualRepeatdemoInfiniteScroll md-virtual-repeat-container {
+  border: solid 1px grey; }
+
+.virtualRepeatdemoInfiniteScroll .md-virtual-repeat-container .md-virtual-repeat-offsetter div {
+  padding-left: 16px; }
+
+
+/*
+Copyright 2016 Google Inc. All Rights Reserved.
+Use of this source code is governed by an MIT-style license that can be foundin the LICENSE file at http://material.angularjs.org/HEAD/license.
+*/

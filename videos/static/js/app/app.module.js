@@ -35,7 +35,9 @@ var app = angular.module('yapoApp', [
     'addItems',
     'settings',
     'playlistList',
-    'playlistDetail'
+    'playlistDetail',
+    'ngMaterial',
+    'infinite-scroll'
 
 
 ]);

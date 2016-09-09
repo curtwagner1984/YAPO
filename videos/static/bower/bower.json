@@ -6,7 +6,7 @@
   ],
   "description": "Yet Another Porn Organizer",
   "main": "app.config.js",
-  "license": "MIT",
+  "license": "GPL",
   "private": true,
   "ignore": [
     "**/.*",
@@ -25,6 +25,7 @@
     "angular-xeditable": "^0.2.0",
     "ngstorage": "^0.3.11",
     "angular-bootstrap": "^2.0.1",
-    "angular-img-cropper": "^1.1.0"
+    "angular-img-cropper": "^1.1.0",
+    "angular-material": "^1.1.1"
   }
 }
