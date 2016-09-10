@@ -193,10 +193,9 @@
     -->
 
 
-
-                <span>Thumb Width</span>
-                <md-slider flex="" min="200" max="400" ng-model="$ctrl.thumbWidth" aria-label="red" id="red-slider">
-                </md-slider>
+    <span>Thumb Width</span>
+    <md-slider flex="" min="200" max="400" ng-model="$ctrl.thumbWidth" aria-label="red" id="red-slider">
+    </md-slider>
 
 
     <div class="top md-whiteframe-z1"
@@ -210,28 +209,35 @@
         <md-list flex>
 
 
+            <md-list-item ng-repeat="scene in $ctrl.infiniteScenes" layout-padding layout-align="start center">
+                <div flex="10" class="rank" layout="row" layout-align="center center">
+                    <span>{{$index + 1}}</span></div>
+                <div flex="35" flex-gt-sm="25" class="image" layout="column" layout-align="center start">
+                    <a href="/#!/scene/{{ scene.id }}">
+                        <img src="{{ scene.thumbnail }}" style="width: {{ $ctrl.thumbWidth }}px"/>
+                    </a>
 
-                    <md-list-item ng-repeat="scene in $ctrl.infiniteScenes" layout-padding layout-align="start center">
-                        <div flex="10" class="rank" layout="row" layout-align="center center">
-                            <span>{{$index + 1}}</span></div>
-                        <div flex="35" flex-gt-sm="25" class="image" layout="column" layout-align="center start">
-                            <a href="/#!/scene/{{ scene.id }}">
-                                <img src="{{ scene.thumbnail }}" style="width: {{ $ctrl.thumbWidth }}px"/>
-                            </a>
-
+                </div>
+                <div flex layout-gt-sm="row" class="detail">
+                    <div flex-gt-sm="50" layout="column">
+                        <div class="name header">{{ scene.name }}</div>
+                        <div class="actors">
+                            <md-chips ng-model="scene.actors" name="fruitName"
+                                      md-max-chips="5">
+                                <md-chip-template>
+                                    <strong>{{$chip.name}}</strong>
+                                    <em>(Actor)</em>
+                                </md-chip-template>
                         </div>
-                        <div flex layout-gt-sm="row" class="detail">
-                            <div flex-gt-sm="50" layout="column">
-                                <div class="name header">{{ scene.name }}</div>
-                                <div class="date content">{{ scene.date_added | date:'dd MMMM yyyy':'z'}}</div>
-                            </div>
-                            <div flex-gt-gm="50" layout="column">
-                                <div class="rating content">Rating: {{ scene.rating }}</div>
+                        <div class="date content">{{ scene.date_added | date:'dd MMMM yyyy':'z'}}</div>
+                    </div>
+                    <div flex-gt-gm="50" layout="column">
+                        <div class="rating content">Rating: {{ scene.rating }}</div>
 
-                            </div>
-                        </div>
+                    </div>
+                </div>
 
-                    </md-list-item>
+            </md-list-item>
         </md-list>
 
     </div>
