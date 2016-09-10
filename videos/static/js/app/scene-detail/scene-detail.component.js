@@ -1,8 +1,9 @@
 angular.module('sceneDetail').component('sceneDetail', {
     templateUrl: 'static/js/app/scene-detail/scene-detail.template.html',
-    controller: ['$routeParams', 'Scene', 'helperService', '$scope', 'SceneTag', 'Actor', 'Website', '$http', '$rootScope', 'scopeWatchService', '$localStorage', '$sessionStorage',
-        function SceneDetailController($routeParams, Scene, helperService, $scope, SceneTag, Actor, Website, $http, $rootScope, scopeWatchService, $localStorage,
-                                       $sessionStorage) {
+    controller: ['$routeParams', 'Scene', 'helperService', '$scope', 'SceneTag', 'Actor', 'Website', '$http',
+        '$rootScope', 'scopeWatchService', '$localStorage', '$sessionStorage', '$filter', '$location',
+        function SceneDetailController($routeParams, Scene, helperService, $scope, SceneTag, Actor, Website, $http,
+                                       $rootScope, scopeWatchService, $localStorage, $sessionStorage, $filter, $location) {
             var self = this;
             var sceneList = helperService.get();
 
@@ -378,14 +379,80 @@ angular.module('sceneDetail').component('sceneDetail', {
 
             });
             
-            self.selectedItem = null;
-            self.searchText = "";
-            
-            self.test = function () {
-              alert("this is a test")  
+            // AM chips autocomplete
+
+            var allGroups = [
+                'one',
+                'two',
+                'three',
+                'one',
+                'two',
+                'three',
+                'one',
+                'two',
+                'three',
+                'one',
+                'two',
+                'three',
+                'one',
+                'two',
+                'three',
+                'one',
+                'two',
+                'three',
+                'one',
+                'two',
+                'three',
+                'one',
+                'two',
+                'three'
+            ];
+
+            $scope.queryGroups = function (search) {
+                var firstPass = $filter('filter')(allGroups, search);
+
+                return firstPass.filter(function (item) {
+                    return $scope.selectedGroups.indexOf(item) === -1;
+                });
             };
-            
-            self.items = ['this is test item', 'this is another test item', 'and this is another one '];
+
+            $scope.addGroup = function (group) {
+                $scope.selectedGroups.push(group);
+            };
+
+            $scope.allGroups = allGroups;
+            $scope.selectedGroups = [allGroups[0]];
+
+            $scope.$watchCollection('selectedGroups', function () {
+                $scope.availableGroups = $scope.queryGroups('');
+            });
+
+            self.chipOnAdd = function (chip, addedChipType) {
+                 self.addItem(chip, addedChipType)
+            };
+
+            self.chipOnRemove = function (chip, removedChipType) {
+                self.removeItem (chip, removedChipType)
+            };
+
+            self.chipOnSelect = function (chip, selectedChipType) {
+
+                var dest_path = "";
+
+                if (selectedChipType == 'websites'){
+                    dest_path = '/website/' + chip.id;
+                }else if (selectedChipType == 'actors'){
+                    dest_path = '/actor/' + chip.id;
+                }else if (selectedChipType == 'scene_tags'){
+                    dest_path = '/scene-tag/' + chip.id;
+                }
+
+
+
+                $location.path(dest_path);
+                $location.replace();
+
+            };
 
             self.transformChip = function (chip) {
 

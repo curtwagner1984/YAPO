@@ -92,75 +92,76 @@
             </li>
 
 
-            <li>Tags:
+            <li>
+                <md-chips ng-model="$ctrl.scene.scene_tags"
+                          md-autocomplete-snap
+                          md-on-add="$ctrl.chipOnAdd($chip,'scene_tags')"
+                          md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags')"
+                          md-on-select="$ctrl.chipOnSelect($chip,'scene_tags')">
+                        <md-autocomplete
+                                         md-search-text="searchText"
+                                         md-items="item in $root.autoCompleteGetItems('scene_tags',searchText)"
+                                         md-item-text="item"
+                                         md-autoselect="true"
+                                         md-select-on-match="true"
+                                         md-no-cache="false"
+                                         placeholder="Add Scene Tag">
 
-                <async-typeahead object="$ctrl.scene.scene_tags"
-                                 object-type='scene_tags'
-                                 sending-object="$ctrl.scene"
-                                 sending-object-type='Scene'
-                                 selected-object="$ctrl.selectedSceneTag = $event.selected"
-                ></async-typeahead>
-
-
-                <span ng-repeat="tag in $ctrl.scene.scene_tags"> <a
-                        href="/#!/scene-tag/{{ tag.id }}">  {{ tag.name }}</a> <span
-                        class="glyphicon glyphicon-remove"
-                        ng-click="$ctrl.removeItem(tag,'scene_tags')"></span> {{$last ? '' : ', '}} </span>
-
-
-            </li>
-
-            <li>Actors:
-
-                <async-typeahead object="$ctrl.scene.actors"
-                                 object-type='actors'
-                                 sending-object="$ctrl.scene"
-                                 sending-object-type='Scene'
-                                 selected-object="$ctrl.selectedActor = $event.selected"
-                ></async-typeahead>
-
-                 <span ng-repeat="actor in $ctrl.scene.actors">  <a
-                         href="/#!/actor/{{ actor.id }}">  {{ actor.name }}</a> <span
-                         class="glyphicon glyphicon-remove"
-                         ng-click="$ctrl.removeItem(actor,'actors')"></span> {{$last ? '' : ', '}} </span>
-
-
-            </li>
-
-            <li>Websites:
-
-                <async-typeahead object="$ctrl.scene.websites"
-                                 object-type='websites'
-                                 sending-object="$ctrl.scene"
-                                 sending-object-type='Scene'
-                                 selected-object="$ctrl.selectedWebsite = $event.selected"
-                ></async-typeahead>
-
-
-
-                <span ng-repeat="site in $ctrl.scene.websites"> <a
-                        href="/#!/website/{{ site.id }}">  {{ site.name }}</a> <span
-                        class="glyphicon glyphicon-remove"
-                        ng-click="$ctrl.removeItem(site,'websites')"></span> {{$last ? '' : ', '}} </span>
-
-
-                <md-chips ng-model="$ctrl.scene.websites" md-autocomplete-snap=""
-                          md-transform-chip="$ctrl.transformChip($chip)"
-
-                    <md-autocomplete md-selected-item="$ctrl.selectedItem"
-                                     md-search-text="$ctrl.searchText"
-                                     md-items="item in $ctrl.items"
-                                     md-item-text="item.name"
-                                     md-min-length="2"
-                                     placeholder="Search for a website"
-                    >
-                        <span md-highlight-text="$ctrl.searchText">{{ item.name }} :: website</span>
-                    </md-autocomplete>
+                            <span md-highlight-text="searchText">{{item.name}}</span>
+                        </md-autocomplete>
                     <md-chip-template>
-                        <span>
-                          <strong>{{$chip.name}}</strong>
-                          <em>(website)</em>
-                        </span>
+                        <span>{{$chip.name}}</span>
+                    </md-chip-template>
+                </md-chips>
+
+
+            </li>
+
+            <li>
+                <md-chips ng-model="$ctrl.scene.actors"
+                          md-autocomplete-snap
+                          md-on-add="$ctrl.chipOnAdd($chip,'actors')"
+                          md-on-remove="$ctrl.chipOnRemove($chip,'actors')"
+                          md-on-select="$ctrl.chipOnSelect($chip,'actors')">
+                        <md-autocomplete
+                                         md-search-text="searchText"
+                                         md-items="item in $root.autoCompleteGetItems('actors',searchText)"
+                                         md-item-text="item"
+                                         md-autoselect="true"
+                                         md-select-on-match="true"
+                                         md-no-cache="true"
+                                         placeholder="Add an Actor">
+
+                            <span md-highlight-text="searchText">{{item.name}}</span>
+                        </md-autocomplete>
+                    <md-chip-template>
+                        <span>{{$chip.name}}</span>
+                    </md-chip-template>
+                </md-chips>
+
+
+            </li>
+
+            <li>
+
+                <md-chips ng-model="$ctrl.scene.websites"
+                          md-autocomplete-snap
+                          md-on-add="$ctrl.chipOnAdd($chip,'websites')"
+                          md-on-remove="$ctrl.chipOnRemove($chip,'websites')"
+                          md-on-select="$ctrl.chipOnSelect($chip,'websites')">
+                        <md-autocomplete
+                                         md-search-text="searchText"
+                                         md-items="item in $root.autoCompleteGetItems('websites',searchText)"
+                                         md-item-text="item"
+                                         md-autoselect="true"
+                                         md-select-on-match="true"
+                                         md-no-cache="true"
+                                         placeholder="Add a website">
+
+                            <span md-highlight-text="searchText">{{item.name}}</span>
+                        </md-autocomplete>
+                    <md-chip-template>
+                        <span>{{$chip.name}}</span>
                     </md-chip-template>
                 </md-chips>
 
