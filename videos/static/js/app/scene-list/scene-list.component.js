@@ -28,6 +28,15 @@ angular.module('sceneList').component('sceneList', {
             self.working =false;
             $scope.gotPromiseSceneList = false;
 
+
+            if (helperService.getNumberOfItemsPerPaige() != undefined){
+                    self.itemsPerPage = helperService.getNumberOfItemsPerPaige()
+            }else{
+                self.itemsPerPage = 10
+            }
+            
+            self.thumbWidth = 200;
+
             self.isSomethingLoaded = function () {
                 return actorLoaded || sceneTagLoaded || websiteLoaded || folderLoaded || didSectionListWrapperLoad
             };
@@ -157,12 +166,21 @@ angular.module('sceneList').component('sceneList', {
                     return;
                 }
 
+                if (self.itemsPerPage * pageNumberForInfScroll > self.totalItems){
+                    console.log("Reached the end of result query...");
+                    return;
+                }
+
                 if (self.totalItems < self.infiniteScenes.length){
                     console.log("Reached the end of result query...");
                     return;
                 }
 
                 self.working = true;
+
+                if (self.infiniteScenes.length > 0 && pageNumberForInfScroll == 0){
+                    pageNumberForInfScroll = 1;
+                }
                 
                 self.nextPage(pageNumberForInfScroll);
                 pageNumberForInfScroll++;
@@ -212,10 +230,11 @@ angular.module('sceneList').component('sceneList', {
                     self.numberOfItemsReturned = self.scenes.length;
                     self.infiniteScenes = self.infiniteScenes.concat(self.scenes);
 
+                    self.scenes = [];
+
                     self.sceneArraystore();
-                    self.gotPromise = true;
-                    self.gotPromiseForInfScroll = true;
-                    $scope.gotPromiseSceneList = true;
+
+
                     
                     self.working = false
 
@@ -234,7 +253,7 @@ angular.module('sceneList').component('sceneList', {
             if (self.treeFolder != undefined) {
                 self.folder = self.treeFolder;
                 pageNumberForInfScroll = 0;
-                // self.nextPage(0);
+                self.nextPage(0);
             }
 
             $scope.$on("paginationChange", function (event, pageInfo) {
@@ -255,7 +274,7 @@ angular.module('sceneList').component('sceneList', {
             $scope.$on("actorLoaded", function (event, actor) {
 
                 self.actor = actor;
-                // self.nextPage(0);
+                self.nextPage(0);
                 pageNumberForInfScroll = 0;
 
 
@@ -330,7 +349,7 @@ angular.module('sceneList').component('sceneList', {
 
                     if (sortOrder.mainPage == undefined || sortOrder.mainPage == true) {
 
-                        // self.nextPage(0);
+                        self.nextPage(0);
                         pageNumberForInfScroll = 0;
 
                     }
@@ -657,8 +676,10 @@ angular.module('sceneList').component('sceneList', {
                     self.infiniteScenes = [];
                     self.searchTerm = searchTerm['searchTerm'];
                     self.searchField = searchTerm['searchField'];
-                    // self.nextPage(0);
+                    self.nextPage(0);
                     pageNumberForInfScroll = 0;
+                    self.totalItems = 0;
+                    // $scope.$emit('list:filtered');
                 }
 
             });
@@ -670,7 +691,7 @@ angular.module('sceneList').component('sceneList', {
                     self.scenes = [];
                     self.infiniteScenes = [];
                     self.runnerUp = runnerUp['runnerUp'];
-                    // self.nextPage(0);
+                    self.nextPage(0);
                     pageNumberForInfScroll = 0;
                 }
 
@@ -784,96 +805,96 @@ angular.module('sceneList').component('sceneList', {
 
             };
 
-            self.infiniteScenes = [];
-
-
-            // In this example, we set up our model using a plain object.
-            // Using a class works too. All that matters is that we implement
-            // getItemAtIndex and getLength.
-            this.infiniteItems = {
-                numLoaded_: 0,
-                toLoad_: 0,
-                counter_: 1,
-                finished_: false,
-                // infiniteScenes_: [],
-
-
-                // Required.
-                getItemAtIndex: function (index) {
-                    if (index > this.numLoaded_ && !this.finished_) {
-                        this.fetchMoreItems_(index);
-                        return null;
-                    }
-
-                    if (self.totalItems == -6 || self.totalItems <= this.numLoaded_) {
-                        this.finished_ = true;
-                    }
-
-
-
-                    if (self.infiniteScenes[index] != undefined) {
-                        return self.infiniteScenes[index];
-                    } else {
-                        // return null;
-                    }
-
-
-                },
-
-                // Required.
-                // For infinite scroll behavior, we always return a slightly higher
-                // number than the previously loaded items.
-                getLength: function () {
-                    return this.numLoaded_ + 10;
-                },
-
-                fetchMoreItems_: function (index) {
-                    // For demo purposes, we simulate loading more items with a timed
-                    // promise. In real code, this function would likely contain an
-                    // $http request.
-
-                    if (this.toLoad_ < index && !this.finished_) {
-                        this.toLoad_ += 10;
-                        $scope.gotPromiseSceneList = false;
-                        self.nextPage(this.counter_);
-                        this.counter_ += 1;
-
-
-
-
-
-
-                        // while(!gotPromise){
-                        //
-                        // }
-                        // console.log("Got Promise");
-
-                        // $http.get('/api/scene/', {
-                        //     params: {
-                        //         offset: this.numLoaded_,
-                        //         limit: this.toLoad_
-                        //
-                        //     }
-                        //
-                        // }).then(function (response) {
-                        //
-                        //     for (var x = 0 ; x < response.data.length; x++){
-                        //         this.infiniteScenes_.push(response.data[x])
-                        //     }
-                        //
-                        //     // alert(angular.toJson(response));
-                        //     // self.response = response.data.vlc_path;
-                        //     // self.pathToVLC = response.data.vlc_path;
-                        //     // alert("Got response from server: " + self.pathToFolderToAdd);
-                        // }, function errorCallback(response) {
-                        //     alert("Something went wrong!" + angular.toJson(response));
-                        // });
-
-                        this.numLoaded_ = this.toLoad_;
-
-                    }
-                }
-            };
+            // self.infiniteScenes = [];
+            //
+            //
+            // // In this example, we set up our model using a plain object.
+            // // Using a class works too. All that matters is that we implement
+            // // getItemAtIndex and getLength.
+            // this.infiniteItems = {
+            //     numLoaded_: 0,
+            //     toLoad_: 0,
+            //     counter_: 1,
+            //     finished_: false,
+            //     // infiniteScenes_: [],
+            //
+            //
+            //     // Required.
+            //     getItemAtIndex: function (index) {
+            //         if (index > this.numLoaded_ && !this.finished_) {
+            //             this.fetchMoreItems_(index);
+            //             return null;
+            //         }
+            //
+            //         if (self.totalItems == -6 || self.totalItems <= this.numLoaded_) {
+            //             this.finished_ = true;
+            //         }
+            //
+            //
+            //
+            //         if (self.infiniteScenes[index] != undefined) {
+            //             return self.infiniteScenes[index];
+            //         } else {
+            //             // return null;
+            //         }
+            //
+            //
+            //     },
+            //
+            //     // Required.
+            //     // For infinite scroll behavior, we always return a slightly higher
+            //     // number than the previously loaded items.
+            //     getLength: function () {
+            //         return this.numLoaded_ + 10;
+            //     },
+            //
+            //     fetchMoreItems_: function (index) {
+            //         // For demo purposes, we simulate loading more items with a timed
+            //         // promise. In real code, this function would likely contain an
+            //         // $http request.
+            //
+            //         if (this.toLoad_ < index && !this.finished_) {
+            //             this.toLoad_ += 10;
+            //             $scope.gotPromiseSceneList = false;
+            //             self.nextPage(this.counter_);
+            //             this.counter_ += 1;
+            //
+            //
+            //
+            //
+            //
+            //
+            //             // while(!gotPromise){
+            //             //
+            //             // }
+            //             // console.log("Got Promise");
+            //
+            //             // $http.get('/api/scene/', {
+            //             //     params: {
+            //             //         offset: this.numLoaded_,
+            //             //         limit: this.toLoad_
+            //             //
+            //             //     }
+            //             //
+            //             // }).then(function (response) {
+            //             //
+            //             //     for (var x = 0 ; x < response.data.length; x++){
+            //             //         this.infiniteScenes_.push(response.data[x])
+            //             //     }
+            //             //
+            //             //     // alert(angular.toJson(response));
+            //             //     // self.response = response.data.vlc_path;
+            //             //     // self.pathToVLC = response.data.vlc_path;
+            //             //     // alert("Got response from server: " + self.pathToFolderToAdd);
+            //             // }, function errorCallback(response) {
+            //             //     alert("Something went wrong!" + angular.toJson(response));
+            //             // });
+            //
+            //             this.numLoaded_ = this.toLoad_;
+            //
+            //         }
+            //     }
+            // };
 
 
         }

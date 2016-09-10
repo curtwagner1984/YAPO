@@ -372,7 +372,8 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
 
 
             if (_currentPage != 0) {
-                _pageOffset = _pageLimit * (_currentPage - 1);
+                // _pageOffset = _pageLimit * (_currentPage - 1);
+                _pageOffset = _pageLimit * (_currentPage);
                 _currentPage = _currentPage + 1;
             } else {
                 _pageOffset = _pageLimit * _currentPage;
