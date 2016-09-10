@@ -380,7 +380,7 @@ angular.module('actorDetail').component('actorDetail', {
                         newName = newName + delimiter + "pornstar";
                     }
 
-                    console.log("Name with delimiter is:" + newName);
+                    // console.log("Name with delimiter is:" + newName);
                     return newName;
                 }
 

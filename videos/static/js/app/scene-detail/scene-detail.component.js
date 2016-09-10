@@ -384,6 +384,8 @@ angular.module('sceneDetail').component('sceneDetail', {
             self.test = function () {
               alert("this is a test")  
             };
+            
+            self.items = ['this is test item', 'this is another test item', 'and this is another one '];
 
             self.transformChip = function (chip) {
 

@@ -211,6 +211,7 @@ angular.module('sceneList').component('sceneList', {
             };
 
             self.nextPage = function (currentPage) {
+                self.working = true;
                 // self.sceneArrayClear();
                 console.log("scene-list: nextPage function triggered!");
 
