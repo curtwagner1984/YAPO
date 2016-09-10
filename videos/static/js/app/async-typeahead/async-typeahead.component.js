@@ -22,7 +22,20 @@ angular.module('asyncTypeahead').component('asyncTypeahead', {
             var websiteURL = 'api/website/';
             var playlistURL = 'api/playlist/';
             var httpGETUrl = null;
-
+            
+            self.items = null;
+            self.mdSearchText= "";
+            self.mdSelectedItem = null;
+            
+            self.searchTextChange = function (newText) {
+              
+                if (newText != ""){
+                    self.items = self.getTags(newText)    
+                }
+                
+            };
+            
+            
 
             self.getTags = function (val) {
                 // console.log("async-typeahead input is: " + val);

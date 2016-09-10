@@ -8,6 +8,31 @@
 
 >
 
+<!--Documentation in https://material.angularjs.org/latest/api/directive/mdAutocomplete -->
+<md-autocomplete
+
+                 md-search-text="$ctrl.mdSearchText"
+                 md-selected-item="$ctrl.mdSelectedItem"
+
+                 md-selected-item-change="$ctrl.onSelect($ctrl.mdSelectedItem)"
+                 md-items="item in $ctrl.getTags($ctrl.mdSearchText)"
+                 md-min-length="2"
+                 md-select-on-match="true"
+                 md-match-case-insensitive="true"
+                 md-item-text="item.name"
+                 placeholder="{{ $ctrl.objectType }}">
+        <md-item-template>
+          <span md-highlight-text="$ctrl.mdSearchText" md-highlight-flags="^i">{{item.name}}</span>
+        </md-item-template>
+        <md-not-found>
+          No states matching "{{ctrl.searchText}}" were found.
+          <a ng-click="ctrl.newState(ctrl.searchText)">Create a new one!</a>
+        </md-not-found>
+      </md-autocomplete>
+
+
+
+
 
 <i ng-show="loadingLocations" class="glyphicon glyphicon-refresh"></i>
 <div ng-show="noResults">

@@ -26,13 +26,13 @@ angular.module('sceneDetail').component('sceneDetail', {
             self.addItem = function (itemToAdd, typeOfItemToAdd) {
 
                 var patchData = [];
-               
+
 
                 if (itemToAdd.id != '-1') {
                     patchData.push(itemToAdd.id);
                     self.scene = $rootScope.addItemToScene(self.scene, itemToAdd, typeOfItemToAdd);
                     // function (sceneToPatchId, patchType, patchData, addOrRemove, multiple, permDelete)
-                    $rootScope.patchEntity('scene',self.scene.id, typeOfItemToAdd, patchData, 'add', false, false, null)
+                    $rootScope.patchEntity('scene', self.scene.id, typeOfItemToAdd, patchData, 'add', false, false, null)
                 } else {
                     var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
                     newItem.$save().then(function (res) {
@@ -44,12 +44,12 @@ angular.module('sceneDetail').component('sceneDetail', {
                 }
 
             };
-            
+
             self.removeItem = function (itemToRemove, typeOfItemToRemove) {
                 var patchData = [];
                 patchData.push(itemToRemove.id);
-                self.scene = $rootScope.removeItemFromScene(self.scene,itemToRemove,typeOfItemToRemove);
-                $rootScope.patchEntity('scene',self.scene.id,typeOfItemToRemove,patchData,'remove',false,false,null)
+                self.scene = $rootScope.removeItemFromScene(self.scene, itemToRemove, typeOfItemToRemove);
+                $rootScope.patchEntity('scene', self.scene.id, typeOfItemToRemove, patchData, 'remove', false, false, null)
             };
 
 
@@ -365,8 +365,8 @@ angular.module('sceneDetail').component('sceneDetail', {
                     alert("Something went wrong!");
                 });
             };
-            
-            
+
+
             $scope.$on("playlistSelected", function (event, object) {
 
                 var selectedPlaylist = object['selectedObject'];
@@ -377,6 +377,26 @@ angular.module('sceneDetail').component('sceneDetail', {
 
 
             });
+            
+            self.selectedItem = null;
+            self.searchText = "";
+            
+            self.test = function () {
+              alert("this is a test")  
+            };
+
+            self.transformChip = function (chip) {
+
+                alert(chip);
+                // If it is an object, it's already a known chip
+                if (angular.isObject(chip)) {
+                    return chip;
+                }
+
+                // Otherwise, create a new one
+                return {name: chip, type: 'new'}
+
+            }
 
 
         }

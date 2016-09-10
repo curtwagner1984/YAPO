@@ -24,24 +24,28 @@ angular.module('sceneList').component('sceneList', {
             var websiteLoaded = false;
             var folderLoaded = false;
             var didSectionListWrapperLoad = false;
+            var didSectionListWrapperLoadIsMainPage = false;
+            var playlistLoaded = false;
+
             self.gotPromise = false;
-            self.working =false;
+            self.working = false;
             $scope.gotPromiseSceneList = false;
 
 
-            if (helperService.getNumberOfItemsPerPaige() != undefined){
-                    self.itemsPerPage = helperService.getNumberOfItemsPerPaige()
-            }else{
+            if (helperService.getNumberOfItemsPerPaige() != undefined) {
+                self.itemsPerPage = helperService.getNumberOfItemsPerPaige()
+            } else {
                 self.itemsPerPage = 10
             }
-            
+
             self.thumbWidth = 200;
 
             self.isSomethingLoaded = function () {
-                return actorLoaded || sceneTagLoaded || websiteLoaded || folderLoaded || didSectionListWrapperLoad
+
+
+                return actorLoaded || sceneTagLoaded || websiteLoaded || folderLoaded || didSectionListWrapperLoadIsMainPage || playlistLoaded
             };
 
-            self.playlistLoaded = false;
 
             self.sceneArray = [];
             self.sceneArray = [];
@@ -160,31 +164,50 @@ angular.module('sceneList').component('sceneList', {
 
                 console.log("self.totalItems are " + self.totalItems);
                 console.log("self.infiniteScenes are " + self.infiniteScenes.length);
-                
-                if (self.working){
+
+                if (self.working) {
                     console.log("Inf scroll tried to load, but another call was already in progress...");
                     return;
                 }
 
-                if (self.itemsPerPage * pageNumberForInfScroll > self.totalItems){
+                if (self.itemsPerPage * pageNumberForInfScroll > self.totalItems) {
                     console.log("Reached the end of result query...");
                     return;
                 }
 
-                if (self.totalItems < self.infiniteScenes.length){
+                if (self.totalItems < self.infiniteScenes.length) {
                     console.log("Reached the end of result query...");
                     return;
+                }
+
+                if (!self.isSomethingLoaded()) {
+                    console.log("Waiting for something to load...");
+                    return;
+                } else {
+                    console.log("actorLoaded: "
+                        + actorLoaded +
+                        " sceneTagLoaded: " +
+                        sceneTagLoaded +
+                        " websiteLoaded: " +
+                        websiteLoaded +
+                        " folderLoaded: " +
+                        folderLoaded +
+                        " didSectionListWrapperLoadIsMainPage: " +
+                        didSectionListWrapperLoadIsMainPage
+                        + "playlistLoaded " +
+                        playlistLoaded
+                    )
                 }
 
                 self.working = true;
 
-                if (self.infiniteScenes.length > 0 && pageNumberForInfScroll == 0){
+                if (self.infiniteScenes.length > 0 && pageNumberForInfScroll == 0) {
                     pageNumberForInfScroll = 1;
                 }
-                
+
                 self.nextPage(pageNumberForInfScroll);
                 pageNumberForInfScroll++;
-                
+
             };
 
             self.nextPage = function (currentPage) {
@@ -235,7 +258,6 @@ angular.module('sceneList').component('sceneList', {
                     self.sceneArraystore();
 
 
-                    
                     self.working = false
 
 
@@ -289,13 +311,13 @@ angular.module('sceneList').component('sceneList', {
 
                 self.playlist = playlist;
                 pageNumberForInfScroll = 0;
-                // self.nextPage(0);
+                self.nextPage(0);
 
 
-                self.playlistLoaded = true;
+                playlistLoaded = true;
             });
 
-            if (!self.playlistLoaded) {
+            if (!playlistLoaded) {
                 scopeWatchService.didPlaylistLoad("a");
             }
 
@@ -351,10 +373,11 @@ angular.module('sceneList').component('sceneList', {
 
                         self.nextPage(0);
                         pageNumberForInfScroll = 0;
+                        didSectionListWrapperLoadIsMainPage = true;
 
                     }
                     self.totalItems = 0;
-                    $scope.$emit('list:filtered');
+                    // $scope.$emit('list:filtered');
                     didSectionListWrapperLoad = true;
 
                 }

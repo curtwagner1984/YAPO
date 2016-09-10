@@ -219,14 +219,26 @@
 
                 </div>
                 <div flex layout-gt-sm="row" class="detail">
-                    <div flex-gt-sm="50" layout="column">
+                    <div flex-gt-sm="70" layout="column">
                         <div class="name header">{{ scene.name }}</div>
                         <div class="actors">
-                            <md-chips ng-model="scene.actors" name="fruitName"
+                            <md-chips ng-model="scene.actors" name="actorName"
                                       md-max-chips="5">
                                 <md-chip-template>
+                                    <a href="/#!/actor/{{ $chip.id }}">
                                     <strong>{{$chip.name}}</strong>
-                                    <em>(Actor)</em>
+                                    </a>
+                                </md-chip-template>
+                        </div>
+                        <div class="scene-tags">
+                            <md-chips ng-model="scene.scene_tags" name="sceneTagName"
+                                      md-max-chips="10">
+                                <md-chip-template>
+                                    <a href="/#!/scene-tag/{{ $chip.id }}">
+                                    <strong>{{$chip.name}}</strong>
+                                    <em>(Scene Tag)</em>
+                                    </a>
+
                                 </md-chip-template>
                         </div>
                         <div class="date content">{{ scene.date_added | date:'dd MMMM yyyy':'z'}}</div>
