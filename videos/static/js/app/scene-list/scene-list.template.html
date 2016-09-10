@@ -222,24 +222,89 @@
                     <div flex-gt-sm="70" layout="column">
                         <div class="name header">{{ scene.name }}</div>
                         <div class="actors">
-                            <md-chips ng-model="scene.actors" name="actorName"
-                                      md-max-chips="5">
-                                <md-chip-template>
-                                    <a href="/#!/actor/{{ $chip.id }}">
-                                    <strong>{{$chip.name}}</strong>
-                                    </a>
-                                </md-chip-template>
+
+
+                            <md-chips ng-model="scene.actors"
+                          md-autocomplete-snap
+                          md-on-add="$ctrl.chipOnAdd($chip,'actors')"
+                          md-on-remove="$ctrl.chipOnRemove($chip,'actors')"
+                          md-on-select="$ctrl.chipOnSelect($chip,'actors')"
+                          md-transform-chip="$ctrl.transformChip($chip)">
+                    <md-autocomplete
+                            md-search-text="searchText"
+                            md-items="item in $root.autoCompleteGetItems('actors',searchText)"
+                            md-item-text="item"
+                            md-autoselect="true"
+                            md-select-on-match="true"
+                            md-no-cache="true"
+                            placeholder="Add an Actor">
+
+                        <md-item-template>
+                                  <span class="item-title">
+                                    <img ng-src="{{item.thumbnail}}" class="md-avatar" style="width: 32px">
+                                    <span md-highlight-text="searchText" md-highlight-flags="gi">{{ item.name }}</span>
+                                  </span>
+
+                        </md-item-template>
+
+
+                    </md-autocomplete>
+                    <md-chip-template>
+                        <img ng-src="{{$chip.thumbnail}}" style="width: 16px">
+                        <span>{{$chip.name}}</span>
+                    </md-chip-template>
+                </md-chips>
+
+
                         </div>
                         <div class="scene-tags">
-                            <md-chips ng-model="scene.scene_tags" name="sceneTagName"
-                                      md-max-chips="10">
-                                <md-chip-template>
-                                    <a href="/#!/scene-tag/{{ $chip.id }}">
-                                    <strong>{{$chip.name}}</strong>
-                                    <em>(Scene Tag)</em>
-                                    </a>
 
-                                </md-chip-template>
+                            <md-chips ng-model="scene.scene_tags"
+                          md-autocomplete-snap
+                          md-on-add="$ctrl.chipOnAdd($chip,'scene_tags')"
+                          md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags')"
+                          md-on-select="$ctrl.chipOnSelect($chip,'scene_tags')"
+                          md-transform-chip="$ctrl.transformChip($chip)">
+
+                    <md-autocomplete
+                            md-search-text="searchText"
+                            md-items="item in $root.autoCompleteGetItems('scene_tags',searchText)"
+                            md-item-text="item"
+                            md-autoselect="true"
+                            md-select-on-match="true"
+                            md-no-cache="false"
+                            placeholder="Add Scene Tag">
+                        <span md-highlight-text="searchText">{{ item.name }}</span>
+                    </md-autocomplete>
+                    <md-chip-template>
+                        <span>{{$chip.name}}</span>
+                    </md-chip-template>
+                </md-chips>
+
+                        </div>
+                        <div class="websites">
+                            <md-chips ng-model="scene.websites"
+                          md-autocomplete-snap
+                          md-on-add="$ctrl.chipOnAdd($chip,'websites')"
+                          md-on-remove="$ctrl.chipOnRemove($chip,'websites')"
+                          md-on-select="$ctrl.chipOnSelect($chip,'websites')"
+                          md-transform-chip="$ctrl.transformChip($chip)">
+                    <md-autocomplete
+                            md-search-text="searchText"
+                            md-items="item in $root.autoCompleteGetItems('websites',searchText)"
+                            md-item-text="item"
+                            md-autoselect="true"
+                            md-select-on-match="true"
+                            md-no-cache="true"
+                            placeholder="Add a website">
+
+                        <span md-highlight-text="searchText">{{ item.name }}</span>
+                    </md-autocomplete>
+                    <md-chip-template>
+                        <span>{{$chip.name}}</span>
+                    </md-chip-template>
+                </md-chips>
+
                         </div>
                         <div class="date content">{{ scene.date_added | date:'dd MMMM yyyy':'z'}}</div>
                     </div>

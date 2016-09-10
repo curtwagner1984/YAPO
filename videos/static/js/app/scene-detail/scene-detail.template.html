@@ -97,18 +97,19 @@
                           md-autocomplete-snap
                           md-on-add="$ctrl.chipOnAdd($chip,'scene_tags')"
                           md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags')"
-                          md-on-select="$ctrl.chipOnSelect($chip,'scene_tags')">
-                        <md-autocomplete
-                                         md-search-text="searchText"
-                                         md-items="item in $root.autoCompleteGetItems('scene_tags',searchText)"
-                                         md-item-text="item"
-                                         md-autoselect="true"
-                                         md-select-on-match="true"
-                                         md-no-cache="false"
-                                         placeholder="Add Scene Tag">
+                          md-on-select="$ctrl.chipOnSelect($chip,'scene_tags')"
+                          md-transform-chip="$ctrl.transformChip($chip)">
 
-                            <span md-highlight-text="searchText">{{item.name}}</span>
-                        </md-autocomplete>
+                    <md-autocomplete
+                            md-search-text="searchText"
+                            md-items="item in $root.autoCompleteGetItems('scene_tags',searchText)"
+                            md-item-text="item"
+                            md-autoselect="true"
+                            md-select-on-match="true"
+                            md-no-cache="false"
+                            placeholder="Add Scene Tag">
+                        <span md-highlight-text="searchText">{{ item.name }}</span>
+                    </md-autocomplete>
                     <md-chip-template>
                         <span>{{$chip.name}}</span>
                     </md-chip-template>
@@ -118,23 +119,47 @@
             </li>
 
             <li>
+                <!-- Trying to get actor images to work woth chips
+                <md-contact-chips ng-model="$ctrl.scene.actors"
+                                  md-contacts="$root.autoCompleteGetItems('actors',searchText)"
+                                  md-contact-name="name"
+                                  md-contact-image="thumbnail"
+
+
+                                  md-highlight-flags="i"
+
+                                  placeholder="To">
+                </md-contact-chips>
+                </md-content>
+                -->
+
                 <md-chips ng-model="$ctrl.scene.actors"
                           md-autocomplete-snap
                           md-on-add="$ctrl.chipOnAdd($chip,'actors')"
                           md-on-remove="$ctrl.chipOnRemove($chip,'actors')"
-                          md-on-select="$ctrl.chipOnSelect($chip,'actors')">
-                        <md-autocomplete
-                                         md-search-text="searchText"
-                                         md-items="item in $root.autoCompleteGetItems('actors',searchText)"
-                                         md-item-text="item"
-                                         md-autoselect="true"
-                                         md-select-on-match="true"
-                                         md-no-cache="true"
-                                         placeholder="Add an Actor">
+                          md-on-select="$ctrl.chipOnSelect($chip,'actors')"
+                          md-transform-chip="$ctrl.transformChip($chip)">
+                    <md-autocomplete
+                            md-search-text="searchText"
+                            md-items="item in $root.autoCompleteGetItems('actors',searchText)"
+                            md-item-text="item"
+                            md-autoselect="true"
+                            md-select-on-match="true"
+                            md-no-cache="true"
+                            placeholder="Add an Actor">
 
-                            <span md-highlight-text="searchText">{{item.name}}</span>
-                        </md-autocomplete>
+                        <md-item-template>
+                                  <span class="item-title">
+                                    <img ng-src="{{item.thumbnail}}" class="md-avatar" style="width: 32px">
+                                    <span md-highlight-text="searchText" md-highlight-flags="gi">{{ item.name }}</span>
+                                  </span>
+
+                        </md-item-template>
+
+
+                    </md-autocomplete>
                     <md-chip-template>
+                        <img ng-src="{{$chip.thumbnail}}" class="md-avatar" style="width: 16px">
                         <span>{{$chip.name}}</span>
                     </md-chip-template>
                 </md-chips>
@@ -148,18 +173,19 @@
                           md-autocomplete-snap
                           md-on-add="$ctrl.chipOnAdd($chip,'websites')"
                           md-on-remove="$ctrl.chipOnRemove($chip,'websites')"
-                          md-on-select="$ctrl.chipOnSelect($chip,'websites')">
-                        <md-autocomplete
-                                         md-search-text="searchText"
-                                         md-items="item in $root.autoCompleteGetItems('websites',searchText)"
-                                         md-item-text="item"
-                                         md-autoselect="true"
-                                         md-select-on-match="true"
-                                         md-no-cache="true"
-                                         placeholder="Add a website">
+                          md-on-select="$ctrl.chipOnSelect($chip,'websites')"
+                          md-transform-chip="$ctrl.transformChip($chip)">
+                    <md-autocomplete
+                            md-search-text="searchText"
+                            md-items="item in $root.autoCompleteGetItems('websites',searchText)"
+                            md-item-text="item"
+                            md-autoselect="true"
+                            md-select-on-match="true"
+                            md-no-cache="true"
+                            placeholder="Add a website">
 
-                            <span md-highlight-text="searchText">{{item.name}}</span>
-                        </md-autocomplete>
+                        <span md-highlight-text="searchText">{{ item.name }}</span>
+                    </md-autocomplete>
                     <md-chip-template>
                         <span>{{$chip.name}}</span>
                     </md-chip-template>

@@ -190,7 +190,8 @@ def search_in_get_queryset(original_queryset, request):
                                     #     t_list.append(i)
                             qs_list = t_list
                         else:
-                            qs_list = list(chain(qs_list, original_queryset.filter(**{qp: term})))
+                            temp_list = list(original_queryset.filter(**{qp: term}))
+                            qs_list = list(chain(qs_list, temp_list))
 
     if 'sortBy' in request.query_params:
         sort_by = request.query_params['sortBy']

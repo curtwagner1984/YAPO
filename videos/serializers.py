@@ -132,7 +132,7 @@ class ActorIdNameSerializer(serializers.ModelSerializer):
 class ActorIdNameMinimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actor
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'thumbnail']
 
 
 class ActorListSerializer(serializers.ModelSerializer):

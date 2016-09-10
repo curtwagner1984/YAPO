@@ -379,53 +379,28 @@ angular.module('sceneDetail').component('sceneDetail', {
 
             });
             
-            // AM chips autocomplete
+            // AM chips autocomplete mostly copypasted from https://jsfiddle.net/langdonx/bpxa44a5/
 
-            var allGroups = [
-                'one',
-                'two',
-                'three',
-                'one',
-                'two',
-                'three',
-                'one',
-                'two',
-                'three',
-                'one',
-                'two',
-                'three',
-                'one',
-                'two',
-                'three',
-                'one',
-                'two',
-                'three',
-                'one',
-                'two',
-                'three',
-                'one',
-                'two',
-                'three'
-            ];
 
-            $scope.queryGroups = function (search) {
-                var firstPass = $filter('filter')(allGroups, search);
 
-                return firstPass.filter(function (item) {
-                    return $scope.selectedGroups.indexOf(item) === -1;
-                });
-            };
+            // $scope.queryGroups = function (search) {
+            //     var firstPass = $filter('filter')(allGroups, search);
+            //
+            //     return firstPass.filter(function (item) {
+            //         return $scope.selectedGroups.indexOf(item) === -1;
+            //     });
+            // };
 
-            $scope.addGroup = function (group) {
-                $scope.selectedGroups.push(group);
-            };
+            // $scope.addGroup = function (group) {
+            //     $scope.selectedGroups.push(group);
+            // };
 
-            $scope.allGroups = allGroups;
-            $scope.selectedGroups = [allGroups[0]];
+            // $scope.allGroups = allGroups;
+            // $scope.selectedGroups = [allGroups[0]];
 
-            $scope.$watchCollection('selectedGroups', function () {
-                $scope.availableGroups = $scope.queryGroups('');
-            });
+            // $scope.$watchCollection('selectedGroups', function () {
+            //     $scope.availableGroups = $scope.queryGroups('');
+            // });
 
             self.chipOnAdd = function (chip, addedChipType) {
                  self.addItem(chip, addedChipType)
@@ -448,7 +423,6 @@ angular.module('sceneDetail').component('sceneDetail', {
                 }
 
 
-
                 $location.path(dest_path);
                 $location.replace();
 
@@ -456,14 +430,15 @@ angular.module('sceneDetail').component('sceneDetail', {
 
             self.transformChip = function (chip) {
 
-                alert(chip);
+                // alert(angular.toJson(chip));
                 // If it is an object, it's already a known chip
                 if (angular.isObject(chip)) {
+                    if (chip.id == -1){
+                        return null;
+                    }
                     return chip;
                 }
 
-                // Otherwise, create a new one
-                return {name: chip, type: 'new'}
 
             }
 

@@ -15,8 +15,10 @@ angular.module('sceneList').component('sceneList', {
         mainPage: '=',
         treeFolder: '='
     },
-    controller: ['$scope', 'Scene', 'helperService', 'scopeWatchService', 'pagerService', 'Actor', 'Website', 'SceneTag', '$http', '$rootScope', '$q',
-        function SceneListController($scope, Scene, helperService, scopeWatchService, pagerService, Actor, Website, SceneTag, $http, $rootScope, $q) {
+    controller: ['$scope', 'Scene', 'helperService', 'scopeWatchService', 'pagerService', 'Actor',
+        'Website', 'SceneTag', '$http', '$rootScope', '$q', '$location',
+        function SceneListController($scope, Scene, helperService, scopeWatchService, pagerService, Actor,
+                                     Website, SceneTag, $http, $rootScope, $q ,$location) {
 
             var self = this;
             var actorLoaded = false;
@@ -325,7 +327,7 @@ angular.module('sceneList').component('sceneList', {
 
             $scope.$on("sceneTagLoaded", function (event, sceneTag) {
                 self.sceneTag = sceneTag;
-                // self.nextPage(0);
+                self.nextPage(0);
                 pageNumberForInfScroll = 0;
                 sceneTagLoaded = true;
             });
@@ -336,7 +338,7 @@ angular.module('sceneList').component('sceneList', {
 
             $scope.$on("websiteLoaded", function (event, website) {
                 self.website = website;
-                // self.nextPage(0);
+                self.nextPage(0);
                 pageNumberForInfScroll = 0;
                 websiteLoaded = true
             });
@@ -354,7 +356,7 @@ angular.module('sceneList').component('sceneList', {
                 self.recursive = folder['recursive'];
                 // alert(folder['recursive']);
                 // self.scenes = [];
-                // self.nextPage(0);
+                self.nextPage(0);
                 pageNumberForInfScroll = 0;
                 folderLoaded = true;
             });
@@ -828,6 +830,46 @@ angular.module('sceneList').component('sceneList', {
 
 
             };
+            
+            self.chipOnAdd = function (chip, addedChipType) {
+                 // self.addItem(chip, addedChipType)
+            };
+
+            self.chipOnRemove = function (chip, removedChipType) {
+                // self.removeItem (chip, removedChipType)
+            };
+
+            self.chipOnSelect = function (chip, selectedChipType) {
+
+                var dest_path = "";
+
+                if (selectedChipType == 'websites'){
+                    dest_path = '/website/' + chip.id;
+                }else if (selectedChipType == 'actors'){
+                    dest_path = '/actor/' + chip.id;
+                }else if (selectedChipType == 'scene_tags'){
+                    dest_path = '/scene-tag/' + chip.id;
+                }
+
+
+                $location.path(dest_path);
+                $location.replace();
+
+            };
+
+            self.transformChip = function (chip) {
+
+                // alert(angular.toJson(chip));
+                // If it is an object, it's already a known chip
+                if (angular.isObject(chip)) {
+                    if (chip.id == -1){
+                        return null;
+                    }
+                    return chip;
+                }
+
+
+            }
 
             // self.infiniteScenes = [];
             //
