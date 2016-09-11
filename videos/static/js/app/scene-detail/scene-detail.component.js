@@ -35,15 +35,20 @@ angular.module('sceneDetail').component('sceneDetail', {
                     // function (sceneToPatchId, patchType, patchData, addOrRemove, multiple, permDelete)
                     $rootScope.patchEntity('scene', self.scene.id, typeOfItemToAdd, patchData, 'add', false, false, null)
                 } else {
-                    var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
+                    addItemNew(itemToAdd,typeOfItemToAdd)
+
+                }
+
+            };
+            
+            var addItemNew = function (itemToAdd, typeOfItemToAdd) {
+                var patchData = [];
+                var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
                     newItem.$save().then(function (res) {
                         self.scene = $rootScope.addItemToScene(self.scene, res, typeOfItemToAdd);
                         patchData.push(res.id);
                         $rootScope.patchEntity('scene', self.scene.id, typeOfItemToAdd, patchData, 'add', false, false, null)
                     });
-
-                }
-
             };
 
             self.removeItem = function (itemToRemove, typeOfItemToRemove) {
@@ -428,12 +433,15 @@ angular.module('sceneDetail').component('sceneDetail', {
 
             };
 
-            self.transformChip = function (chip) {
+            self.transformChip = function (chip, typeOfItemToAdd) {
 
                 // alert(angular.toJson(chip));
                 // If it is an object, it's already a known chip
                 if (angular.isObject(chip)) {
                     if (chip.id == -1){
+
+                        addItemNew(chip,typeOfItemToAdd);
+
                         return null;
                     }
                     return chip;

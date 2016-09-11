@@ -203,6 +203,9 @@ angular.module('navBar', []).component('navBar', {
                     }
 
                     var createVal = {"id": -1, "name": "Create: " + "\"" + val + "\"", "value": val};
+                    if (searchedObjectType == "actors"){
+                        createVal['thumbnail'] = 'media/images/actor/Unknown/profile/profile.jpg'
+                    }
                     b.push(createVal);
 
                     // alert(angular.toJson(a));

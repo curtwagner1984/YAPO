@@ -98,7 +98,7 @@
                           md-on-add="$ctrl.chipOnAdd($chip,'scene_tags')"
                           md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags')"
                           md-on-select="$ctrl.chipOnSelect($chip,'scene_tags')"
-                          md-transform-chip="$ctrl.transformChip($chip)">
+                          md-transform-chip="$ctrl.transformChip($chip,'scene_tags')">
 
                     <md-autocomplete
                             md-search-text="searchText"
@@ -138,7 +138,7 @@
                           md-on-add="$ctrl.chipOnAdd($chip,'actors')"
                           md-on-remove="$ctrl.chipOnRemove($chip,'actors')"
                           md-on-select="$ctrl.chipOnSelect($chip,'actors')"
-                          md-transform-chip="$ctrl.transformChip($chip)">
+                          md-transform-chip="$ctrl.transformChip($chip,'actors')">
                     <md-autocomplete
                             md-search-text="searchText"
                             md-items="item in $root.autoCompleteGetItems('actors',searchText)"
@@ -159,7 +159,7 @@
 
                     </md-autocomplete>
                     <md-chip-template>
-                        <img ng-src="{{$chip.thumbnail}}" class="md-avatar" style="width: 16px">
+                        <img ng-src="{{$chip.thumbnail}}" style="width: 16px">
                         <span>{{$chip.name}}</span>
                     </md-chip-template>
                 </md-chips>
@@ -174,7 +174,7 @@
                           md-on-add="$ctrl.chipOnAdd($chip,'websites')"
                           md-on-remove="$ctrl.chipOnRemove($chip,'websites')"
                           md-on-select="$ctrl.chipOnSelect($chip,'websites')"
-                          md-transform-chip="$ctrl.transformChip($chip)">
+                          md-transform-chip="$ctrl.transformChip($chip,'websites')">
                     <md-autocomplete
                             md-search-text="searchText"
                             md-items="item in $root.autoCompleteGetItems('websites',searchText)"

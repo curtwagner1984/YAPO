@@ -539,6 +539,35 @@ angular.module('sceneList').component('sceneList', {
 
             };
 
+            var addItemNew = function (itemToAdd, typeOfItemToAdd, scene) {
+
+
+                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, self.infiniteScenes);
+
+
+                var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
+
+                    newItem.$save().then(function (res) {
+
+                        // Duplicate code from  [if (itemToAdd.id != '-1')] need to clean up.
+                        var patchData = [];
+                        patchData.push(res.id);
+
+                        if (self.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
+                            updateScenesOnPageOnAdd(res, typeOfItemToAdd);
+
+                            $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', true, false, self.selectedScenes)
+                        } else {
+                            updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, res);
+
+                            $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', false, false, self.selectedScenes)
+                        }
+
+
+                    })
+
+            };
+
 
             self.addItem = function (scene, itemToAdd, typeOfItemToAdd) {
 
@@ -578,31 +607,35 @@ angular.module('sceneList').component('sceneList', {
 
 
                 } else {
+                    addItemNew(itemToAdd,typeOfItemToAdd,scene);
 
-                    var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
-
-                    newItem.$save().then(function (res) {
-
-                        // Duplicate code from  [if (itemToAdd.id != '-1')] need to clean up.
-                        var patchData = [];
-                        patchData.push(res.id);
-
-                        if (self.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
-                            updateScenesOnPageOnAdd(res, typeOfItemToAdd);
-
-                            $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', true, false, self.selectedScenes)
-                        } else {
-                            updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, res);
-
-                            $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', false, false, self.selectedScenes)
-                        }
-
-
-                    })
+                    // var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
+                    //
+                    // newItem.$save().then(function (res) {
+                    //
+                    //     // Duplicate code from  [if (itemToAdd.id != '-1')] need to clean up.
+                    //     var patchData = [];
+                    //     patchData.push(res.id);
+                    //
+                    //     if (self.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
+                    //         updateScenesOnPageOnAdd(res, typeOfItemToAdd);
+                    //
+                    //         $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', true, false, self.selectedScenes)
+                    //     } else {
+                    //         updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, res);
+                    //
+                    //         $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', false, false, self.selectedScenes)
+                    //     }
+                    //
+                    //
+                    // })
                 }
 
 
             };
+            
+            
+
 
             self.patchScene = function (sceneToPatchId, patchType, patchData, addOrRemove, multiple, permDelete) {
 
@@ -857,29 +890,32 @@ angular.module('sceneList').component('sceneList', {
                 // If it is an object, it's already a known chip
                 if (angular.isObject(chip)) {
                     if (chip.id == -1) {
-                       
-                        var newItem = $rootScope.createNewItem(typeOfItemToAdd, chip.value);
                         
-
-                        newItem.$save().then(function (res) {
-
-                            // Duplicate code from  [if (itemToAdd.id != '-1')] need to clean up.
-                            var patchData = [];
-                            patchData.push(res.id);
-
-                            if (self.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
-                                updateScenesOnPageOnAdd(res, typeOfItemToAdd);
-
-                                $rootScope.patchEntity('scene', originalItem.id, typeOfItemToAdd, patchData, 'add', true, false, self.selectedScenes)
-                            } else {
-                                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(originalItem,self.infiniteScenes);
-                                updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, res);
-
-                                $rootScope.patchEntity('scene', originalItem.id, typeOfItemToAdd, patchData, 'add', false, false, self.selectedScenes)
-                            }
-
-
-                        });
+                        // var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(originalItem,self.infiniteScenes);
+                        addItemNew(chip,typeOfItemToAdd,originalItem);
+                        
+                        // var newItem = $rootScope.createNewItem(typeOfItemToAdd, chip.value);
+                        //
+                        //
+                        // newItem.$save().then(function (res) {
+                        //
+                        //     // Duplicate code from  [if (itemToAdd.id != '-1')] need to clean up.
+                        //     var patchData = [];
+                        //     patchData.push(res.id);
+                        //
+                        //     if (self.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
+                        //         updateScenesOnPageOnAdd(res, typeOfItemToAdd);
+                        //
+                        //         $rootScope.patchEntity('scene', originalItem.id, typeOfItemToAdd, patchData, 'add', true, false, self.selectedScenes)
+                        //     } else {
+                        //        
+                        //         updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, res);
+                        //
+                        //         $rootScope.patchEntity('scene', originalItem.id, typeOfItemToAdd, patchData, 'add', false, false, self.selectedScenes)
+                        //     }
+                        //
+                        //
+                        // });
                         return null
                     }
 
