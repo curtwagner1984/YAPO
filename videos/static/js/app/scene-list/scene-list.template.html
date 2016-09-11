@@ -193,6 +193,7 @@
     -->
 
 
+
     <span>Thumb Width</span>
     <md-slider flex="" min="200" max="400" ng-model="$ctrl.thumbWidth" aria-label="red" id="red-slider">
     </md-slider>
@@ -200,18 +201,21 @@
 
     <div class="top md-whiteframe-z1"
          infinite-scroll="$ctrl.infNextPage()"
-
-
          infinite-scroll-listen-for-event="list:filtered"
-
          infinite-scroll-disabled="$ctrl.working"
          infinite-scroll-distance="3">
+
         <md-list flex>
 
 
             <md-list-item ng-repeat="scene in $ctrl.infiniteScenes" layout-padding layout-align="start center">
                 <div flex="10" class="rank" layout="row" layout-align="center center">
-                    <span>{{$index + 1}}</span></div>
+                    <span>{{$index + 1}}
+                     <md-checkbox ng-if="$ctrl.tagMultiple" ng-model="scene.selected" ng-click="$ctrl.sceneSelectToggle(scene)" aria-label="Checkbox 1">
+                     </md-checkbox>
+                        </span>
+
+                </div>
                 <div flex="35" flex-gt-sm="25" class="image" layout="column" layout-align="center start">
                     <a href="/#!/scene/{{ scene.id }}">
                         <img src="{{ scene.thumbnail }}" style="width: {{ $ctrl.thumbWidth }}px"/>
@@ -225,93 +229,122 @@
 
 
                             <md-chips ng-model="scene.actors"
-                          md-autocomplete-snap
-                          md-on-add="$ctrl.chipOnAdd($chip,'actors',scene)"
-                          md-on-remove="$ctrl.chipOnRemove($chip,'actors',scene)"
-                          md-on-select="$ctrl.chipOnSelect($chip,'actors')"
-                          md-transform-chip="$ctrl.transformChip($chip,'actors',scene)">
-                    <md-autocomplete
-                            md-search-text="searchText"
-                            md-items="item in $root.autoCompleteGetItems('actors',searchText)"
-                            md-item-text="item.name"
-                            md-autoselect="true"
-                            md-select-on-match="true"
-                            md-no-cache="true"
-                            placeholder="Add an Actor">
+                                      md-autocomplete-snap
+                                      md-on-add="$ctrl.chipOnAdd($chip,'actors',scene)"
+                                      md-on-remove="$ctrl.chipOnRemove($chip,'actors',scene)"
+                                      md-on-select="$ctrl.chipOnSelect($chip,'actors')"
+                                      md-transform-chip="$ctrl.transformChip($chip,'actors',scene)">
+                                <md-autocomplete
+                                        md-search-text="searchText"
+                                        md-items="item in $root.autoCompleteGetItems('actors',searchText)"
+                                        md-item-text="item.name"
+                                        md-autoselect="true"
+                                        md-select-on-match="true"
+                                        md-no-cache="true"
+                                        placeholder="Add an Actor">
 
-                        <md-item-template>
+                                    <md-item-template>
                                   <span class="item-title">
-                                    <img ng-src="{{item.thumbnail}}" class="md-avatar" style="width: 32px">
+                                    <img ng-src="{{ item.thumbnail }}" class="md-avatar" style="width: 32px">
                                     <span md-highlight-text="searchText" md-highlight-flags="gi">{{ item.name }}</span>
                                   </span>
 
-                        </md-item-template>
+                                    </md-item-template>
 
 
-                    </md-autocomplete>
-                    <md-chip-template>
-                        <img ng-src="{{$chip.thumbnail}}" style="width: 16px">
-                        <span>{{$chip.name}}</span>
-                    </md-chip-template>
-                </md-chips>
+                                </md-autocomplete>
+                                <md-chip-template>
+                                    <img ng-src="{{$chip.thumbnail}}" style="width: 16px">
+                                    <span>{{$chip.name}}</span>
+                                </md-chip-template>
+                            </md-chips>
 
 
                         </div>
                         <div class="scene-tags">
 
                             <md-chips ng-model="scene.scene_tags"
-                          md-autocomplete-snap
-                          md-on-add="$ctrl.chipOnAdd($chip,'scene_tags',scene)"
-                          md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags',scene)"
-                          md-on-select="$ctrl.chipOnSelect($chip,'scene_tags')"
-                          md-transform-chip="$ctrl.transformChip($chip,'scene_tags',scene)">
+                                      md-autocomplete-snap
+                                      md-on-add="$ctrl.chipOnAdd($chip,'scene_tags',scene)"
+                                      md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags',scene)"
+                                      md-on-select="$ctrl.chipOnSelect($chip,'scene_tags')"
+                                      md-transform-chip="$ctrl.transformChip($chip,'scene_tags',scene)">
 
-                    <md-autocomplete
-                            md-search-text="searchText"
-                            md-items="item in $root.autoCompleteGetItems('scene_tags',searchText)"
-                            md-item-text="item.name"
-                            md-autoselect="true"
-                            md-select-on-match="true"
-                            md-no-cache="false"
-                            placeholder="Add Scene Tag">
-                        <span md-highlight-text="searchText">{{ item.name }}</span>
-                    </md-autocomplete>
-                    <md-chip-template>
-                        <span>{{$chip.name}}</span>
-                    </md-chip-template>
-                </md-chips>
+                                <md-autocomplete
+                                        md-search-text="searchText"
+                                        md-items="item in $root.autoCompleteGetItems('scene_tags',searchText)"
+                                        md-item-text="item.name"
+                                        md-autoselect="true"
+                                        md-select-on-match="true"
+                                        md-no-cache="false"
+                                        placeholder="Add Scene Tag">
+                                    <span md-highlight-text="searchText">{{ item.name }}</span>
+                                </md-autocomplete>
+                                <md-chip-template>
+                                    <span>{{$chip.name}}</span>
+                                </md-chip-template>
+                            </md-chips>
 
                         </div>
                         <div class="websites">
                             <md-chips ng-model="scene.websites"
-                          md-autocomplete-snap
-                          md-on-add="$ctrl.chipOnAdd($chip,'websites',scene)"
-                          md-on-remove="$ctrl.chipOnRemove($chip,'websites',scene)"
-                          md-on-select="$ctrl.chipOnSelect($chip,'websites',scene)"
-                          md-transform-chip="$ctrl.transformChip($chip,'websites',scene)">
-                    <md-autocomplete
-                            md-search-text="searchText"
-                            md-items="item in $root.autoCompleteGetItems('websites',searchText)"
-                            md-item-text="item.name"
-                            md-autoselect="true"
-                            md-select-on-match="true"
-                            md-no-cache="true"
-                            placeholder="Add a website">
+                                      md-autocomplete-snap
+                                      md-on-add="$ctrl.chipOnAdd($chip,'websites',scene)"
+                                      md-on-remove="$ctrl.chipOnRemove($chip,'websites',scene)"
+                                      md-on-select="$ctrl.chipOnSelect($chip,'websites',scene)"
+                                      md-transform-chip="$ctrl.transformChip($chip,'websites',scene)">
+                                <md-autocomplete
+                                        md-search-text="searchText"
+                                        md-items="item in $root.autoCompleteGetItems('websites',searchText)"
+                                        md-item-text="item.name"
+                                        md-autoselect="true"
+                                        md-select-on-match="true"
+                                        md-no-cache="true"
+                                        placeholder="Add a website">
 
-                        <span md-highlight-text="searchText">{{ item.name }}</span>
-                    </md-autocomplete>
-                    <md-chip-template>
-                        <span>{{$chip.name}}</span>
-                    </md-chip-template>
-                </md-chips>
+                                    <span md-highlight-text="searchText">{{ item.name }}</span>
+                                </md-autocomplete>
+                                <md-chip-template>
+                                    <span>{{$chip.name}}</span>
+                                </md-chip-template>
+                            </md-chips>
 
                         </div>
-                        <div class="date content">{{ scene.date_added | date:'dd MMMM yyyy':'z'}}</div>
+                        <div class="date content">Added {{ scene.date_added | date:'dd MMMM yyyy':'z'}}</div>
                     </div>
                     <div flex-gt-gm="50" layout="column">
+                        <div flex-auto="" layout="column">
+                            <md-fab-speed-dial ng-hide="demo.hidden" md-direction="left" md-open="demo.isOpen"
+                                               class="md-scale md-fab-top-right"
+                                               ng-class="{ 'md-hover-full': demo.hover }"
+                                               ng-mouseenter="demo.isOpen=true" ng-mouseleave="demo.isOpen=false">
+                                <md-fab-trigger>
+                                    <md-button aria-label="menu" class="md-fab">
+                                        <md-tooltip md-direction="top" md-visible="tooltipVisible">Menu</md-tooltip>
+
+                                    </md-button>
+                                </md-fab-trigger>
+
+                                <md-fab-actions>
+                                    <div ng-repeat="item in $ctrl.actionList">
+                                        <md-button aria-label="{{ item.name }}" class="md-fab md-raised md-mini"
+                                                   ng-click="$ctrl.actionClicked($event, item, scene, $ctrl.selectedScenes)">
+                                            <md-tooltip md-direction="{{ item.direction }}" md-visible="tooltipVisible"
+                                                        md-autohide="false">
+                                                {{ item.name }}
+                                            </md-tooltip>
+
+
+                                        </md-button>
+                                    </div>
+                                </md-fab-actions>
+                            </md-fab-speed-dial>
+                            </md-content>
+                        </div>
                         <div class="rating content">Rating: {{ scene.rating }}</div>
 
                     </div>
+
                 </div>
 
             </md-list-item>

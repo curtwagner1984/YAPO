@@ -40,7 +40,11 @@ angular.module('navBar', []).component('navBar', {
 
                 var itemsToUpdate = [];
                 if (multiple) {
-                    itemsToUpdate = selectedScenes
+                    itemsToUpdate = [];
+                    for (var i = 0 ; i < selectedScenes.length ; i++ ){
+                        itemsToUpdate.push(selectedScenes[i].id)
+                    }
+                    
                 } else {
                     itemsToUpdate.push(entityToPatchId)
                 }

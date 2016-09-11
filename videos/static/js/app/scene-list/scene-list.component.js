@@ -16,9 +16,9 @@ angular.module('sceneList').component('sceneList', {
         treeFolder: '='
     },
     controller: ['$scope', 'Scene', 'helperService', 'scopeWatchService', 'pagerService', 'Actor',
-        'Website', 'SceneTag', '$http', '$rootScope', '$q', '$location',
+        'Website', 'SceneTag', '$http', '$rootScope', '$q', '$location', '$mdDialog',
         function SceneListController($scope, Scene, helperService, scopeWatchService, pagerService, Actor,
-                                     Website, SceneTag, $http, $rootScope, $q, $location) {
+                                     Website, SceneTag, $http, $rootScope, $q, $location, $mdDialog) {
 
             var self = this;
             var actorLoaded = false;
@@ -55,8 +55,10 @@ angular.module('sceneList').component('sceneList', {
             self.scenesToAdd = [];
 
             self.pageType = 'Scene';
-
+            
+            
             self.selectedScenes = [];
+
 
             self.selectAllStatus = false;
 
@@ -69,6 +71,91 @@ angular.module('sceneList').component('sceneList', {
                 } else {
                     self.tagMultiple = true;
                 }
+
+            };
+
+
+            self.actionList = [
+                {name: 'Add To Queue', direction: "bottom"},
+                {name: 'Add To Playlist', direction: "top"},
+                {name: 'Delete From Db', direction: "bottom"},
+                {name: 'Delete From Disk', direction: "top"}
+
+            ];
+
+
+            self.actionClicked = function ($event, item, scene, selectedScenes) {
+
+                if (item.name == 'Add To Queue') {
+                    $http.get('add-to-playlist//', {
+                        params: {
+                            playlistName: "Queue Playlist",
+                            sceneId: scene.id
+                        }
+                    }).then(function (response) {
+                        // alert(angular.toJson(response));
+
+                        // alert("Got response from server: " + self.pathToFolderToAdd);
+                    }, function errorCallback(response) {
+                        alert("Something went wrong!");
+                    });
+                } else {
+                    $mdDialog.show({
+                        clickOutsideToClose: true,
+                        controller: function ($mdDialog) {
+                            // Save the clicked item
+                            this.item = item;
+                            this.scene = scene;
+                            this.searchText = "";
+                            this.mdSelectedItem = null;
+                            this.selectedScenes = selectedScenes;
+                            
+                            this.greeting = "";
+                            
+
+                            
+                            this.isPartOfSelection = function () {
+                                var ans = false;
+                                
+                                if (this.selectedScenes.length > 0 && checkIfSceneSelected(scene) ){
+                                    ans = true
+                                }
+                                
+                                return ans;
+                            };
+
+
+                            if (this.item.name == "Add To Playlist" && this.isPartOfSelection()){
+                                this.greeting = 'Hello User! You clicked on \'' + this.item.name + '\'. And you have selected multiple scenes ' +
+                                    'Please select a Playlist to which you would like to add the following scenes:' 
+                            }else if (this.item.name == "Add To Playlist"){
+                                this.greeting = 'Hello User! You clicked on \'' + this.item.name + '\' Please select a Playlist to add the ' +
+                                    'scene <b>' + this.scene.name + '</b> to: '
+                            }
+                            
+                            
+                            this.onSelect = function (selectedItem) {
+                                
+                                // alert(angular.toJson(selectedItem));
+                                self.addItem(scene, selectedItem, 'playlists');
+                                $mdDialog.hide();
+                                
+                            };
+
+                            // Setup some handlers
+                            this.close = function () {
+                                $mdDialog.cancel();
+                            };
+                            this.submit = function () {
+                                $mdDialog.hide();
+                            };
+                        },
+                        controllerAs: 'dialog',
+                        templateUrl: 'static/js/app/scene-list/dialog-templates/dialog.html',
+                        targetEvent: $event
+                    });
+                }
+
 
             };
 
@@ -94,7 +181,7 @@ angular.module('sceneList').component('sceneList', {
                 self.selectedScenes = [];
                 for (var i = 0; i < self.infiniteScenes.length; i++) {
                     self.infiniteScenes[i].selected = true;
-                    self.selectedScenes.push(self.infiniteScenes[i].id)
+                    self.selectedScenes.push(self.infiniteScenes[i])
                 }
 
             };
@@ -114,19 +201,21 @@ angular.module('sceneList').component('sceneList', {
                 var found = false;
 
                 for (var i = 0; i < self.selectedScenes.length; i++) {
-                    if (scene.id == self.selectedScenes[i]) {
+                    if (scene.id == self.selectedScenes[i].id) {
                         found = true;
                     }
 
                 }
 
                 if (!found) {
-                    self.selectedScenes.push(scene.id)
+                    self.selectedScenes.push(scene);
+                    console.log("Added scene " + scene.name + " To selected scenes" )
 
                 }
 
                 if (found) {
-                    self.selectedScenes.splice(self.selectedScenes.indexOf(scene.id), 1)
+                    self.selectedScenes.splice(self.selectedScenes.indexOf(scene), 1);
+                    console.log("Removed scene " + scene.name + " from selected scenes" );
                 }
 
                 // alert(angular.toJson(self.selectedScenes))
@@ -529,7 +618,7 @@ angular.module('sceneList').component('sceneList', {
             var checkIfSceneSelected = function (scene) {
                 var found = false;
                 for (var i = 0; i < self.selectedScenes.length && !found; i++) {
-                    if (scene.id == self.selectedScenes[i]) {
+                    if (scene.id == self.selectedScenes[i].id) {
                         found = true;
                     }
 
@@ -547,24 +636,24 @@ angular.module('sceneList').component('sceneList', {
 
                 var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
 
-                    newItem.$save().then(function (res) {
+                newItem.$save().then(function (res) {
 
-                        // Duplicate code from  [if (itemToAdd.id != '-1')] need to clean up.
-                        var patchData = [];
-                        patchData.push(res.id);
+                    // Duplicate code from  [if (itemToAdd.id != '-1')] need to clean up.
+                    var patchData = [];
+                    patchData.push(res.id);
 
-                        if (self.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
-                            updateScenesOnPageOnAdd(res, typeOfItemToAdd);
+                    if (self.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
+                        updateScenesOnPageOnAdd(res, typeOfItemToAdd);
 
-                            $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', true, false, self.selectedScenes)
-                        } else {
-                            updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, res);
+                        $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', true, false, self.selectedScenes)
+                    } else {
+                        updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, res);
 
-                            $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', false, false, self.selectedScenes)
-                        }
+                        $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', false, false, self.selectedScenes)
+                    }
 
 
-                    })
+                })
 
             };
 
@@ -607,7 +696,7 @@ angular.module('sceneList').component('sceneList', {
 
 
                 } else {
-                    addItemNew(itemToAdd,typeOfItemToAdd,scene);
+                    addItemNew(itemToAdd, typeOfItemToAdd, scene);
 
                     // var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
                     //
@@ -633,8 +722,6 @@ angular.module('sceneList').component('sceneList', {
 
 
             };
-            
-            
 
 
             self.patchScene = function (sceneToPatchId, patchType, patchData, addOrRemove, multiple, permDelete) {
@@ -820,7 +907,7 @@ angular.module('sceneList').component('sceneList', {
 
             self.deleteScene = function (sceneToRemove) {
 
-                if (self.selectedScenes == [] || self.selectedScenes.indexOf(sceneToRemove.id) == -1) {
+                if (self.selectedScenes == [] || self.selectedScenes.indexOf(sceneToRemove) == -1) {
                     Scene.remove({sceneId: sceneToRemove.id});
 
                     // var index_of_scene = findIndexOfSceneInList(sceneToRemove.id);
@@ -863,7 +950,7 @@ angular.module('sceneList').component('sceneList', {
             self.chipOnRemove = function (chip, removedChipType, originalObject) {
                 // self.removeItem (chip, removedChipType)
                 console.log("Triggered on remove")
-                self.removeItem(originalObject,chip,removedChipType,false);
+                self.removeItem(originalObject, chip, removedChipType, false);
             };
 
             self.chipOnSelect = function (chip, selectedChipType) {
@@ -890,10 +977,10 @@ angular.module('sceneList').component('sceneList', {
                 // If it is an object, it's already a known chip
                 if (angular.isObject(chip)) {
                     if (chip.id == -1) {
-                        
+
                         // var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(originalItem,self.infiniteScenes);
-                        addItemNew(chip,typeOfItemToAdd,originalItem);
-                        
+                        addItemNew(chip, typeOfItemToAdd, originalItem);
+
                         // var newItem = $rootScope.createNewItem(typeOfItemToAdd, chip.value);
                         //
                         //

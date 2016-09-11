@@ -85,6 +85,7 @@ urlpatterns = [
                   url(r'^settings/', views.settings),
                   url(r'^ffmpeg/', views.ffmpeg),
                   url(r'^tag-multiple-items/', views.tag_multiple_items),
+                  url(r'^add-to-playlist/', views.add_scene_to_playlist),
 
 
 

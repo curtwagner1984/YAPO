@@ -857,6 +857,26 @@ def play_scene_vlc(scene, random):
 
 
 @api_view(['GET', 'POST'])
+def add_scene_to_playlist(request):
+    if request.method == 'GET':
+        playlist_name = request.query_params['playlistName']
+        scene_id = request.query_params['sceneId']
+
+        if not Playlist.objects.filter(name=playlist_name):
+            pl = Playlist(name=playlist_name)
+            pl.save()
+
+        pl = Playlist.objects.filter(name=playlist_name).first()
+        sc = Scene.objects.get(id=scene_id)
+        pl.scenes.add(sc)
+        pl.save()
+
+        print("Added scene '{}' to playlist '[]'".format(sc.name, pl.name))
+
+        return Response(status=200)
+
+
+@api_view(['GET', 'POST'])
 def play_in_vlc(request):
     scene = None
     random = True
@@ -1016,6 +1036,9 @@ class PlaylistViewSet(viewsets.ModelViewSet):
             return PlaylistListSerializer
         else:
             return PlaylistSerializer
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
 
 class LocalSceneFoldersViewSet(viewsets.ModelViewSet):
