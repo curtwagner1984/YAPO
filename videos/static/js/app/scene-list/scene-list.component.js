@@ -55,8 +55,8 @@ angular.module('sceneList').component('sceneList', {
             self.scenesToAdd = [];
 
             self.pageType = 'Scene';
-            
-            
+
+
             self.selectedScenes = [];
 
 
@@ -109,51 +109,68 @@ angular.module('sceneList').component('sceneList', {
                             this.searchText = "";
                             this.mdSelectedItem = null;
                             this.selectedScenes = selectedScenes;
-                            
-                            this.greeting = "";
-                            
+                            this.playlistAutocompleteNeeded = false
 
-                            
+                            this.greeting = "";
+
+
                             this.isPartOfSelection = function () {
                                 var ans = false;
-                                
-                                if (this.selectedScenes.length > 0 && checkIfSceneSelected(scene) ){
+
+                                if (this.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
                                     ans = true
                                 }
-                                
+
                                 return ans;
                             };
 
 
-                            if (this.item.name == "Add To Playlist" && this.isPartOfSelection()){
+                            if (this.item.name == "Add To Playlist" && this.isPartOfSelection()) {
                                 this.greeting = 'Hello User! You clicked on \'' + this.item.name + '\'. And you have selected multiple scenes ' +
-                                    'Please select a Playlist to which you would like to add the following scenes:' 
-                            }else if (this.item.name == "Add To Playlist"){
+                                    'Please select a Playlist to which you would like to add the following scenes:'
+                                this.playlistAutocompleteNeeded = true;
+                            } else if (this.item.name == "Add To Playlist") {
                                 this.greeting = 'Hello User! You clicked on \'' + this.item.name + '\' Please select a Playlist to add the ' +
                                     'scene <b>' + this.scene.name + '</b> to: '
+                                this.playlistAutocompleteNeeded = true;
+                            } else if (this.item.name == "Delete From Db" && this.isPartOfSelection()) {
+                                this.greeting = 'Hello User! Are you sure you want do remove the following scenes from the database ?'
+                            } else if (this.item.name == "Delete From Db") {
+                                this.greeting = 'Hello User! Are you sure you want to remove the scene <b>' + scene.name + '</b> from the database ?';
+                            } else if (this.item.name == "Delete From Disk" && this.isPartOfSelection()) {
+                                this.greeting = 'Hello User! Are you really sure you want do <font color="red">delete</font> ' +
+                                    'the following scenes from the hard disk? ?';
+                            } else if (this.item.name == "Delete From Disk") {
+                                this.greeting = 'Hello User! Are you REALLY sure you want ' +
+                                    'to <font color="red">delete</font> the scene <b>' + scene.name + '</b> from disk ?';
                             }
-                            
-                            
-                            this.onSelect = function (selectedItem) {
-                                
-                                // alert(angular.toJson(selectedItem));
-                                self.addItem(scene, selectedItem, 'playlists');
-                                $mdDialog.hide();
-                                
-                            };
 
-                            // Setup some handlers
-                            this.close = function () {
-                                $mdDialog.cancel();
-                            };
-                            this.submit = function () {
-                                $mdDialog.hide();
-                            };
-                        },
-                        controllerAs: 'dialog',
-                        templateUrl: 'static/js/app/scene-list/dialog-templates/dialog.html',
-                        targetEvent: $event
-                    });
+
+                                this.onSelect = function (selectedItem) {
+
+                                    // alert(angular.toJson(selectedItem));
+                                    self.addItem(scene, selectedItem, 'playlists');
+                                    $mdDialog.hide();
+
+                                };
+
+                                // Setup some handlers
+                                this.close = function () {
+                                    $mdDialog.cancel();
+                                };
+                                this.submit = function () {
+                                    $mdDialog.hide();
+                                };
+                            }
+                            ,
+                            controllerAs: 'dialog',
+                                templateUrl
+                            :
+                            'static/js/app/scene-list/dialog-templates/dialog.html',
+                                targetEvent
+                            :
+                            $event
+                        });
                 }
 
 
@@ -209,13 +226,13 @@ angular.module('sceneList').component('sceneList', {
 
                 if (!found) {
                     self.selectedScenes.push(scene);
-                    console.log("Added scene " + scene.name + " To selected scenes" )
+                    console.log("Added scene " + scene.name + " To selected scenes")
 
                 }
 
                 if (found) {
                     self.selectedScenes.splice(self.selectedScenes.indexOf(scene), 1);
-                    console.log("Removed scene " + scene.name + " from selected scenes" );
+                    console.log("Removed scene " + scene.name + " from selected scenes");
                 }
 
                 // alert(angular.toJson(self.selectedScenes))

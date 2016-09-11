@@ -10,36 +10,38 @@
         </div>
 
 
-
         <ul ng-if="dialog.isPartOfSelection()">
             <li ng-repeat="scene in dialog.selectedScenes"> {{ scene.name }} </li>
         </ul>
         <br>
-        Playlist:
-        <md-autocomplete
+        <div ng-if="dialog.playlistAutocompleteNeeded">
+            Playlist:
+            <md-autocomplete
 
-                md-search-text="$ctrl.searchText"
-                md-items="item in $root.autoCompleteGetItems('playlists',$ctrl.searchText)"
-                md-selected-item="dialog.mdSelectedItem"
+                    md-search-text="$ctrl.searchText"
+                    md-items="item in $root.autoCompleteGetItems('playlists',$ctrl.searchText)"
+                    md-selected-item="dialog.mdSelectedItem"
 
-                md-selected-item-change="dialog.onSelect(dialog.mdSelectedItem)"
-                md-item-text="item.name"
-                placeholder="{{ $ctrl.objectType }}">
-            <md-item-template>
-                <span md-highlight-text="$ctrl.searchText" md-highlight-flags="^i">{{ item.name }}</span>
-            </md-item-template>
+                    md-selected-item-change="dialog.onSelect(dialog.mdSelectedItem)"
+                    md-item-text="item.name"
+                    placeholder="{{ $ctrl.objectType }}">
+                <md-item-template>
+                    <span md-highlight-text="$ctrl.searchText" md-highlight-flags="^i">{{ item.name }}</span>
+                </md-item-template>
 
-        </md-autocomplete>
+            </md-autocomplete>
+        </div>
+
 
     </md-dialog-content>
 
     <div class="md-actions">
         <md-button aria-label="Close dialog" ng-click="dialog.close()" class="md-primary">
-            Close Greeting
+            Cancel
         </md-button>
 
-        <md-button aria-label="Submit dialog" ng-click="dialog.submit()" class="md-primary">
-            Submit
+        <md-button aria-label="Submit dialog" ng-click="dialog.submit()" class="md-warn">
+            Proceed
         </md-button>
     </div>
 </md-dialog>
