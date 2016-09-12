@@ -1,3 +1,38 @@
+Total Items {{ $ctrl.totalItems }}
+<div class="virtualRepeatdemoDeferredLoading">
+    <md-content layout="column">
+
+        <md-virtual-repeat-container id="vertical-container">
+            <div layout="column">
+                <div md-virtual-repeat="item in $ctrl.dynamicItems" md-on-demand="" class="repeated-item-actor" flex>
+                    <div layout="row">
+                        <div flex="1">{{$index + 1}}</div>
+                        <div flex="10">
+                            <a href="/#!/actor/{{ item.id }}"><img ng-src="{{ item.thumbnail }}"
+                                                                   style="width: 64px"></a>
+
+                        </div>
+                        <div flex="30"><a href="/#!/actor/{{ item.id }}">{{ item.name }}</a></div>
+
+                        <div layout="column">
+                            <div flex>Uses: {{ item.usage_count }}</div>
+                            <div flex>Rating: {{ item.rating }}</div>
+                            <div flex>Play Count: {{ item.play_count }}</div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </md-virtual-repeat-container>
+
+
+    </md-content>
+</div>
+
+
 <!--
         <div class="col-md-2">
 
@@ -19,6 +54,8 @@
 
         </div>
         -->
+
+<!--
 <pagination page-type="'Actor'"></pagination>
 
 
@@ -26,10 +63,7 @@
 <div class="col-md-10" id="big-scroll-item" ng-if="!$ctrl.gridView" >
 
     <ul class="actors" >
-        <!--
-                Search: <input ng-model="$ctrl.searchTerm"/>
-                {{ $ctrl.searchTerm }}
-                -->
+
 
 
         <li ng-repeat="actor in $ctrl.actors "
@@ -117,6 +151,7 @@
     </div>
 </div>
 </div>
+-->
 
 
 

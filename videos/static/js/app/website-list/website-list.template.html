@@ -6,7 +6,7 @@ Total Items {{ $ctrl.totalItems }}
             <div layout="column">
                 <div md-virtual-repeat="item in $ctrl.dynamicItems" md-on-demand="" flex class="repeated-item">
                     <div layout="row">
-                        <div flex="10">{{$index + 1}}</div>
+                        <div flex="1">{{$index + 1}}</div>
                         <div flex="30"><a href="/#!/website/{{ item.id }}">{{ item.name }}</a></div>
                         <div layout="column">
                             <div flex>Uses: {{ item.usage_count }}</div>

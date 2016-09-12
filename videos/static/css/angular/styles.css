@@ -340,6 +340,12 @@ input:checked + .slider:before {
   height: 70px;
   padding-top: 10px; }
 
+.virtualRepeatdemoDeferredLoading .repeated-item-actor {
+  border-bottom: 1px solid #ddd;
+  box-sizing: border-box;
+  height: 150px;
+  padding-top: 10px; }
+
 .virtualRepeatdemoDeferredLoading md-content {
   margin: 16px; }
 
