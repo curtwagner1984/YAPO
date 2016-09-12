@@ -353,7 +353,7 @@
 
             <md-virtual-repeat-container id="vertical-container">
                 <div layout="column">
-                    <div md-virtual-repeat="item in $ctrl.dynamicItems" md-on-demand="" flex
+                    <div md-virtual-repeat="item in $ctrl.dynamicItems" md-on-demand="" flex=""
                          class="repeated-item-scene">
 
                         <div layout="row" layout-align="space-around center">
@@ -375,10 +375,10 @@
                                 <div flex>
                                     <md-chips ng-model="item.actors"
                                               md-autocomplete-snap
-                                              md-on-add="$ctrl.chipOnAdd($chip,'actors',scene)"
-                                              md-on-remove="$ctrl.chipOnRemove($chip,'actors',scene)"
+                                              md-on-add="$ctrl.chipOnAdd($chip,'actors',item)"
+                                              md-on-remove="$ctrl.chipOnRemove($chip,'actors',item)"
                                               md-on-select="$ctrl.chipOnSelect($chip,'actors')"
-                                              md-transform-chip="$ctrl.transformChip($chip,'actors',scene)">
+                                              md-transform-chip="$ctrl.transformChip($chip,'actors',item)">
                                         <md-autocomplete
                                                 md-search-text="searchText"
                                                 md-items="item in $root.autoCompleteGetItems('actors',searchText)"
@@ -408,10 +408,10 @@
                                 <div flex>
                                     <md-chips ng-model="item.scene_tags"
                                               md-autocomplete-snap
-                                              md-on-add="$ctrl.chipOnAdd($chip,'scene_tags',scene)"
-                                              md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags',scene)"
+                                              md-on-add="$ctrl.chipOnAdd($chip,'scene_tags',item)"
+                                              md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags',item)"
                                               md-on-select="$ctrl.chipOnSelect($chip,'scene_tags')"
-                                              md-transform-chip="$ctrl.transformChip($chip,'scene_tags',scene)">
+                                              md-transform-chip="$ctrl.transformChip($chip,'scene_tags',item)">
 
                                         <md-autocomplete
                                                 md-search-text="searchText"
@@ -432,10 +432,10 @@
                                 <div flex=>
                                     <md-chips ng-model="item.websites"
                                               md-autocomplete-snap
-                                              md-on-add="$ctrl.chipOnAdd($chip,'websites',scene)"
-                                              md-on-remove="$ctrl.chipOnRemove($chip,'websites',scene)"
-                                              md-on-select="$ctrl.chipOnSelect($chip,'websites',scene)"
-                                              md-transform-chip="$ctrl.transformChip($chip,'websites',scene)">
+                                              md-on-add="$ctrl.chipOnAdd($chip,'websites',item)"
+                                              md-on-remove="$ctrl.chipOnRemove($chip,'websites',item)"
+                                              md-on-select="$ctrl.chipOnSelect($chip,'websites')"
+                                              md-transform-chip="$ctrl.transformChip($chip,'websites',item)">
                                         <md-autocomplete
                                                 md-search-text="searchText"
                                                 md-items="item in $root.autoCompleteGetItems('websites',searchText)"

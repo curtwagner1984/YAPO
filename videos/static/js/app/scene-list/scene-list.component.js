@@ -44,12 +44,16 @@ angular.module('sceneList').component('sceneList', {
                  */
                 this.loadedPages = {};
 
+                this.isWorking = [0];
+
+                this.loadedItems = [[],[]];
+
                 /** @type {number} Total number of items. */
                 this.numItems = 0;
 
                 /** @const {number} Number of items to fetch per request. */
                 if (helperService.getNumberOfItemsPerPaige() != undefined) {
-                    this.PAGE_SIZE = helperService.getNumberOfItemsPerPaige();
+                    this.PAGE_SIZE = parseInt(helperService.getNumberOfItemsPerPaige());
                 } else {
                     this.PAGE_SIZE = 10;
                 }
@@ -60,7 +64,7 @@ angular.module('sceneList').component('sceneList', {
 
 
             DynamicItems.prototype.reset = function () {
-                this.loadedPages = {};
+                this.loadedItems = [[],[]];
                 this.numItems = 0;
 
             };
@@ -68,12 +72,19 @@ angular.module('sceneList').component('sceneList', {
             // Required.
             DynamicItems.prototype.getItemAtIndex = function (index) {
                 var pageNumber = Math.floor(index / this.PAGE_SIZE);
-                var page = this.loadedPages[pageNumber];
+                // var page = this.loadedPages[pageNumber];
+                var itemToReturn = this.loadedItems[0][index];
 
-                if (page) {
-                    return page[index % this.PAGE_SIZE];
-                } else if (page !== null) {
-                    this.fetchPage_(pageNumber);
+                // if (page) {
+                //     return page[index % this.PAGE_SIZE];
+                // } else if (page !== null) {
+                //     this.fetchPage_(pageNumber);
+                // }
+
+                if (itemToReturn){
+                    return itemToReturn
+                }else if (this.loadedItems[1][0] != 1){
+                    this.fetchPage_(pageNumber)
                 }
             };
 
@@ -85,6 +96,7 @@ angular.module('sceneList').component('sceneList', {
             DynamicItems.prototype.nextPage = function (pageNumber, wasCalledFromDynamicItems) {
 
                 var loadedPages = this.loadedPages;
+                var lodeadItems = this.loadedItems;
 
                 var input = {
                     currentPage: pageNumber,
@@ -120,22 +132,30 @@ angular.module('sceneList').component('sceneList', {
 
                         scopeWatchService.paginationInit(paginationInfo);
 
-                        self.websites = helperService.resourceToArray(res[0]);
+                        self.itemsFormServer = helperService.resourceToArray(res[0]);
 
                         if (wasCalledFromDynamicItems) {
-                            for (var i = 0; i < self.websites.length; i++) {
-                                loadedPages[pageNumber].push(self.websites[i])
-                            }
+                            // for (var i = 0; i < self.websites.length; i++) {
+                            //     loadedPages[pageNumber].push(self.websites[i])
+                            // }
 
-                            this.loadedPages = loadedPages;
+
+
+                            lodeadItems[0] = lodeadItems[0].concat(self.itemsFormServer);
+                            this.loadedItems = lodeadItems;
+                            this.loadedItems[1][0] = 0;
+                            // this.loadedPages = loadedPages;
+                            // this.isWorking[0] = 0;
                         } else {
                             if (self.totalItems == -6) {
-                                self.totalItems = self.websites.length;
+                                self.totalItems = self.itemsFormServer.length;
                             }
 
                             self.dynamicItems.numItems = self.totalItems;
 
                         }
+
+
 
 
                     });
@@ -145,7 +165,19 @@ angular.module('sceneList').component('sceneList', {
 
             DynamicItems.prototype.fetchPage_ = function (pageNumber) {
                 // Set the page to null so we know it is already being fetched.
-                this.loadedPages[pageNumber] = null;
+                // this.loadedPages[pageNumber] = null;
+                // this.isWorking[0] = 1;
+
+                // var pageOffset = pageNumber * this.PAGE_SIZE;
+                // var limit = pageOffset + this.PAGE_SIZE;
+                //     for (var i = pageOffset; i < limit ; i++) {
+                //       // this.loadedPages[pageNumber].push(i);
+                //         this.loadedItems.push(null);
+                //
+                //     }
+
+                this.loadedItems[1][0] = 1;
+
 
                 // For demo purposes, we simulate loading more items with a timed
                 // promise. In real code, this function would likely contain an
@@ -175,6 +207,8 @@ angular.module('sceneList').component('sceneList', {
 
             this.dynamicItems = new DynamicItems();
 
+
+            self.infiniteScenes = self.dynamicItems.loadedItems[0];
 
             if (helperService.getNumberOfItemsPerPaige() != undefined) {
                 self.itemsPerPage = helperService.getNumberOfItemsPerPaige()
@@ -334,9 +368,9 @@ angular.module('sceneList').component('sceneList', {
             self.selectAll = function () {
 
                 self.selectedScenes = [];
-                for (var i = 0; i < self.infiniteScenes.length; i++) {
-                    self.infiniteScenes[i].selected = true;
-                    self.selectedScenes.push(self.infiniteScenes[i])
+                for (var i = 0; i < self.dynamicItems.loadedItems[0].length; i++) {
+                    self.dynamicItems.loadedItems[0][i].selected = true;
+                    self.selectedScenes.push(self.dynamicItems.loadedItems[0][i])
                 }
 
             };
@@ -344,8 +378,8 @@ angular.module('sceneList').component('sceneList', {
 
             self.selectNone = function () {
 
-                for (var i = 0; i < self.infiniteScenes.length; i++) {
-                    self.infiniteScenes[i].selected = false;
+                for (var i = 0; i < self.dynamicItems.loadedItems[0].length; i++) {
+                    self.dynamicItems.loadedItems[0][i].selected = false;
                 }
                 self.selectedScenes = [];
 
@@ -384,8 +418,8 @@ angular.module('sceneList').component('sceneList', {
 
                 // helperService.set(self.sceneArray);
                 var scArray = [];
-                for (i = 0; i < self.infiniteScenes.length; i++) {
-                    scArray.push(self.infiniteScenes[i].id)
+                for (i = 0; i < self.dynamicItems.loadedItems[0].length; i++) {
+                    scArray.push(self.dynamicItems.loadedItems[0][i].id)
                 }
 
                 helperService.set(scArray);
@@ -409,7 +443,7 @@ angular.module('sceneList').component('sceneList', {
             // self.infNextPage = function () {
             //
             //     console.log("self.totalItems are " + self.totalItems);
-            //     console.log("self.infiniteScenes are " + self.infiniteScenes.length);
+            //     console.log("self.dynamicItems.loadedItems[0] are " + self.dynamicItems.loadedItems[0].length);
             //
             //     if (self.working) {
             //         console.log("Inf scroll tried to load, but another call was already in progress...");
@@ -421,7 +455,7 @@ angular.module('sceneList').component('sceneList', {
             //         return;
             //     }
             //
-            //     if (self.totalItems < self.infiniteScenes.length) {
+            //     if (self.totalItems < self.dynamicItems.loadedItems[0].length) {
             //         console.log("Reached the end of result query...");
             //         return;
             //     }
@@ -447,7 +481,7 @@ angular.module('sceneList').component('sceneList', {
             //
             //     self.working = true;
             //
-            //     if (self.infiniteScenes.length > 0 && pageNumberForInfScroll == 0) {
+            //     if (self.dynamicItems.loadedItems[0].length > 0 && pageNumberForInfScroll == 0) {
             //         pageNumberForInfScroll = 1;
             //     }
             //
@@ -498,7 +532,7 @@ angular.module('sceneList').component('sceneList', {
             //         self.scenes = helperService.resourceToArray(res[0]);
             //
             //         self.numberOfItemsReturned = self.scenes.length;
-            //         self.infiniteScenes = self.infiniteScenes.concat(self.scenes);
+            //         self.dynamicItems.loadedItems[0] = self.dynamicItems.loadedItems[0].concat(self.scenes);
             //
             //         self.scenes = [];
             //
@@ -605,7 +639,7 @@ angular.module('sceneList').component('sceneList', {
             $scope.$on("folderOpened", function (event, folder) {
                 console.log("scene-list: folderOpened broadcast was caught");
                 self.scenes = [];
-                self.infiniteScenes = [];
+                // self.infiniteScenes = [];
                 self.folder = folder['dir'];
                 self.recursive = folder['recursive'];
                 // alert(folder['recursive']);
@@ -625,7 +659,7 @@ angular.module('sceneList').component('sceneList', {
                 if (sortOrder['sectionType'] == 'SceneList') {
                     console.log("Sort Order Changed!");
                     self.scenes = [];
-                    self.infiniteScenes = [];
+                    // self.infiniteScenes = [];
                     self.sortBy = sortOrder['sortBy'];
                     if (self.dynamicItems != undefined){
                             self.dynamicItems.reset();
@@ -692,10 +726,10 @@ angular.module('sceneList').component('sceneList', {
                     for (var j = 0; j < scenes.length; j++) {
 
                         // var sceneIndex = findIndexOfSceneInList(scenes[j]);
-                        var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scenes[j], self.infiniteScenes);
+                        var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scenes[j], self.dynamicItems.loadedItems[0]);
 
 
-                        self.infiniteScenes[sceneIndex] = $rootScope.removeItemFromScene(self.infiniteScenes[sceneIndex], itemToRemove, typeOfItemToRemove);
+                        self.dynamicItems.loadedItems[0][sceneIndex] = $rootScope.removeItemFromScene(self.dynamicItems.loadedItems[0][sceneIndex], itemToRemove, typeOfItemToRemove);
 
 
                     }
@@ -712,12 +746,12 @@ angular.module('sceneList').component('sceneList', {
 
                 if (typeof sceneToRemvoe === 'object') {
                     // index_of_scene = findIndexOfSceneInList(sceneToRemvoe.id);
-                    index_of_scene = helperService.getObjectIndexFromArrayOfObjects(sceneToRemvoe.id, self.infiniteScenes);
+                    index_of_scene = helperService.getObjectIndexFromArrayOfObjects(sceneToRemvoe.id, self.dynamicItems.loadedItems[0]);
                 } else {
-                    index_of_scene = helperService.getObjectIndexFromArrayOfObjects(sceneToRemvoe.id, self.infiniteScenes);
+                    index_of_scene = helperService.getObjectIndexFromArrayOfObjects(sceneToRemvoe.id, self.dynamicItems.loadedItems[0]);
                 }
 
-                self.infiniteScenes.splice(index_of_scene, 1);
+                self.dynamicItems.loadedItems[0].splice(index_of_scene, 1);
 
             };
 
@@ -739,16 +773,16 @@ angular.module('sceneList').component('sceneList', {
 
                 // var resId = [];
 
-                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, self.infiniteScenes);
+                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, self.dynamicItems.loadedItems[0]);
 
                 var itToRemove = [];
                 itToRemove.push(itemToRemove.id);
 
                 if (self.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
-                    $rootScope.patchEntity('scene', self.infiniteScenes[sceneIndex].id, typeOfItemToRemove, itToRemove, 'remove', true, permDelete, self.selectedScenes);
+                    $rootScope.patchEntity('scene', self.dynamicItems.loadedItems[0][sceneIndex].id, typeOfItemToRemove, itToRemove, 'remove', true, permDelete, self.selectedScenes);
                     self.updateScenesOnRemove(self.selectedScenes, itemToRemove, typeOfItemToRemove)
                 } else {
-                    $rootScope.patchEntity('scene', self.infiniteScenes[sceneIndex].id, typeOfItemToRemove, itToRemove, 'remove', false, permDelete, self.selectedScenes);
+                    $rootScope.patchEntity('scene', self.dynamicItems.loadedItems[0][sceneIndex].id, typeOfItemToRemove, itToRemove, 'remove', false, permDelete, self.selectedScenes);
                     if (typeOfItemToRemove != 'delete') {
                         var scenes = [];
                         scenes.push(scene.id);
@@ -771,7 +805,7 @@ angular.module('sceneList').component('sceneList', {
             var updateSceneOnPageOnAdd = function (sceneIndex, typeOfItemToAdd, itemToAdd) {
 
 
-                self.infiniteScenes[sceneIndex] = $rootScope.addItemToScene(self.infiniteScenes[sceneIndex], itemToAdd, typeOfItemToAdd);
+                self.dynamicItems.loadedItems[0][sceneIndex] = $rootScope.addItemToScene(self.dynamicItems.loadedItems[0][sceneIndex], itemToAdd, typeOfItemToAdd);
 
 
             };
@@ -781,7 +815,7 @@ angular.module('sceneList').component('sceneList', {
                 for (var i = 0; i < self.selectedScenes.length; i++) {
 
                     // var sceneIndex = findIndexOfSceneInList(self.selectedScenes[i]);
-                    var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(self.selectedScenes[i], self.infiniteScenes);
+                    var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(self.selectedScenes[i], self.dynamicItems.loadedItems[0]);
                     updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, itemToAdd);
 
 
@@ -804,7 +838,7 @@ angular.module('sceneList').component('sceneList', {
             var addItemNew = function (itemToAdd, typeOfItemToAdd, scene) {
 
 
-                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, self.infiniteScenes);
+                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, self.dynamicItems.loadedItems[0]);
 
 
                 var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
@@ -835,7 +869,7 @@ angular.module('sceneList').component('sceneList', {
 
                 // Find the scene in question in self.scenes
                 // var sceneIndex = findIndexOfSceneInList(scene.id);
-                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, self.infiniteScenes);
+                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, self.dynamicItems.loadedItems[0]);
 
                 // if the type of item to add does not exist in the scene (EX: The websites array does not exist)
                 // create empty one.
@@ -981,7 +1015,7 @@ angular.module('sceneList').component('sceneList', {
 
                 if (searchTerm['sectionType'] == 'SceneList') {
                     self.scenes = [];
-                    self.infiniteScenes = [];
+                    // self.infiniteScenes = [];
                     self.searchTerm = searchTerm['searchTerm'];
                     self.searchField = searchTerm['searchField'];
                     // self.nextPage(0);
@@ -999,7 +1033,7 @@ angular.module('sceneList').component('sceneList', {
                 if (runnerUp['sectionType'] == 'SceneList') {
                     console.log("Sort Order Changed!");
                     self.scenes = [];
-                    self.infiniteScenes = [];
+                    // self.infiniteScenes = [];
                     self.runnerUp = runnerUp['runnerUp'];
                     // self.nextPage(0);
                     // pageNumberForInfScroll = 0;
@@ -1088,8 +1122,8 @@ angular.module('sceneList').component('sceneList', {
                     Scene.remove({sceneId: sceneToRemove.id});
 
                     // var index_of_scene = findIndexOfSceneInList(sceneToRemove.id);
-                    var index_of_scene = helperService.getObjectIndexFromArrayOfObjects(sceneToRemove, self.infiniteScenes);
-                    self.infiniteScenes.splice(index_of_scene, 1);
+                    var index_of_scene = helperService.getObjectIndexFromArrayOfObjects(sceneToRemove, self.dynamicItems.loadedItems[0]);
+                    self.dynamicItems.loadedItems[0].splice(index_of_scene, 1);
                 }
 
 
@@ -1097,14 +1131,14 @@ angular.module('sceneList').component('sceneList', {
 
             self.removeSceneFromPlaylist = function (sceneToRemove) {
                 // var sceneIndex = findIndexOfSceneInList(sceneToRemove);
-                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(sceneToRemove, self.infiniteScenes);
+                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(sceneToRemove, self.dynamicItems.loadedItems[0]);
                 var patchData = [];
                 patchData.push(self.playlist.id);
 
                 if (self.selectedScenes.length > 0 && checkIfSceneSelected(sceneToRemove)) {
 
 
-                    $rootScope.patchEntity('scene', self.infiniteScenes[sceneIndex].id, 'playlists', patchData, 'remove', true, false, self.selectedScenes);
+                    $rootScope.patchEntity('scene', self.dynamicItems.loadedItems[0][sceneIndex].id, 'playlists', patchData, 'remove', true, false, self.selectedScenes);
                     for (var i = 0; i < self.selectedScenes.length; i++) {
                         self.removeSceneFromList(self.selectedScenes[i])
                     }
@@ -1112,7 +1146,7 @@ angular.module('sceneList').component('sceneList', {
 
                 } else {
 
-                    $rootScope.patchEntity('scene', self.infiniteScenes[sceneIndex].id, 'playlists', patchData, 'remove', false, false, self.selectedScenes);
+                    $rootScope.patchEntity('scene', self.dynamicItems.loadedItems[0][sceneIndex].id, 'playlists', patchData, 'remove', false, false, self.selectedScenes);
                     self.removeSceneFromList(sceneToRemove);
                 }
 
@@ -1126,7 +1160,7 @@ angular.module('sceneList').component('sceneList', {
 
             self.chipOnRemove = function (chip, removedChipType, originalObject) {
                 // self.removeItem (chip, removedChipType)
-                console.log("Triggered on remove")
+                console.log("Triggered on remove");
                 self.removeItem(originalObject, chip, removedChipType, false);
             };
 
@@ -1155,31 +1189,10 @@ angular.module('sceneList').component('sceneList', {
                 if (angular.isObject(chip)) {
                     if (chip.id == -1) {
 
-                        // var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(originalItem,self.infiniteScenes);
+
                         addItemNew(chip, typeOfItemToAdd, originalItem);
 
-                        // var newItem = $rootScope.createNewItem(typeOfItemToAdd, chip.value);
-                        //
-                        //
-                        // newItem.$save().then(function (res) {
-                        //
-                        //     // Duplicate code from  [if (itemToAdd.id != '-1')] need to clean up.
-                        //     var patchData = [];
-                        //     patchData.push(res.id);
-                        //
-                        //     if (self.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
-                        //         updateScenesOnPageOnAdd(res, typeOfItemToAdd);
-                        //
-                        //         $rootScope.patchEntity('scene', originalItem.id, typeOfItemToAdd, patchData, 'add', true, false, self.selectedScenes)
-                        //     } else {
-                        //        
-                        //         updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, res);
-                        //
-                        //         $rootScope.patchEntity('scene', originalItem.id, typeOfItemToAdd, patchData, 'add', false, false, self.selectedScenes)
-                        //     }
-                        //
-                        //
-                        // });
+
                         return null
                     }
 
@@ -1189,7 +1202,7 @@ angular.module('sceneList').component('sceneList', {
 
             };
 
-            // self.infiniteScenes = [];
+            // self.dynamicItems.loadedItems[0] = [];
             //
             //
             // // In this example, we set up our model using a plain object.
@@ -1216,8 +1229,8 @@ angular.module('sceneList').component('sceneList', {
             //
             //
             //
-            //         if (self.infiniteScenes[index] != undefined) {
-            //             return self.infiniteScenes[index];
+            //         if (self.dynamicItems.loadedItems[0][index] != undefined) {
+            //             return self.dynamicItems.loadedItems[0][index];
             //         } else {
             //             // return null;
             //         }
