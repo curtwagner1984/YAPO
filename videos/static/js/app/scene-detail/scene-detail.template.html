@@ -103,7 +103,7 @@
                     <md-autocomplete
                             md-search-text="searchText"
                             md-items="item in $root.autoCompleteGetItems('scene_tags',searchText)"
-                            md-item-text="item"
+                            md-item-text="item.name"
                             md-autoselect="true"
                             md-select-on-match="true"
                             md-no-cache="false"
@@ -142,7 +142,7 @@
                     <md-autocomplete
                             md-search-text="searchText"
                             md-items="item in $root.autoCompleteGetItems('actors',searchText)"
-                            md-item-text="item"
+                            md-item-text="item.name"
                             md-autoselect="true"
                             md-select-on-match="true"
                             md-no-cache="true"
@@ -178,7 +178,7 @@
                     <md-autocomplete
                             md-search-text="searchText"
                             md-items="item in $root.autoCompleteGetItems('websites',searchText)"
-                            md-item-text="item"
+                            md-item-text="item.name"
                             md-autoselect="true"
                             md-select-on-match="true"
                             md-no-cache="true"
