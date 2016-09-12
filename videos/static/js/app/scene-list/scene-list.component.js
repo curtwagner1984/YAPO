@@ -16,7 +16,7 @@ angular.module('sceneList').component('sceneList', {
         treeFolder: '='
     },
     controller: ['$scope', 'Scene', 'helperService', 'scopeWatchService', 'pagerService', 'Actor',
-        'Website', 'SceneTag', '$http', '$rootScope', '$q', '$location', '$mdDialog','$timeout',
+        'Website', 'SceneTag', '$http', '$rootScope', '$q', '$location', '$mdDialog', '$timeout',
         function SceneListController($scope, Scene, helperService, scopeWatchService, pagerService, Actor,
                                      Website, SceneTag, $http, $rootScope, $q, $location, $mdDialog, $timeout) {
 
@@ -46,7 +46,7 @@ angular.module('sceneList').component('sceneList', {
 
                 this.isWorking = [0];
 
-                this.loadedItems = [[],[]];
+                this.loadedItems = [[], []];
 
                 /** @type {number} Total number of items. */
                 this.numItems = 0;
@@ -64,7 +64,7 @@ angular.module('sceneList').component('sceneList', {
 
 
             DynamicItems.prototype.reset = function () {
-                this.loadedItems = [[],[]];
+                this.loadedItems = [[], []];
                 this.numItems = 0;
 
             };
@@ -81,9 +81,9 @@ angular.module('sceneList').component('sceneList', {
                 //     this.fetchPage_(pageNumber);
                 // }
 
-                if (itemToReturn){
+                if (itemToReturn) {
                     return itemToReturn
-                }else if (this.loadedItems[1][0] != 1){
+                } else if (this.loadedItems[1][0] != 1) {
                     this.fetchPage_(pageNumber)
                 }
             };
@@ -140,7 +140,6 @@ angular.module('sceneList').component('sceneList', {
                             // }
 
 
-
                             lodeadItems[0] = lodeadItems[0].concat(self.itemsFormServer);
                             this.loadedItems = lodeadItems;
                             this.loadedItems[1][0] = 0;
@@ -154,8 +153,6 @@ angular.module('sceneList').component('sceneList', {
                             self.dynamicItems.numItems = self.totalItems;
 
                         }
-
-
 
 
                     });
@@ -185,7 +182,7 @@ angular.module('sceneList').component('sceneList', {
                 $timeout(angular.noop, 300).then(angular.bind(this, function () {
                     this.loadedPages[pageNumber] = [];
 
-                    this.nextPage(pageNumber,true);
+                    this.nextPage(pageNumber, true);
 
 
                     // var pageOffset = pageNumber * this.PAGE_SIZE;
@@ -661,9 +658,9 @@ angular.module('sceneList').component('sceneList', {
                     self.scenes = [];
                     // self.infiniteScenes = [];
                     self.sortBy = sortOrder['sortBy'];
-                    if (self.dynamicItems != undefined){
-                            self.dynamicItems.reset();
-                        }
+                    if (self.dynamicItems != undefined) {
+                        self.dynamicItems.reset();
+                    }
 
 
                     if (sortOrder.mainPage == undefined || sortOrder.mainPage == true) {
@@ -1200,6 +1197,15 @@ angular.module('sceneList').component('sceneList', {
                 }
 
 
+            };
+
+
+            // AM menu functions:
+            var originatorEv;
+
+            this.openMenu = function ($mdOpenMenu, ev) {
+                originatorEv = ev;
+                $mdOpenMenu(ev);
             };
 
             // self.dynamicItems.loadedItems[0] = [];

@@ -353,7 +353,7 @@
 
             <md-virtual-repeat-container id="vertical-container">
                 <div layout="column">
-                    <div md-virtual-repeat="item in $ctrl.dynamicItems" md-on-demand="" flex=""
+                    <div md-virtual-repeat="scene in $ctrl.dynamicItems" md-on-demand="" flex=""
                          class="repeated-item-scene">
 
                         <div layout="row" layout-align="space-around center">
@@ -365,20 +365,20 @@
                         </span>
                             </div>
                             <div flex="15">
-                                <a href="/#!/scene/{{ item.id }}">
-                                    <img src="{{ item.thumbnail }}" style="width: 240px"/>
+                                <a href="/#!/scene/{{ scene.id }}">
+                                    <img src="{{ scene.thumbnail }}" style="width: 240px"/>
                                 </a>
                             </div>
                             <div layout="column">
-                                <div flex><a href="/#!/scene/{{ item.id }}">{{ item.name }}</a></div>
+                                <div flex><a href="/#!/scene/{{ scene.id }}">{{ scene.name }}</a></div>
 
                                 <div flex>
-                                    <md-chips ng-model="item.actors"
+                                    <md-chips ng-model="scene.actors"
                                               md-autocomplete-snap
-                                              md-on-add="$ctrl.chipOnAdd($chip,'actors',item)"
-                                              md-on-remove="$ctrl.chipOnRemove($chip,'actors',item)"
+                                              md-on-add="$ctrl.chipOnAdd($chip,'actors',scene)"
+                                              md-on-remove="$ctrl.chipOnRemove($chip,'actors',scene)"
                                               md-on-select="$ctrl.chipOnSelect($chip,'actors')"
-                                              md-transform-chip="$ctrl.transformChip($chip,'actors',item)">
+                                              md-transform-chip="$ctrl.transformChip($chip,'actors',scene)">
                                         <md-autocomplete
                                                 md-search-text="searchText"
                                                 md-items="item in $root.autoCompleteGetItems('actors',searchText)"
@@ -406,12 +406,12 @@
                                 </div>
 
                                 <div flex>
-                                    <md-chips ng-model="item.scene_tags"
+                                    <md-chips ng-model="scene.scene_tags"
                                               md-autocomplete-snap
-                                              md-on-add="$ctrl.chipOnAdd($chip,'scene_tags',item)"
-                                              md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags',item)"
+                                              md-on-add="$ctrl.chipOnAdd($chip,'scene_tags',scene)"
+                                              md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags',scene)"
                                               md-on-select="$ctrl.chipOnSelect($chip,'scene_tags')"
-                                              md-transform-chip="$ctrl.transformChip($chip,'scene_tags',item)">
+                                              md-transform-chip="$ctrl.transformChip($chip,'scene_tags',scene)">
 
                                         <md-autocomplete
                                                 md-search-text="searchText"
@@ -430,12 +430,12 @@
                                 </div>
 
                                 <div flex=>
-                                    <md-chips ng-model="item.websites"
+                                    <md-chips ng-model="scene.websites"
                                               md-autocomplete-snap
-                                              md-on-add="$ctrl.chipOnAdd($chip,'websites',item)"
-                                              md-on-remove="$ctrl.chipOnRemove($chip,'websites',item)"
+                                              md-on-add="$ctrl.chipOnAdd($chip,'websites',scene)"
+                                              md-on-remove="$ctrl.chipOnRemove($chip,'websites',scene)"
                                               md-on-select="$ctrl.chipOnSelect($chip,'websites')"
-                                              md-transform-chip="$ctrl.transformChip($chip,'websites',item)">
+                                              md-transform-chip="$ctrl.transformChip($chip,'websites',scene)">
                                         <md-autocomplete
                                                 md-search-text="searchText"
                                                 md-items="item in $root.autoCompleteGetItems('websites',searchText)"
@@ -459,10 +459,27 @@
                             <div layout="column">
                                 <div flex>
 
-                                    <h2>Test</h2>
+                                    <md-menu>
+                                        <md-button class="md-raised" ng-click="$ctrl.openMenu($mdOpenMenu, $event)">
+                                            Button
+                                        </md-button>
+                                        <md-menu-content width="4">
+
+
+                                            <md-menu-item ng-repeat="item in $ctrl.actionList">
+                                                <md-button
+                                                        ng-click="$ctrl.actionClicked($event, item, scene, $ctrl.selectedScenes)">
+                                                    {{ item.name }}
+                                                </md-button>
+                                            </md-menu-item>
+
+                                        </md-menu-content>
+                                    </md-menu>
                                 </div>
                                 <div flex>
-                                    <h2>Another test</h2>
+                                    <md-button class="md-raised" ng-click="$ctrl.playScene(scene)">
+                                            Play Scene
+                                        </md-button>
                                 </div>
                             </div>
 
