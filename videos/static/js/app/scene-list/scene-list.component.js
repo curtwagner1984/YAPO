@@ -16,9 +16,9 @@ angular.module('sceneList').component('sceneList', {
         treeFolder: '='
     },
     controller: ['$scope', 'Scene', 'helperService', 'scopeWatchService', 'pagerService', 'Actor',
-        'Website', 'SceneTag', '$http', '$rootScope', '$q', '$location', '$mdDialog',
+        'Website', 'SceneTag', '$http', '$rootScope', '$q', '$location', '$mdDialog','$timeout',
         function SceneListController($scope, Scene, helperService, scopeWatchService, pagerService, Actor,
-                                     Website, SceneTag, $http, $rootScope, $q, $location, $mdDialog) {
+                                     Website, SceneTag, $http, $rootScope, $q, $location, $mdDialog, $timeout) {
 
             var self = this;
             var actorLoaded = false;
@@ -32,6 +32,148 @@ angular.module('sceneList').component('sceneList', {
             self.gotPromise = false;
             self.working = false;
             $scope.gotPromiseSceneList = false;
+
+            // AM deferred loading wrapper https://material.angularjs.org/latest/demo/virtualRepeat
+
+            // In this example, we set up our model using a class.
+            // Using a plain object works too. All that matters
+            // is that we implement getItemAtIndex and getLength.
+            var DynamicItems = function () {
+                /**
+                 * @type {!Object<?Array>} Data pages, keyed by page number (0-index).
+                 */
+                this.loadedPages = {};
+
+                /** @type {number} Total number of items. */
+                this.numItems = 0;
+
+                /** @const {number} Number of items to fetch per request. */
+                if (helperService.getNumberOfItemsPerPaige() != undefined) {
+                    this.PAGE_SIZE = helperService.getNumberOfItemsPerPaige();
+                } else {
+                    this.PAGE_SIZE = 10;
+                }
+
+
+                this.fetchNumItems_();
+            };
+
+
+            DynamicItems.prototype.reset = function () {
+                this.loadedPages = {};
+                this.numItems = 0;
+
+            };
+
+            // Required.
+            DynamicItems.prototype.getItemAtIndex = function (index) {
+                var pageNumber = Math.floor(index / this.PAGE_SIZE);
+                var page = this.loadedPages[pageNumber];
+
+                if (page) {
+                    return page[index % this.PAGE_SIZE];
+                } else if (page !== null) {
+                    this.fetchPage_(pageNumber);
+                }
+            };
+
+            // Required.
+            DynamicItems.prototype.getLength = function () {
+                return this.numItems;
+            };
+
+            DynamicItems.prototype.nextPage = function (pageNumber, wasCalledFromDynamicItems) {
+
+                var loadedPages = this.loadedPages;
+
+                var input = {
+                    currentPage: pageNumber,
+                    pageType: self.pageType,
+                    scene: self.scene,
+                    searchTerm: self.searchTerm,
+                    searchField: self.searchField,
+                    sortBy: self.sortBy,
+                    actorTag: self.actorTag,
+                    isRunnerUp: self.runnerUp,
+                    actor: self.actor,
+                    sceneTag: self.sceneTag,
+                    website: self.website,
+                    folder: self.folder,
+                    recursive: self.recursive,
+                    playlist: self.playlist
+
+
+                };
+
+                self.actorsToadd = pagerService.getNextPage(input);
+                if (self.actorsToadd != undefined) {
+                    self.actorsToadd.$promise.then(function (res) {
+
+                        // self.actorsToadd = res[0];
+
+                        var paginationInfo = {
+                            pageType: input.pageType,
+                            pageInfo: res[1]
+                        };
+
+                        self.totalItems = parseInt(paginationInfo.pageInfo.replace(/.*<(\d+)>; rel="count".*/, '$1'));
+
+                        scopeWatchService.paginationInit(paginationInfo);
+
+                        self.websites = helperService.resourceToArray(res[0]);
+
+                        if (wasCalledFromDynamicItems) {
+                            for (var i = 0; i < self.websites.length; i++) {
+                                loadedPages[pageNumber].push(self.websites[i])
+                            }
+
+                            this.loadedPages = loadedPages;
+                        } else {
+                            if (self.totalItems == -6) {
+                                self.totalItems = self.websites.length;
+                            }
+
+                            self.dynamicItems.numItems = self.totalItems;
+
+                        }
+
+
+                    });
+                }
+
+            };
+
+            DynamicItems.prototype.fetchPage_ = function (pageNumber) {
+                // Set the page to null so we know it is already being fetched.
+                this.loadedPages[pageNumber] = null;
+
+                // For demo purposes, we simulate loading more items with a timed
+                // promise. In real code, this function would likely contain an
+                // $http request.
+                $timeout(angular.noop, 300).then(angular.bind(this, function () {
+                    this.loadedPages[pageNumber] = [];
+
+                    this.nextPage(pageNumber,true);
+
+
+                    // var pageOffset = pageNumber * this.PAGE_SIZE;
+                    // for (var i = pageOffset; i < pageOffset + this.PAGE_SIZE; i++) {
+                    //   this.loadedPages[pageNumber].push(i);
+                    // }
+                }));
+            };
+
+            DynamicItems.prototype.fetchNumItems_ = function () {
+                // For demo purposes, we simulate loading the item count with a timed
+                // promise. In real code, this function would likely contain an
+                // $http request.
+
+                $timeout(angular.noop, 500).then(angular.bind(this, function () {
+                    this.numItems = self.totalItems;
+                }));
+            };
+
+            this.dynamicItems = new DynamicItems();
 
 
             if (helperService.getNumberOfItemsPerPaige() != undefined) {
@@ -109,7 +251,7 @@ angular.module('sceneList').component('sceneList', {
                             this.searchText = "";
                             this.mdSelectedItem = null;
                             this.selectedScenes = selectedScenes;
-                            this.playlistAutocompleteNeeded = false
+                            this.playlistAutocompleteNeeded = false;
 
                             this.greeting = "";
 
@@ -146,31 +288,27 @@ angular.module('sceneList').component('sceneList', {
                             }
 
 
-                                this.onSelect = function (selectedItem) {
+                            this.onSelect = function (selectedItem) {
 
-                                    // alert(angular.toJson(selectedItem));
-                                    self.addItem(scene, selectedItem, 'playlists');
-                                    $mdDialog.hide();
+                                // alert(angular.toJson(selectedItem));
+                                self.addItem(scene, selectedItem, 'playlists');
+                                $mdDialog.hide();
 
-                                };
+                            };
 
-                                // Setup some handlers
-                                this.close = function () {
-                                    $mdDialog.cancel();
-                                };
-                                this.submit = function () {
-                                    $mdDialog.hide();
-                                };
-                            }
-                            ,
-                            controllerAs: 'dialog',
-                                templateUrl
-                            :
-                            'static/js/app/scene-list/dialog-templates/dialog.html',
-                                targetEvent
-                            :
-                            $event
-                        });
+                            // Setup some handlers
+                            this.close = function () {
+                                $mdDialog.cancel();
+                            };
+                            this.submit = function () {
+                                $mdDialog.hide();
+                            };
+                        }
+                        ,
+                        controllerAs: 'dialog',
+                        templateUrl: 'static/js/app/scene-list/dialog-templates/dialog.html',
+                        targetEvent: $event
+                    });
                 }
 
 
@@ -266,114 +404,114 @@ angular.module('sceneList').component('sceneList', {
 
             };
 
-            var pageNumberForInfScroll = 0;
+            // var pageNumberForInfScroll = 0;
+            //
+            // self.infNextPage = function () {
+            //
+            //     console.log("self.totalItems are " + self.totalItems);
+            //     console.log("self.infiniteScenes are " + self.infiniteScenes.length);
+            //
+            //     if (self.working) {
+            //         console.log("Inf scroll tried to load, but another call was already in progress...");
+            //         return;
+            //     }
+            //
+            //     if (self.itemsPerPage * pageNumberForInfScroll > self.totalItems) {
+            //         console.log("Reached the end of result query...");
+            //         return;
+            //     }
+            //
+            //     if (self.totalItems < self.infiniteScenes.length) {
+            //         console.log("Reached the end of result query...");
+            //         return;
+            //     }
+            //
+            //     if (!self.isSomethingLoaded()) {
+            //         console.log("Waiting for something to load...");
+            //         return;
+            //     } else {
+            //         console.log("actorLoaded: "
+            //             + actorLoaded +
+            //             " sceneTagLoaded: " +
+            //             sceneTagLoaded +
+            //             " websiteLoaded: " +
+            //             websiteLoaded +
+            //             " folderLoaded: " +
+            //             folderLoaded +
+            //             " didSectionListWrapperLoadIsMainPage: " +
+            //             didSectionListWrapperLoadIsMainPage
+            //             + "playlistLoaded " +
+            //             playlistLoaded
+            //         )
+            //     }
+            //
+            //     self.working = true;
+            //
+            //     if (self.infiniteScenes.length > 0 && pageNumberForInfScroll == 0) {
+            //         pageNumberForInfScroll = 1;
+            //     }
+            //
+            //     self.nextPage(pageNumberForInfScroll);
+            //     pageNumberForInfScroll++;
+            //
+            // };
 
-            self.infNextPage = function () {
-
-                console.log("self.totalItems are " + self.totalItems);
-                console.log("self.infiniteScenes are " + self.infiniteScenes.length);
-
-                if (self.working) {
-                    console.log("Inf scroll tried to load, but another call was already in progress...");
-                    return;
-                }
-
-                if (self.itemsPerPage * pageNumberForInfScroll > self.totalItems) {
-                    console.log("Reached the end of result query...");
-                    return;
-                }
-
-                if (self.totalItems < self.infiniteScenes.length) {
-                    console.log("Reached the end of result query...");
-                    return;
-                }
-
-                if (!self.isSomethingLoaded()) {
-                    console.log("Waiting for something to load...");
-                    return;
-                } else {
-                    console.log("actorLoaded: "
-                        + actorLoaded +
-                        " sceneTagLoaded: " +
-                        sceneTagLoaded +
-                        " websiteLoaded: " +
-                        websiteLoaded +
-                        " folderLoaded: " +
-                        folderLoaded +
-                        " didSectionListWrapperLoadIsMainPage: " +
-                        didSectionListWrapperLoadIsMainPage
-                        + "playlistLoaded " +
-                        playlistLoaded
-                    )
-                }
-
-                self.working = true;
-
-                if (self.infiniteScenes.length > 0 && pageNumberForInfScroll == 0) {
-                    pageNumberForInfScroll = 1;
-                }
-
-                self.nextPage(pageNumberForInfScroll);
-                pageNumberForInfScroll++;
-
-            };
-
-            self.nextPage = function (currentPage) {
-                self.working = true;
-                // self.sceneArrayClear();
-                console.log("scene-list: nextPage function triggered!");
-
-                var input = {
-                    currentPage: currentPage,
-                    pageType: self.pageType,
-                    actor: self.actor,
-                    sceneTag: self.sceneTag,
-                    website: self.website,
-                    folder: self.folder,
-                    searchTerm: self.searchTerm,
-                    searchField: self.searchField,
-                    sortBy: self.sortBy,
-                    isRunnerUp: self.runnerUp,
-                    recursive: self.recursive,
-                    playlist: self.playlist
-                };
-
-
-                self.actorsToadd = pagerService.getNextPage(input
-                );
-
-
-                self.actorsToadd.$promise.then(function (res) {
-
-                    // self.actorsToadd = res[0];
-
-                    var paginationInfo = {
-                        pageType: input.pageType,
-                        pageInfo: res[1]
-                    };
-
-                    // scopeWatchService.paginationInit(paginationInfo);
-
-                    self.totalItems = parseInt(paginationInfo.pageInfo.replace(/.*<(\d+)>; rel="count".*/, '$1'));
-
-
-                    self.scenes = helperService.resourceToArray(res[0]);
-
-                    self.numberOfItemsReturned = self.scenes.length;
-                    self.infiniteScenes = self.infiniteScenes.concat(self.scenes);
-
-                    self.scenes = [];
-
-                    self.sceneArraystore();
-
-
-                    self.working = false
-
-
-                });
-
-
-            };
+            // self.nextPage = function (currentPage) {
+            //     self.working = true;
+            //     // self.sceneArrayClear();
+            //     console.log("scene-list: nextPage function triggered!");
+            //
+            //     var input = {
+            //         currentPage: currentPage,
+            //         pageType: self.pageType,
+            //         actor: self.actor,
+            //         sceneTag: self.sceneTag,
+            //         website: self.website,
+            //         folder: self.folder,
+            //         searchTerm: self.searchTerm,
+            //         searchField: self.searchField,
+            //         sortBy: self.sortBy,
+            //         isRunnerUp: self.runnerUp,
+            //         recursive: self.recursive,
+            //         playlist: self.playlist
+            //     };
+            //
+            //
+            //     self.actorsToadd = pagerService.getNextPage(input
+            //     );
+            //
+            //
+            //     self.actorsToadd.$promise.then(function (res) {
+            //
+            //         // self.actorsToadd = res[0];
+            //
+            //         var paginationInfo = {
+            //             pageType: input.pageType,
+            //             pageInfo: res[1]
+            //         };
+            //
+            //         // scopeWatchService.paginationInit(paginationInfo);
+            //
+            //         self.totalItems = parseInt(paginationInfo.pageInfo.replace(/.*<(\d+)>; rel="count".*/, '$1'));
+            //
+            //
+            //         self.scenes = helperService.resourceToArray(res[0]);
+            //
+            //         self.numberOfItemsReturned = self.scenes.length;
+            //         self.infiniteScenes = self.infiniteScenes.concat(self.scenes);
+            //
+            //         self.scenes = [];
+            //
+            //         self.sceneArraystore();
+            //
+            //
+            //         self.working = false
+            //
+            //
+            //     });
+            //
+            //
+            // };
 
 
             // if (self.mainPage) {
@@ -383,8 +521,10 @@ angular.module('sceneList').component('sceneList', {
 
             if (self.treeFolder != undefined) {
                 self.folder = self.treeFolder;
-                pageNumberForInfScroll = 0;
-                self.nextPage(0);
+                // pageNumberForInfScroll = 0;
+                // self.nextPage(0);
+                self.dynamicItems.reset();
+                self.dynamicItems.nextPage(0, false)
             }
 
             $scope.$on("paginationChange", function (event, pageInfo) {
@@ -405,8 +545,10 @@ angular.module('sceneList').component('sceneList', {
             $scope.$on("actorLoaded", function (event, actor) {
 
                 self.actor = actor;
-                self.nextPage(0);
-                pageNumberForInfScroll = 0;
+                // self.nextPage(0);
+                // pageNumberForInfScroll = 0;
+                self.dynamicItems.reset();
+                self.dynamicItems.nextPage(0, false);
 
 
                 actorLoaded = true;
@@ -419,8 +561,10 @@ angular.module('sceneList').component('sceneList', {
             $scope.$on("playlistLoaded", function (event, playlist) {
 
                 self.playlist = playlist;
-                pageNumberForInfScroll = 0;
-                self.nextPage(0);
+                // pageNumberForInfScroll = 0;
+                // self.nextPage(0);
+                self.dynamicItems.reset();
+                self.dynamicItems.nextPage(0, false);
 
 
                 playlistLoaded = true;
@@ -433,8 +577,10 @@ angular.module('sceneList').component('sceneList', {
 
             $scope.$on("sceneTagLoaded", function (event, sceneTag) {
                 self.sceneTag = sceneTag;
-                self.nextPage(0);
-                pageNumberForInfScroll = 0;
+                // self.nextPage(0);
+                // pageNumberForInfScroll = 0;
+                self.dynamicItems.reset();
+                self.dynamicItems.nextPage(0, false);
                 sceneTagLoaded = true;
             });
 
@@ -444,8 +590,10 @@ angular.module('sceneList').component('sceneList', {
 
             $scope.$on("websiteLoaded", function (event, website) {
                 self.website = website;
-                self.nextPage(0);
-                pageNumberForInfScroll = 0;
+                // self.nextPage(0);
+                // pageNumberForInfScroll = 0;
+                self.dynamicItems.reset();
+                self.dynamicItems.nextPage(0, false);
                 websiteLoaded = true
             });
 
@@ -462,8 +610,10 @@ angular.module('sceneList').component('sceneList', {
                 self.recursive = folder['recursive'];
                 // alert(folder['recursive']);
                 // self.scenes = [];
-                self.nextPage(0);
-                pageNumberForInfScroll = 0;
+                // self.nextPage(0);
+                // pageNumberForInfScroll = 0;
+                self.dynamicItems.reset();
+                self.dynamicItems.nextPage(0, false);
                 folderLoaded = true;
             });
 
@@ -477,11 +627,17 @@ angular.module('sceneList').component('sceneList', {
                     self.scenes = [];
                     self.infiniteScenes = [];
                     self.sortBy = sortOrder['sortBy'];
+                    if (self.dynamicItems != undefined){
+                            self.dynamicItems.reset();
+                        }
+
 
                     if (sortOrder.mainPage == undefined || sortOrder.mainPage == true) {
 
-                        self.nextPage(0);
-                        pageNumberForInfScroll = 0;
+                        // self.nextPage(0);
+                        // pageNumberForInfScroll = 0;
+
+                        self.dynamicItems.nextPage(0, false);
                         didSectionListWrapperLoadIsMainPage = true;
 
                     }
@@ -828,8 +984,10 @@ angular.module('sceneList').component('sceneList', {
                     self.infiniteScenes = [];
                     self.searchTerm = searchTerm['searchTerm'];
                     self.searchField = searchTerm['searchField'];
-                    self.nextPage(0);
-                    pageNumberForInfScroll = 0;
+                    // self.nextPage(0);
+                    // pageNumberForInfScroll = 0;
+                    self.dynamicItems.reset();
+                    self.dynamicItems.nextPage(0, false);
                     self.totalItems = 0;
                     // $scope.$emit('list:filtered');
                 }
@@ -843,8 +1001,10 @@ angular.module('sceneList').component('sceneList', {
                     self.scenes = [];
                     self.infiniteScenes = [];
                     self.runnerUp = runnerUp['runnerUp'];
-                    self.nextPage(0);
-                    pageNumberForInfScroll = 0;
+                    // self.nextPage(0);
+                    // pageNumberForInfScroll = 0;
+                    self.dynamicItems.reset();
+                    self.dynamicItems.nextPage(0, false);
                 }
 
             });
