@@ -82,7 +82,7 @@ class WebsiteIdNameSerailzier(serializers.ModelSerializer):
 
     class Meta:
         model = Website
-        fields = ['id', 'name', 'scene_tags_with_names', 'usage_count', 'play_count']
+        fields = ['id', 'name', 'scene_tags_with_names', 'usage_count', 'play_count', 'date_added']
 
     def get_usage_count(self, obj):
         return obj.scenes.count()
@@ -268,5 +268,3 @@ class PlaylistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
         fields = '__all__'
-
-

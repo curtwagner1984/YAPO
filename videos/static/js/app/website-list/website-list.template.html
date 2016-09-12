@@ -1,18 +1,29 @@
-<pagination page-type="'Website'"></pagination>
+Total Items {{ $ctrl.totalItems }}
+<div class="virtualRepeatdemoDeferredLoading">
+    <md-content layout="column">
 
-<ul class="websites">
-    <li ng-repeat="site in $ctrl.websites">
-        <a href="/#!/website/{{ site.id }}">{{ site.name }} [{{ site.usage_count }}] </a><span ng-if="!$ctrl.mainPage"
-            ng-click="$ctrl.removeWebsiteFromScene(site)"
-            class="glyphicon glyphicon-remove"></span>
+        <md-virtual-repeat-container id="vertical-container">
+            <div layout="column">
+                <div md-virtual-repeat="item in $ctrl.dynamicItems" md-on-demand="" flex class="repeated-item">
+                    <div layout="row">
+                        <div flex="10">{{$index + 1}}</div>
+                        <div flex="30"><a href="/#!/website/{{ item.id }}">{{ item.name }}</a></div>
+                        <div layout="column">
+                            <div flex>Uses: {{ item.usage_count }}</div>
+                            <div flex>Play Count: {{ item.play_count }}</div>
+                            <div flex>Date Added: {{ item.date_added | date:'dd MMMM yyyy':'z'}}</div>
 
-        <span ng-if="$ctrl.mainPage" ng-click="$ctrl.deleteWebsiteFromDb(site)"
-              class="glyphicon glyphicon-trash on-hover-red-cursor-pointer"
-              uib-popover-html="'<strong>Delete</strong> tag from database!'"
-              popover-trigger="mouseenter">
+                        </div>
+                    </div>
+                </div>
 
-                            </span>
 
-    </li>
-</ul>
+            </div>
+        </md-virtual-repeat-container>
+
+
+    </md-content>
+</div>
+
+
 
