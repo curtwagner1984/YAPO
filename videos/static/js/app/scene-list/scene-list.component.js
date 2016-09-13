@@ -63,9 +63,10 @@ angular.module('sceneList').component('sceneList', {
             };
 
 
-            DynamicItems.prototype.reset = function () {
+            DynamicItems.prototype.reset = function (caller) {
                 this.loadedItems = [[], []];
                 this.numItems = 0;
+                console.log("DynamicItems reset was triggered by " + caller)
 
             };
 
@@ -81,15 +82,21 @@ angular.module('sceneList').component('sceneList', {
                 //     this.fetchPage_(pageNumber);
                 // }
 
+                console.log("this.loadedItems[0]length is  " + this.loadedItems[0].length + " this.numItems is" + this.numItems);
+
+
                 if (itemToReturn) {
                     return itemToReturn
-                } else if (this.loadedItems[1][0] != 1) {
+                } else if ((this.loadedItems[1][0] != 1) && (this.loadedItems[0].length != this.numItems)){
                     this.fetchPage_(pageNumber)
                 }
+
+
             };
 
             // Required.
             DynamicItems.prototype.getLength = function () {
+
                 return this.numItems;
             };
 
@@ -198,6 +205,9 @@ angular.module('sceneList').component('sceneList', {
                 // $http request.
 
                 $timeout(angular.noop, 500).then(angular.bind(this, function () {
+                    if (self.totalItems == -6) {
+                        self.totalItems = self.itemsFormServer.length;
+                    }
                     this.numItems = self.totalItems;
                 }));
             };
@@ -554,7 +564,7 @@ angular.module('sceneList').component('sceneList', {
                 self.folder = self.treeFolder;
                 // pageNumberForInfScroll = 0;
                 // self.nextPage(0);
-                self.dynamicItems.reset();
+                self.dynamicItems.reset("treeFolder");
                 self.dynamicItems.nextPage(0, false)
             }
 
@@ -578,7 +588,7 @@ angular.module('sceneList').component('sceneList', {
                 self.actor = actor;
                 // self.nextPage(0);
                 // pageNumberForInfScroll = 0;
-                self.dynamicItems.reset();
+                self.dynamicItems.reset("actorLoaded");
                 self.dynamicItems.nextPage(0, false);
 
 
@@ -594,7 +604,7 @@ angular.module('sceneList').component('sceneList', {
                 self.playlist = playlist;
                 // pageNumberForInfScroll = 0;
                 // self.nextPage(0);
-                self.dynamicItems.reset();
+                self.dynamicItems.reset("playlistLoaded");
                 self.dynamicItems.nextPage(0, false);
 
 
@@ -610,7 +620,7 @@ angular.module('sceneList').component('sceneList', {
                 self.sceneTag = sceneTag;
                 // self.nextPage(0);
                 // pageNumberForInfScroll = 0;
-                self.dynamicItems.reset();
+                self.dynamicItems.reset("sceneTagLoaded");
                 self.dynamicItems.nextPage(0, false);
                 sceneTagLoaded = true;
             });
@@ -623,7 +633,7 @@ angular.module('sceneList').component('sceneList', {
                 self.website = website;
                 // self.nextPage(0);
                 // pageNumberForInfScroll = 0;
-                self.dynamicItems.reset();
+                self.dynamicItems.reset('websiteLoaded');
                 self.dynamicItems.nextPage(0, false);
                 websiteLoaded = true
             });
@@ -643,7 +653,7 @@ angular.module('sceneList').component('sceneList', {
                 // self.scenes = [];
                 // self.nextPage(0);
                 // pageNumberForInfScroll = 0;
-                self.dynamicItems.reset();
+                self.dynamicItems.reset('folderOpened');
                 self.dynamicItems.nextPage(0, false);
                 folderLoaded = true;
             });
@@ -659,7 +669,7 @@ angular.module('sceneList').component('sceneList', {
                     // self.infiniteScenes = [];
                     self.sortBy = sortOrder['sortBy'];
                     if (self.dynamicItems != undefined) {
-                        self.dynamicItems.reset();
+                        self.dynamicItems.reset('sortOrderChanged');
                     }
 
 
@@ -1017,7 +1027,7 @@ angular.module('sceneList').component('sceneList', {
                     self.searchField = searchTerm['searchField'];
                     // self.nextPage(0);
                     // pageNumberForInfScroll = 0;
-                    self.dynamicItems.reset();
+                    self.dynamicItems.reset('searchTermChanged');
                     self.dynamicItems.nextPage(0, false);
                     self.totalItems = 0;
                     // $scope.$emit('list:filtered');
@@ -1034,7 +1044,7 @@ angular.module('sceneList').component('sceneList', {
                     self.runnerUp = runnerUp['runnerUp'];
                     // self.nextPage(0);
                     // pageNumberForInfScroll = 0;
-                    self.dynamicItems.reset();
+                    self.dynamicItems.reset('runnerUpChanged');
                     self.dynamicItems.nextPage(0, false);
                 }
 

@@ -868,10 +868,14 @@ def add_scene_to_playlist(request):
 
         pl = Playlist.objects.filter(name=playlist_name).first()
         sc = Scene.objects.get(id=scene_id)
-        pl.scenes.add(sc)
-        pl.save()
+        if sc not in pl.scenes.all():
+            pl.scenes.add(sc)
+            pl.save()
+            print("Added scene '{}' to playlist '{}'".format(sc.name, pl.name))
+        else:
+            print("Scene '{}' is already in playlist '{}'".format(sc.name, pl.name))
 
-        print("Added scene '{}' to playlist '[]'".format(sc.name, pl.name))
+
 
         return Response(status=200)
 
