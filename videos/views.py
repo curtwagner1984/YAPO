@@ -1117,7 +1117,7 @@ def operator_contents(string, open_parenthsis, close_parenthsis):
         if i < len(string):
 
             temp_str = string[i: i + 2]
-            print("string i:i+1 is '{}'".format(temp_str))
+            # print("string i:i+1 is '{}'".format(temp_str))
             if (not inside_parenthsis) and (
                         temp_str in operators):
                 if temp_str not in single_operator:
@@ -1298,9 +1298,7 @@ def advanced_search_recursive(adv_search_string, qs):
 
 
 def advanced_search(adv_search_string):
-    binary_operators = {'&&', '||'}
-    single_operators = {'!!'}
-    a = operator_contents(adv_search_string, '(', ')')
+
     scenes = Scene.objects.all()
 
     # a = list(parenthetic_contents(adv_search_string, '(', ')'))
