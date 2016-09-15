@@ -25,6 +25,7 @@ from rest_framework.reverse import reverse
 from rest_framework import renderers
 from rest_framework import viewsets, views
 from rest_framework.parsers import FileUploadParser
+import re
 
 import operator
 import functools
@@ -1184,6 +1185,12 @@ def remove_parenthesis_at_index(string, indexes):
     return ans
 
 
+def remove_and_strip(string, string_to_remove):
+    string = string.replace(string_to_remove, '')
+    string = string.strip()
+    return string
+
+
 def get_q_object_from_literal(literal):
     literal = literal.strip()
 
@@ -1197,6 +1204,52 @@ def get_q_object_from_literal(literal):
             q = Q(scene_tags__name__icontains=j[key])
         elif key == 'websites':
             q = Q(websites__name__icontains=j[key])
+
+        elif 'scene_properties_' in key:
+
+            int_fields = ['play_count', 'rating', 'width', 'height', 'bit_rate', 'duration', 'size', 'framerate',
+                          'date_added', 'date_runner_up', 'date_last_played', 'is_runner_up', 'modified_date']
+            str_fields = ['name', 'path_to_file', 'description', 'codec_name']
+
+            key_new = key.replace('scene_properties_', '')
+
+            value_stripped = j[key].strip()
+            reverse_keyarg = ""
+            temp = ""
+
+            if key_new in int_fields:
+
+                if key_new == 'size':
+                    a = re.findall(r'\d+', j[key])
+                    t1 = int(a[0])
+                    t2 = t1 * 1000000
+                    t3 = str(t2)
+                    j[key] = j[key].replace(a[0], t3)
+
+                if '>=' in value_stripped:
+                    temp = remove_and_strip(j[key], '>=')
+                    reverse_keyarg = key_new + "__gte"
+
+                elif '<=' in value_stripped:
+                    temp = remove_and_strip(j[key], '<=')
+                    reverse_keyarg = key_new + "__lte"
+
+                elif '>' in value_stripped:
+                    temp = remove_and_strip(j[key], '>')
+                    reverse_keyarg = key_new + "__gt"
+
+                elif '<' in value_stripped:
+                    temp = remove_and_strip(j[key], '<')
+                    reverse_keyarg = key_new + "__lt"
+
+                else:
+                    temp = j[key].strip()
+                    reverse_keyarg = key_new
+            else:
+                temp = j[key].strip()
+                reverse_keyarg = key_new + "__icontains"
+
+            q = Q(**{reverse_keyarg: temp})
 
     return q
 
@@ -1298,7 +1351,6 @@ def advanced_search_recursive(adv_search_string, qs):
 
 
 def advanced_search(adv_search_string):
-
     scenes = Scene.objects.all()
 
     # a = list(parenthetic_contents(adv_search_string, '(', ')'))

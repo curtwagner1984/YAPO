@@ -116,6 +116,16 @@
                             </md-option>
                         </md-select>
                     </md-input-container>
+                    <md-input-container>
+                        <label>Scene Properties</label>
+                        <md-select ng-model="dialog.selectedOption" md-on-close="dialog.onSelect(dialog.selectedOption,'scene_properties')">
+                            <md-option ng-repeat="option in dialog.scene_properties" ng-value="option"
+                                       >
+                                {{ option }}
+                            </md-option>
+
+                        </md-select>
+                    </md-input-container>
 
                 </div>
                 <md-autocomplete
@@ -125,7 +135,7 @@
                         md-selected-item="dialog.mdSelectedItem"
                         md-item-text="item.name"
                         md-selected-item-change="dialog.onSelect(dialog.selectedOption,dialog.mdSelectedItem)"
-                        placeholder="{{ $ctrl.objectType }}">
+                        md-floating-label="Autocomplete input">
                     <md-item-template>
                         <span md-highlight-text="$ctrl.searchText" md-highlight-flags="^i">{{ item.name }}</span>
                     </md-item-template>

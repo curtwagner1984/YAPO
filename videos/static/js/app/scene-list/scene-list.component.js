@@ -390,6 +390,9 @@ angular.module('sceneList').component('sceneList', {
                             return {abbrev: option}
                         });
 
+
+                        this.scene_properties = "name,path_to_file,date_added,date_last_played,date_runner_up,play_count,is_runner_up,rating,description,width,height,bit_rate,duration,size,codec_name,framerate,modified_date".split(',');
+
                         this.advStringtoString = function () {
                             var str = "";
 
@@ -412,7 +415,16 @@ angular.module('sceneList').component('sceneList', {
 
                         this.onSelect = function (selctedItemType, selectedItem) {
 
-                            var ans = "{"+"\""+selctedItemType +"\"" + ':'+ "\""+ selectedItem.name+ "\""+"}";
+                            var ans ="";
+
+                            if ('scene_properties' == selectedItem){
+                                var x = 'scene_properties'+'_'+selctedItemType;
+                                ans = "{" + "\"" + x + "\"" + ':' + "\"" + "value" + "\"" + "}";
+                            }else{
+                                ans = "{" + "\"" + selctedItemType + "\"" + ':' + "\"" + selectedItem.name + "\"" + "}";
+                            }
+
+
                             // if (this.advSearchDict[selctedItemType] == undefined) {
                             //     this.advSearchDict[selctedItemType] = '\'' + selectedItem.name + '\'';
                             // } else {
@@ -452,7 +464,7 @@ angular.module('sceneList').component('sceneList', {
 
 
                         this.advSearchOnSelect = function (selectedItem, selectedItemType) {
-                             var ans = "{"+selectedItemType + ':'+ "\""+ selectedItem.name+ "\""+"}";
+                            var ans = "{" + selectedItemType + ':' + "\"" + selectedItem.name + "\"" + "}";
                             this.advSearchString = this.advSearchString + ans;
 
                             // this.advSearchString = "[" + selectedItemType + ":" + selectedItem.name + "]"
@@ -466,7 +478,6 @@ angular.module('sceneList').component('sceneList', {
                             submitAdvSearch(this.advSearchString);
                             $mdDialog.hide();
                         };
-
 
 
                     }
