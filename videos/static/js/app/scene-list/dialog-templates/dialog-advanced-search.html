@@ -1,0 +1,135 @@
+<!--
+<md-dialog>
+    <md-toolbar>
+        <div class="md-toolbar-tools">Advanced Search !
+         <span flex></span>
+        </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+        <div class="md-dialog-content">
+
+            <div >
+            {{ dialog.actorSearchText }}
+            </div>
+
+            <div layout="row">
+                <md-input-container flex="100">
+                <label>Adv Search string</label>
+                <input ng-model="dialog.advSearchString">
+            </md-input-container>
+            </div>
+
+
+
+        <md-autocomplete
+
+                md-search-text="dialog.actorSearchText"
+                md-items="item in $root.autoCompleteGetItems('actors',dialog.actorSearchText)"
+                md-selected-item="dialog.mdSelectedItem"
+                md-item-text="item.name"
+                placeholder="{{ $ctrl.objectType }}">
+            <md-item-template>
+                <span md-highlight-text="$ctrl.searchText" md-highlight-flags="^i">{{ item.name }}</span>
+            </md-item-template>
+
+        </md-autocomplete>
+        <md-button class="md-raised" ng-click="dialog.actorAddAND(dialog.actorSearchText)">
+            Add AND
+        </md-button>
+
+        </div>
+
+
+
+
+    </md-dialog-content>
+
+    <md-dialog-actions>
+        <md-button aria-label="Close dialog" ng-click="dialog.close()" class="md-primary">
+            Cancel
+        </md-button>
+
+        <md-button aria-label="Submit dialog" ng-click="dialog.submit()" class="md-warn">
+            Proceed
+        </md-button>
+    </md-dialog-actions>
+
+
+</md-dialog>
+-->
+
+
+<md-dialog aria-label="Mango (Fruit)">
+    <form ng-cloak>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Advanced search</h2>
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()">
+
+                </md-button>
+            </div>
+        </md-toolbar>
+
+        <md-dialog-content>
+            <div class="md-dialog-content">
+                <h2>Using .md-dialog-content class that sets the padding as the spec</h2>
+                <div>
+                    {{ dialog.advSearchString }}
+                </div>
+
+                <div layout="row">
+                    <md-input-container flex="100">
+                        <label>Adv Search string</label>
+                        <input type="text" ng-model="dialog.advSearchString">
+                    </md-input-container>
+                </div>
+
+
+                <div>
+                    <md-input-container>
+                        <label>Search Option</label>
+                        <md-select ng-model="dialog.selectedOption">
+                            <md-option ng-repeat="option in dialog.options" ng-value="option.abbrev"
+                                       >
+                                {{ option.abbrev }}
+                            </md-option>
+                        </md-select>
+                    </md-input-container>
+
+                </div>
+                <md-autocomplete
+
+                        md-search-text="dialog.actorSearchText"
+                        md-items="item in $root.autoCompleteGetItems(dialog.selectedOption,dialog.actorSearchText)"
+                        md-selected-item="dialog.mdSelectedItem"
+                        md-item-text="item.name"
+                        md-selected-item-change="dialog.onSelect(dialog.selectedOption,dialog.mdSelectedItem)"
+                        placeholder="{{ $ctrl.objectType }}">
+                    <md-item-template>
+                        <span md-highlight-text="$ctrl.searchText" md-highlight-flags="^i">{{ item.name }}</span>
+                    </md-item-template>
+
+                </md-autocomplete>
+                <md-button class="md-raised" ng-click="dialog.clearSearchString()">
+                    Clear
+                </md-button>
+
+            </div>
+        </md-dialog-content>
+
+        <md-dialog-actions layout="row">
+            <md-button href="http://en.wikipedia.org/wiki/Mango" target="_blank" md-autofocus>
+                More on Wikipedia
+            </md-button>
+            <span flex></span>
+            <md-button ng-click="dialog.close()">
+                Close
+            </md-button>
+            <md-button ng-click="dialog.submit()">
+                Submit
+            </md-button>
+        </md-dialog-actions>
+    </form>
+</md-dialog>

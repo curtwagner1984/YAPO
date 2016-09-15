@@ -82,12 +82,12 @@ angular.module('sceneList').component('sceneList', {
                 //     this.fetchPage_(pageNumber);
                 // }
 
-                console.log("this.loadedItems[0]length is  " + this.loadedItems[0].length + " this.numItems is" + this.numItems);
+                // console.log("this.loadedItems[0]length is  " + this.loadedItems[0].length + " this.numItems is" + this.numItems);
 
 
                 if (itemToReturn) {
                     return itemToReturn
-                } else if ((this.loadedItems[1][0] != 1) && (this.loadedItems[0].length != this.numItems)){
+                } else if ((this.loadedItems[1][0] != 1) && (this.loadedItems[0].length != this.numItems)) {
                     this.fetchPage_(pageNumber)
                 }
 
@@ -119,7 +119,8 @@ angular.module('sceneList').component('sceneList', {
                     website: self.website,
                     folder: self.folder,
                     recursive: self.recursive,
-                    playlist: self.playlist
+                    playlist: self.playlist,
+                    advSearch: self.advSearchString
 
 
                 };
@@ -262,12 +263,16 @@ angular.module('sceneList').component('sceneList', {
                 {name: 'Add To Queue', direction: "bottom"},
                 {name: 'Add To Playlist', direction: "top"},
                 {name: 'Delete From Db', direction: "bottom"},
-                {name: 'Delete From Disk', direction: "top"}
+                {name: 'Delete From Disk', direction: "top"},
+
 
             ];
 
 
             self.actionClicked = function ($event, item, scene, selectedScenes) {
+
+                var defaultTemplate = 'static/js/app/scene-list/dialog-templates/dialog.html';
+
 
                 if (item.name == 'Add To Queue') {
                     $http.get('add-to-playlist//', {
@@ -293,6 +298,7 @@ angular.module('sceneList').component('sceneList', {
                             this.mdSelectedItem = null;
                             this.selectedScenes = selectedScenes;
                             this.playlistAutocompleteNeeded = false;
+                            this.advSearchString = "";
 
                             this.greeting = "";
 
@@ -337,6 +343,10 @@ angular.module('sceneList').component('sceneList', {
 
                             };
 
+                            this.advSearchOnSelect = function (selectedItem, selectedItemType) {
+                                this.advSearchString = "[" + selectedItemType + ":" + selectedItem.name + "]"
+                            };
+
                             // Setup some handlers
                             this.close = function () {
                                 $mdDialog.cancel();
@@ -347,12 +357,125 @@ angular.module('sceneList').component('sceneList', {
                         }
                         ,
                         controllerAs: 'dialog',
-                        templateUrl: 'static/js/app/scene-list/dialog-templates/dialog.html',
+                        templateUrl: defaultTemplate,
                         targetEvent: $event
                     });
                 }
 
 
+            };
+
+            var submitAdvSearch = function (advSearchString) {
+                self.advSearchString = advSearchString;
+
+                self.dynamicItems.reset("actorLoaded");
+                self.dynamicItems.nextPage(0, false);
+
+            };
+
+            self.advSearch = function ($event) {
+
+                $mdDialog.show({
+                    clickOutsideToClose: true,
+                    controller: function ($mdDialog) {
+
+
+                        this.greeting = "";
+                        this.advSearchDict = {};
+                        this.advSearchString = "";
+                        this.actorSearchText = "";
+                        this.sceneTagSearchText = "";
+                        this.selectedOption = '';
+                        this.options = 'actors,scene_tags,websites'.split(',').map(function (option) {
+                            return {abbrev: option}
+                        });
+
+                        this.advStringtoString = function () {
+                            var str = "";
+
+                            for (var key in this.advSearchDict) {
+                                if (this.advSearchDict.hasOwnProperty(key)) {
+                                    var temp = "[" + key + ": " + this.advSearchDict[key];
+                                    // for (var x = 0 ; x < this.advSearchDict[key].length ; x++){
+                                    //     str = str + this.advSearchDict[key][x] + ","
+                                    // }
+                                    temp = temp + ']';
+
+                                }
+                                str = str + temp;
+
+                            }
+                            return str;
+
+
+                        };
+
+                        this.onSelect = function (selctedItemType, selectedItem) {
+
+                            var ans = "{"+"\""+selctedItemType +"\"" + ':'+ "\""+ selectedItem.name+ "\""+"}";
+                            // if (this.advSearchDict[selctedItemType] == undefined) {
+                            //     this.advSearchDict[selctedItemType] = '\'' + selectedItem.name + '\'';
+                            // } else {
+                            //     this.advSearchDict[selctedItemType] = this.advSearchDict[selctedItemType] + " " + selectedItem.name;
+                            // }
+                            //
+                            // this.advSearchString = this.advStringtoString();
+
+                            this.advSearchString = this.advSearchString + ans;
+
+                            this.actorSearchText = "";
+
+                        };
+
+
+                        // this.actorAddAND = function (actorToAdd) {
+                        //
+                        //     if (this.advSearchDict['Actor'] == undefined){
+                        //         this.advSearchDict['Actor'] = actorToAdd;
+                        //     }else{
+                        //         this.advSearchDict['Actor'] = this.advSearchDict['Actor'] + " " + actorToAdd;
+                        //     }
+                        //
+                        //     this.advSearchString = this.advStringtoString();
+                        //
+                        //     this.actorSearchText = "";
+                        //
+                        //
+                        //
+                        //
+                        // };
+
+                        this.clearSearchString = function () {
+                            this.advSearchString = "";
+                            this.advSearchDict = {};
+                        };
+
+
+                        this.advSearchOnSelect = function (selectedItem, selectedItemType) {
+                             var ans = "{"+selectedItemType + ':'+ "\""+ selectedItem.name+ "\""+"}";
+                            this.advSearchString = this.advSearchString + ans;
+
+                            // this.advSearchString = "[" + selectedItemType + ":" + selectedItem.name + "]"
+                        };
+
+                        // Setup some handlers
+                        this.close = function () {
+                            $mdDialog.cancel();
+                        };
+                        this.submit = function () {
+                            submitAdvSearch(this.advSearchString);
+                            $mdDialog.hide();
+                        };
+
+
+
+                    }
+                    ,
+                    controllerAs: 'dialog',
+                    templateUrl: 'static/js/app/scene-list/dialog-templates/dialog-advanced-search.html',
+                    targetEvent: $event,
+                    parent: angular.element(document.body)
+                });
             };
 
 

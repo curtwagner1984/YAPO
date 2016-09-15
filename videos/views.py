@@ -18,7 +18,7 @@ import urllib.request
 import platform
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
+from django.db.models import Q
 from videos.serializers import *
 from rest_framework import generics
 from rest_framework.reverse import reverse
@@ -26,6 +26,8 @@ from rest_framework import renderers
 from rest_framework import viewsets, views
 from rest_framework.parsers import FileUploadParser
 
+import operator
+import functools
 from rest_framework import filters
 from itertools import chain
 import base64
@@ -159,6 +161,7 @@ def search_in_get_queryset(original_queryset, request):
                         (qp != 'searchField') and \
                         (qp != 'format') and \
                         (qp != 'pageType') and \
+                        (qp != 'advSearch') and \
                         (qp != 'search'):
 
                     # if qp == 'sortBy':
@@ -875,8 +878,6 @@ def add_scene_to_playlist(request):
         else:
             print("Scene '{}' is already in playlist '{}'".format(sc.name, pl.name))
 
-
-
         return Response(status=200)
 
 
@@ -1100,9 +1101,241 @@ class SceneTagViewSet(viewsets.ModelViewSet):
     serializer_class = SceneTagSerializer
 
 
+def operator_contents(string, open_parenthsis, close_parenthsis):
+    """Generate parenthesized contents in string as pairs (level, contents)."""
+
+    adv_search_dict = list()
+    stack = []
+    inside_parenthsis = False
+    operators = {'&&', '||', '!!'}
+    single_operator = {'!!'}
+    start = 0
+    found_operator = False
+
+    for i, c in enumerate(string):
+
+        if i < len(string):
+
+            temp_str = string[i: i + 2]
+            print("string i:i+1 is '{}'".format(temp_str))
+            if (not inside_parenthsis) and (
+                        temp_str in operators):
+                if temp_str not in single_operator:
+                    adv_search_dict.append(string[start:i])
+                adv_search_dict.append(temp_str)
+                found_operator = True
+
+                start = i + 2
+
+        if c == open_parenthsis:
+            stack.append(i)
+            inside_parenthsis = True
+        elif c == close_parenthsis and stack:
+            stack.pop()
+
+        if not stack:
+            inside_parenthsis = False
+
+    if not found_operator:
+        return None
+    else:
+        adv_search_dict.append(string[start:])
+        return adv_search_dict
+
+
+def parenthetic_contents(string, open_parenthsis, close_parenthsis):
+    """Generate parenthesized contents in string as pairs (level, contents)."""
+    stack = []
+    for i, c in enumerate(string):
+        if c == open_parenthsis:
+            stack.append(i)
+        elif c == close_parenthsis and stack:
+            start = stack.pop()
+            yield (len(stack), string[start + 1: i])
+
+
+def has_parenthesis(string):
+    stack = []
+    first = None
+    last = None
+    found_first = False
+    for i, c in enumerate(string):
+        if c == '(':
+            stack.append(i)
+            if not found_first:
+                first = i
+                found_first = True
+        elif c == ')' and stack:
+            stack.pop()
+            if not stack:
+                last = i
+    if (first != None) and (last != None):
+        return {first, last}
+    else:
+        return None
+
+
+def remove_parenthesis_at_index(string, indexes):
+    ans = ""
+    for i, c in enumerate(string):
+        if i not in indexes:
+            ans = ans + c
+
+    return ans
+
+
+def get_q_object_from_literal(literal):
+    literal = literal.strip()
+
+    j = json.loads(literal)
+
+    q = None
+    for key in j:
+        if key == 'actors':
+            q = Q(actors__name__icontains=j[key])
+        elif key == 'scene_tags':
+            q = Q(scene_tags__name__icontains=j[key])
+        elif key == 'websites':
+            q = Q(websites__name__icontains=j[key])
+
+    return q
+
+
+def evaluate_literal(literal, qs):
+    print(type(literal))
+    if type(literal) == django.db.models.query.QuerySet:
+        return literal
+    else:
+        literal = literal.strip()
+        parenthesis_index = has_parenthesis(literal)
+        if parenthesis_index:
+            literal_without_outer_parenthesis = remove_parenthesis_at_index(literal, parenthesis_index)
+            qs = advanced_search_recursive(literal_without_outer_parenthesis, qs)
+            return qs
+
+    q = get_q_object_from_literal(literal)
+
+    return q
+
+
+def evaluate_binary_operations(q1, q2, operation, qs):
+    if operation == '&&':
+
+        if type(q1) == django.db.models.query.QuerySet and not type(q2) == django.db.models.query.QuerySet:
+            qs = q1.filter(q2)
+        elif type(q2) == django.db.models.query.QuerySet and not type(q1) == django.db.models.query.QuerySet:
+            qs = q2.filter(q1)
+        elif type(q2) == django.db.models.query.QuerySet and type(q1) == django.db.models.query.QuerySet:
+            qs = q1 & q2
+        else:
+            qs = qs.filter(q1)
+            qs = qs.filter(q2)
+
+    elif operation == '||':
+        if type(q1) == django.db.models.query.QuerySet and not type(q2) == django.db.models.query.QuerySet:
+            temp = Scene.objects.filter(q2)
+            qs = q1 | temp
+        elif type(q2) == django.db.models.query.QuerySet and not type(q1) == django.db.models.query.QuerySet:
+            temp = Scene.objects.filter(q1)
+            qs = q2 | temp
+        elif type(q2) == django.db.models.query.QuerySet and type(q1) == django.db.models.query.QuerySet:
+            qs = q1 | q2
+        else:
+            qs = qs.filter(q1 | q2)
+    return qs
+
+
+def evaluate_single_operator(q1, op, qs):
+    if op == "!!":
+
+        if type(q1) == django.db.models.query.QuerySet:
+            all_scenes = Scene.objects.all()
+            # qs = all_scenes & ~q1
+            q = Q(id__in=q1)
+            qs = all_scenes.exclude(q)
+        else:
+            q1 = q1.strip()
+            parenthesis_index = has_parenthesis(q1)
+            if parenthesis_index:
+                literal_without_outer_parenthesis = remove_parenthesis_at_index(q1, parenthesis_index)
+                rec_result = advanced_search_recursive(literal_without_outer_parenthesis, qs)
+                qs = evaluate_single_operator(rec_result, op, qs)
+            else:
+                q = get_q_object_from_literal(q1)
+                all_scenes = Scene.objects.all()
+                qs = all_scenes.filter(~q)
+
+    return qs
+
+
+def advanced_search_recursive(adv_search_string, qs):
+    binary_operators = {'&&', '||'}
+    single_operators = {'!!'}
+    a = operator_contents(adv_search_string, '(', ')')
+
+    if a:
+        while len(a) > 1:
+            if a[0] in single_operators:
+                q_not = evaluate_single_operator(a[1], a[0], qs)
+                del a[0]
+                del a[0]
+                a.insert(0, q_not)
+
+            elif a[1] in binary_operators:
+                q1 = evaluate_literal(a[0], qs)
+                q2 = evaluate_literal(a[2], qs)
+                evl = evaluate_binary_operations(q1, q2, a[1], qs)
+                del a[0]
+                del a[0]
+                del a[0]
+                a.insert(0, evl)
+    else:
+        q = evaluate_literal(adv_search_string, qs)
+        qs = qs.filter(q)
+        return qs
+
+    return a[0]
+
+
+def advanced_search(adv_search_string):
+    binary_operators = {'&&', '||'}
+    single_operators = {'!!'}
+    a = operator_contents(adv_search_string, '(', ')')
+    scenes = Scene.objects.all()
+
+    # a = list(parenthetic_contents(adv_search_string, '(', ')'))
+    # if a:
+    #     while len(a) > 1:
+    #         if a[1] in binary_operators:
+    #             q1 = evaluate_literal(a[0])
+    #             q2 = evaluate_literal(a[2])
+    #             evl = evaluate_binary_operations(q1, q2, a[1], scenes)
+    #             del a[0]
+    #             del a[0]
+    #             del a[0]
+    #             a.insert(0, evl)
+    #
+    #     scenes = a[0]
+    #
+    # else:
+    #     print("No operators found in string '{}'".format(adv_search_string))
+    #     q = evaluate_literal(adv_search_string)
+    #     scenes = Scene.objects.filter(q)
+
+    scenes = advanced_search_recursive(adv_search_string, scenes)
+
+    return scenes
+
+
 class SceneViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Scene.objects.all()
+        if 'advSearch' in self.request.query_params:
+            if self.request.query_params['advSearch'] != '':
+                adv_search_string = self.request.query_params['advSearch']
+                print("Adv search string is {}".format(adv_search_string))
+                queryset = advanced_search(adv_search_string)
+
         # queryset = self.get_serializer_class().setup_eager_loading(queryset,queryset)
         # queryset = SceneListSerializer.setup_eager_loading(queryset, queryset)
         return search_in_get_queryset(queryset, self.request)

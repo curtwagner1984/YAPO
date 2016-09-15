@@ -214,6 +214,7 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
         var _recursive = "";
         var _parent = "";
         var _playlist = "";
+        var _advSearch = "";
 
         function nextPageInput(input) {
 
@@ -235,6 +236,7 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
                         _searchField = "";
                         _parent = "";
                         _playlist ="";
+                        _advSearch =";"
 
                     }
                 }
@@ -344,6 +346,12 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
                     _playlist = input["playlist"].id
                 }
             }
+            
+            if ("advSearch" in input){
+                if (input["advSearch"] != undefined){
+                    _advSearch = input["advSearch"]
+                }
+            }
 
 
         }
@@ -435,7 +443,8 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
                     is_runner_up: _runnerUp,
                     recursive: _recursive,
                     pageType: _pageType,
-                    playlists: _playlist
+                    playlists: _playlist,
+                    advSearch: _advSearch
 
                 })
             } else if (_pageType == 'SceneTag') {
