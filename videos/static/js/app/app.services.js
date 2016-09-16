@@ -4,6 +4,9 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
     $rootScope.savedData = {};
     $rootScope.savedData2 = [];
 
+
+    var NUMBER_OF_QUERIES_TO_SAVE = 30;
+
     // $rootScope.$storage.scArray ;
 
     function setNumberOfItemsPerPaige(numberOfItems) {
@@ -12,6 +15,31 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
 
     function getNumberOfItemsPerPaige() {
         return $rootScope.$storage.numberOfItemsPerPage
+    }
+
+    function saveAdvSearchQueries(query) {
+        if ($rootScope.$storage.advSearchQueries.length < NUMBER_OF_QUERIES_TO_SAVE) {
+            var found = false;
+            for (var i = 0 ; i < $rootScope.$storage.advSearchQueries.length && !found ; i++ ){
+                if ($rootScope.$storage.advSearchQueries[i] == query) {
+                    found = true
+                }
+            }
+            if (!found){
+                $rootScope.$storage.advSearchQueries.unshift(query)
+            }
+
+        } else {
+            $rootScope.$storage.advSearchQueries.splice(-1, 1);
+            $rootScope.$storage.advSearchQueries.unshift(query)
+        }
+    }
+
+    function getAdvSearchQueries() {
+        if ($rootScope.$storage.advSearchQueries == undefined) {
+            $rootScope.$storage.advSearchQueries = [];
+        }
+        return $rootScope.$storage.advSearchQueries;
     }
 
 
@@ -155,7 +183,7 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
         }
 
         newItem.name = newItemName;
-        
+
         return newItem
     }
 
@@ -175,7 +203,9 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
         getNumberOfItemsPerPaige: getNumberOfItemsPerPaige,
         setSortByInSectionWrapper: setSortByInSectionWrapper,
         getSortByInSectionWrapper: getSortByInSectionWrapper,
-        createNewItem: createNewItem
+        createNewItem: createNewItem,
+        saveAdvSearchQueries: saveAdvSearchQueries,
+        getAdvSearchQueries: getAdvSearchQueries
     }
 
 });
@@ -235,8 +265,8 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
                         _recursive = "";
                         _searchField = "";
                         _parent = "";
-                        _playlist ="";
-                        _advSearch =";"
+                        _playlist = "";
+                        _advSearch = ""
 
                     }
                 }
@@ -341,14 +371,14 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
 
             }
 
-            if ("playlist" in input){
-                if (input["playlist"] != undefined){
+            if ("playlist" in input) {
+                if (input["playlist"] != undefined) {
                     _playlist = input["playlist"].id
                 }
             }
-            
-            if ("advSearch" in input){
-                if (input["advSearch"] != undefined){
+
+            if ("advSearch" in input) {
+                if (input["advSearch"] != undefined) {
                     _advSearch = input["advSearch"]
                 }
             }
@@ -599,7 +629,7 @@ angular.module('scopeWatch', []).factory('scopeWatchService', function ($rootSco
         $rootScope.$broadcast("websiteSelected", website);
 
     }
-    
+
     function playlistSelected(playlist) {
 
         console.log("app-service-scopeWatch: playlistSelected was triggered! ");
@@ -722,7 +752,7 @@ angular.module('scopeWatch', []).factory('scopeWatchService', function ($rootSco
         $rootScope.$broadcast("didSectionListWrapperLoaded", callingSection);
 
     }
-    
+
     function didPlaylistLoad(someVariable) {
 
         console.log("app-service-scopeWatch: didPlaylistLoad was triggered! ");

@@ -389,9 +389,12 @@ angular.module('sceneList').component('sceneList', {
                         this.options = 'actors,scene_tags,websites'.split(',').map(function (option) {
                             return {abbrev: option}
                         });
+                        
+                        this.remeberedQueries = helperService.getAdvSearchQueries();
 
 
                         this.scene_properties = "name,path_to_file,date_added,date_last_played,date_runner_up,play_count,is_runner_up,rating,description,width,height,bit_rate,duration,size,codec_name,framerate,modified_date".split(',');
+                        this.actor_properties = "name,description,gender,official_pages,ethnicity,country_of_origin,tattoos,measurements,extra_text,actor_aliases,date_added,date_runner_up,date_of_birth,play_count,is_runner_up,rating,modified_date,height,weight".split(',');
 
                         this.advStringtoString = function () {
                             var str = "";
@@ -420,7 +423,12 @@ angular.module('sceneList').component('sceneList', {
                             if ('scene_properties' == selectedItem){
                                 var x = 'scene_properties'+'_'+selctedItemType;
                                 ans = "{" + "\"" + x + "\"" + ':' + "\"" + "value" + "\"" + "}";
-                            }else{
+
+                            }else if ('actor_properties' == selectedItem) {
+                                var x = 'actor_properties'+'_'+selctedItemType;
+                                ans = "{" + "\"" + x + "\"" + ':' + "\"" + "value" + "\"" + "}";
+
+                            }else if (selectedItem != null){
                                 ans = "{" + "\"" + selctedItemType + "\"" + ':' + "\"" + selectedItem.name + "\"" + "}";
                             }
 
@@ -476,6 +484,7 @@ angular.module('sceneList').component('sceneList', {
                         };
                         this.submit = function () {
                             submitAdvSearch(this.advSearchString);
+                            helperService.saveAdvSearchQueries(this.advSearchString);
                             $mdDialog.hide();
                         };
 

@@ -1191,6 +1191,39 @@ def remove_and_strip(string, string_to_remove):
     return string
 
 
+def get_reverse_keyargs_for_int_values(value_stripped, key_value, key_new):
+    if '>=' in value_stripped:
+        temp = remove_and_strip(key_value, '>=')
+        reverse_keyarg = key_new + "__gte"
+
+    elif '<=' in value_stripped:
+        temp = remove_and_strip(key_value, '<=')
+        reverse_keyarg = key_new + "__lte"
+
+    elif '>' in value_stripped:
+        temp = remove_and_strip(key_value, '>')
+        reverse_keyarg = key_new + "__gt"
+
+    elif '<' in value_stripped:
+        temp = remove_and_strip(key_value, '<')
+        reverse_keyarg = key_new + "__lt"
+
+    else:
+        temp = key_value.strip()
+        reverse_keyarg = key_new
+
+    return {reverse_keyarg: temp}
+
+
+def append_to_name_of_first_key_in_dict(dictionary, string):
+    key = next(dictionary.__iter__())
+    key_name = key
+    new_key_name = string + key_name
+    dictionary[new_key_name] = dictionary.pop(key_name)
+
+    return dictionary
+
+
 def get_q_object_from_literal(literal):
     literal = literal.strip()
 
@@ -1199,16 +1232,26 @@ def get_q_object_from_literal(literal):
     q = None
     for key in j:
         if key == 'actors':
-            q = Q(actors__name__icontains=j[key])
+            if j[key] == "":
+                q = Q(actors__isnull=True)
+            else:
+                q = Q(actors__name__icontains=j[key])
         elif key == 'scene_tags':
-            q = Q(scene_tags__name__icontains=j[key])
+            if j[key] == "":
+                q = Q(scene_tags__isnull=True)
+            else:
+                q = Q(scene_tags__name__icontains=j[key])
         elif key == 'websites':
-            q = Q(websites__name__icontains=j[key])
+            if j[key] == "":
+                q = Q(websites__isnull=True)
+            else:
+                q = Q(websites__name__icontains=j[key])
 
         elif 'scene_properties_' in key:
 
             int_fields = ['play_count', 'rating', 'width', 'height', 'bit_rate', 'duration', 'size', 'framerate',
                           'date_added', 'date_runner_up', 'date_last_played', 'is_runner_up', 'modified_date']
+
             str_fields = ['name', 'path_to_file', 'description', 'codec_name']
 
             key_new = key.replace('scene_properties_', '')
@@ -1226,30 +1269,43 @@ def get_q_object_from_literal(literal):
                     t3 = str(t2)
                     j[key] = j[key].replace(a[0], t3)
 
-                if '>=' in value_stripped:
-                    temp = remove_and_strip(j[key], '>=')
-                    reverse_keyarg = key_new + "__gte"
-
-                elif '<=' in value_stripped:
-                    temp = remove_and_strip(j[key], '<=')
-                    reverse_keyarg = key_new + "__lte"
-
-                elif '>' in value_stripped:
-                    temp = remove_and_strip(j[key], '>')
-                    reverse_keyarg = key_new + "__gt"
-
-                elif '<' in value_stripped:
-                    temp = remove_and_strip(j[key], '<')
-                    reverse_keyarg = key_new + "__lt"
-
-                else:
-                    temp = j[key].strip()
-                    reverse_keyarg = key_new
+                reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
             else:
                 temp = j[key].strip()
                 reverse_keyarg = key_new + "__icontains"
+                reverse_keyarg_dict = {reverse_keyarg: temp}
 
-            q = Q(**{reverse_keyarg: temp})
+            q = Q(**reverse_keyarg_dict)
+
+        elif 'actor_properties_' in key:
+
+            int_fields = ['date_added', 'date_runner_up', 'date_of_birth', 'play_count', 'is_runner_up', 'rating',
+                          'modified_date', 'height', 'weight']
+
+            str_fields = ['name', 'description', 'gender', 'official_pages', 'ethnicity', 'country_of_origin',
+                          'tattoos', 'measurements', 'extra_text']
+
+            other_fields = ['actor_aliases']
+
+            key_new = key.replace('actor_properties_', '')
+
+            value_stripped = j[key].strip()
+            reverse_keyarg = ""
+            temp = ""
+
+            if key_new in int_fields:
+                reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
+                reverse_keyarg_dict = append_to_name_of_first_key_in_dict(reverse_keyarg_dict,"actors__")
+            elif key_new in other_fields:
+                temp = j[key].strip()
+                reverse_keyarg = "actors__" + key_new + "__name__icontains"
+                reverse_keyarg_dict = {reverse_keyarg: temp}
+            else:
+                temp = j[key].strip()
+                reverse_keyarg = "actors__" + key_new + "__icontains"
+                reverse_keyarg_dict = {reverse_keyarg: temp}
+
+            q = Q(**reverse_keyarg_dict)
 
     return q
 
