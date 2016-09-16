@@ -1269,6 +1269,20 @@ def get_q_object_from_literal(literal):
                     t3 = str(t2)
                     j[key] = j[key].replace(a[0], t3)
 
+                elif key_new == 'duration':
+                    a = re.findall(r'\d+', j[key])
+                    t1 = int(a[0])
+                    t2 = t1 * 60
+                    t3 = str(t2)
+                    j[key] = j[key].replace(a[0], t3)
+
+                elif key_new == 'bit_rate':
+                    a = re.findall(r'\d+', j[key])
+                    t1 = int(a[0])
+                    t2 = t1 * 1000
+                    t3 = str(t2)
+                    j[key] = j[key].replace(a[0], t3)
+
                 reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
             else:
                 temp = j[key].strip()
@@ -1295,7 +1309,7 @@ def get_q_object_from_literal(literal):
 
             if key_new in int_fields:
                 reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
-                reverse_keyarg_dict = append_to_name_of_first_key_in_dict(reverse_keyarg_dict,"actors__")
+                reverse_keyarg_dict = append_to_name_of_first_key_in_dict(reverse_keyarg_dict, "actors__")
             elif key_new in other_fields:
                 temp = j[key].strip()
                 reverse_keyarg = "actors__" + key_new + "__name__icontains"
@@ -1400,7 +1414,12 @@ def advanced_search_recursive(adv_search_string, qs):
                 a.insert(0, evl)
     else:
         q = evaluate_literal(adv_search_string, qs)
-        qs = qs.filter(q)
+
+        if type(q) == django.db.models.query.QuerySet:
+            qs = qs & q
+        else:
+            qs = qs.filter(q)
+
         return qs
 
     return a[0]

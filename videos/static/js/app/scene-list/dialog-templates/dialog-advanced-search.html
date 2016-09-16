@@ -94,75 +94,82 @@
 
                     We can also search for 'stoya' AND NOT 'lesbian, like so:
                     {&quot;actors&quot;:&quot;Stoya&quot;} &amp;&amp; (!!{&quot;scene_tags&quot;:&quot;Lesbian&quot;})
+                </p>
 
+                <h4>Finding untagged scenes:</h4>
+                <p>
+                    It's possible to find untagged scenes by simply erasing the 'value' value of the missing tag you
+                    want to search for. For example, if you want to find all the scenes that are not tagged with any
+                    actors you would do this: {&quot;actors&quot;:&quot;&quot;}. The same goes for scene_tags and
+                    websites. So if you want to find scenes without scenes and without actors and without websites you
+                    will do this: {&quot;actors&quot;:&quot;&quot;}&amp;&amp;{&quot;scene_tags&quot;:&quot;&quot;}&amp;&amp;{&quot;websites&quot;:&quot;&quot;}
+                </p>
+
+                <h4>Note:</h4>
+                <p>
+                    The spelling does not need to be exact. The search is case insensitive and the query value doesn't
+                    need to match the result exactly. For example:Instead of {&quot;actors&quot;:&quot;Isis Love&quot;}
+                    we can say {&quot;actors&quot;:&quot;isis&quot;} to search for scenes who are tagged with actors
+                    which contain 'isis' in their name.
 
                 </p>
 
-                <div>
-                    {{ dialog.advSearchString }}
-                </div>
-
                 <div layout="column">
-                    <div flex="">
-                        <md-input-container flex="100">
+                    <md-input-container>
                         <label>Adv Search string</label>
-                        <input autocomplete="on" type="text" ng-model="dialog.advSearchString">
+                        <input ng-model="dialog.advSearchString">
                     </md-input-container>
-                    </div>
-
-                    <div flex="">
-                        <md-autocomplete
-                            ng-model="dialog.advSearchString"
-                            md-search-text="dialog.advSearchString"
-                            md-items="item in dialog.remeberedQueries"
-                            md-item-text="item"
-
-                        <md-item-template>
-                            <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item}}</span>
-                        </md-item-template>
-
-                    </md-autocomplete>
-                    </div>
 
 
-
-
-
-                </div>
-
-
-                <div>
                     <md-input-container>
-                        <label>Search Option</label>
-                        <md-select ng-model="dialog.selectedOption">
-                            <md-option ng-repeat="option in dialog.options" ng-value="option.abbrev"
-                            >
-                                {{ option.abbrev }}
-                            </md-option>
-                        </md-select>
-                    </md-input-container>
-                    <md-input-container>
-                        <label>Scene Properties</label>
-                        <md-select ng-model="dialog.selectedOption"
-                                   md-on-close="dialog.onSelect(dialog.selectedOption,'scene_properties')">
-                            <md-option ng-repeat="option in dialog.scene_properties" ng-value="option"
+                        <label>30 Previous Searches</label>
+                        <md-select ng-model="dialog.advSearchString">
+                            <md-option ng-repeat="option in dialog.remeberedQueries track by $index"
                             >
                                 {{ option }}
                             </md-option>
-
                         </md-select>
                     </md-input-container>
-                    <md-input-container>
-                        <label>Actor Properties</label>
-                        <md-select ng-model="dialog.selectedOption"
-                                   md-on-close="dialog.onSelect(dialog.selectedOption,'actor_properties')">
-                            <md-option ng-repeat="option in dialog.actor_properties" ng-value="option"
-                            >
-                                {{ option }}
-                            </md-option>
 
-                        </md-select>
-                    </md-input-container>
+                    <div layout="row">
+
+                        <md-input-container>
+                            <label>Search Option</label>
+                            <md-select ng-model="dialog.selectedOption">
+                                <md-option ng-repeat="option in dialog.options" ng-value="option.abbrev"
+                                >
+                                    {{ option.abbrev }}
+                                </md-option>
+                            </md-select>
+                        </md-input-container>
+                        <md-input-container>
+                            <label>Scene Properties</label>
+                            <md-select ng-model="dialog.selectedOption"
+                                       md-on-close="dialog.onSelect(dialog.selectedOption,'scene_properties')">
+                                <md-option ng-repeat="option in dialog.scene_properties" ng-value="option"
+                                >
+                                    {{ option }}
+                                </md-option>
+
+                            </md-select>
+                        </md-input-container>
+                        <md-input-container>
+                            <label>Actor Properties</label>
+                            <md-select ng-model="dialog.selectedOption"
+                                       md-on-close="dialog.onSelect(dialog.selectedOption,'actor_properties')">
+                                <md-option ng-repeat="option in dialog.actor_properties" ng-value="option"
+                                >
+                                    {{ option }}
+                                </md-option>
+
+                            </md-select>
+                        </md-input-container>
+
+                    </div>
+
+
+
+
 
                 </div>
                 <md-autocomplete
@@ -174,7 +181,7 @@
                         md-selected-item-change="dialog.onSelect(dialog.selectedOption,dialog.mdSelectedItem)"
                         md-floating-label="Autocomplete input">
                     <md-item-template>
-                        <span md-highlight-text="$ctrl.searchText" md-highlight-flags="^i">{{ item.name }}</span>
+                        <span md-highlight-text="dialog.actorSearchText" md-highlight-flags="^i">{{ item.name }}</span>
                     </md-item-template>
 
                 </md-autocomplete>
