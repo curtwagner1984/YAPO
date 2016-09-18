@@ -18,7 +18,7 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
     }
 
     function saveAdvSearchQueries(query) {
-        if ($rootScope.$storage.advSearchQueries.length < NUMBER_OF_QUERIES_TO_SAVE) {
+
             var found = false;
             for (var i = 0 ; i < $rootScope.$storage.advSearchQueries.length && !found ; i++ ){
                 if ($rootScope.$storage.advSearchQueries[i] == query) {
@@ -26,14 +26,17 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
                 }
             }
             if (!found){
-                $rootScope.$storage.advSearchQueries.unshift(query)
+                if ($rootScope.$storage.advSearchQueries.length < NUMBER_OF_QUERIES_TO_SAVE) {
+                    $rootScope.$storage.advSearchQueries.unshift(query)
+                }else{
+                    $rootScope.$storage.advSearchQueries.splice(-1, 1);
+                    $rootScope.$storage.advSearchQueries.unshift(query)
+                }
+
             }
 
-        } else {
-            $rootScope.$storage.advSearchQueries.splice(-1, 1);
-            $rootScope.$storage.advSearchQueries.unshift(query)
         }
-    }
+
 
     function getAdvSearchQueries() {
         if ($rootScope.$storage.advSearchQueries == undefined) {
@@ -463,17 +466,17 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
                 itemsToAdd = Scene.query({
                     offset: _pageOffset,
                     limit: _pageLimit,
-                    actors: _actorId,
-                    scene_tags: _sceneTagId,
-                    websites: _websiteId,
-                    folders_in_tree: _folderId,
-                    search: _searchTerm,
-                    searchField: _searchField,
+                    // actors: _actorId,
+                    // scene_tags: _sceneTagId,
+                    // websites: _websiteId,
+                    // folders_in_tree: _folderId,
+                    // search: _searchTerm,
+                    // searchField: _searchField,
                     sortBy: _sortBy,
-                    is_runner_up: _runnerUp,
-                    recursive: _recursive,
+                    // is_runner_up: _runnerUp,
+                    // recursive: _recursive,
                     pageType: _pageType,
-                    playlists: _playlist,
+                    // playlists: _playlist,
                     advSearch: _advSearch
 
                 })

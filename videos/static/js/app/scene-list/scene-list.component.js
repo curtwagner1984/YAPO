@@ -33,6 +33,62 @@ angular.module('sceneList').component('sceneList', {
             self.working = false;
             $scope.gotPromiseSceneList = false;
 
+            self.advSearchObject = {};
+
+
+            var generateAdvSearchString = function (searchType, searchedItem, append) {
+
+                var objectToSearch = {};
+
+
+                if (!append) {
+                    self.advSearchObject = {};
+                }
+
+                if (angular.isObject(searchedItem)) {
+                    self.advSearchObject[searchType] = searchedItem.id;
+                } else {
+                    self.advSearchObject[searchType] = searchedItem;
+                }
+
+
+                var ans = "";
+                var first = true;
+
+                for (var key in self.advSearchObject) {
+                    if (self.advSearchObject.hasOwnProperty(key)) {
+                        if (self.advSearchObject[key] != "") {
+                            var temp = "{\"" + key + "\":\"" + self.advSearchObject[key] + "\"}";
+                            if (first) {
+                                ans = temp;
+                                first = false
+                            } else {
+                                var temp1 = "(" + ans + ")";
+                                var temp2 = "(" + temp + ")";
+                                ans = temp1 + "&&" + temp2;
+
+                            }
+                        }
+
+
+                    }
+                }
+
+                self.advSearchString = ans;
+
+
+                // if (!append || (self.advSearchString == undefined)) {
+                //
+                //     self.advSearchString = angular.toJson(objectToSearch)
+                // } else {
+                //     var temp1 = "(" + self.advSearchString + ")";
+                //     var temp2 = "(" + angular.toJson(objectToSearch) + ")";
+                //
+                //     self.advSearchString = temp1 + "&&" + temp2
+                // }
+
+            };
+
             // AM deferred loading wrapper https://material.angularjs.org/latest/demo/virtualRepeat
 
             // In this example, we set up our model using a class.
@@ -108,18 +164,18 @@ angular.module('sceneList').component('sceneList', {
                 var input = {
                     currentPage: pageNumber,
                     pageType: self.pageType,
-                    scene: self.scene,
-                    searchTerm: self.searchTerm,
-                    searchField: self.searchField,
+                    // scene: self.scene,
+                    // searchTerm: self.searchTerm,
+                    // searchField: self.searchField,
                     sortBy: self.sortBy,
-                    actorTag: self.actorTag,
-                    isRunnerUp: self.runnerUp,
-                    actor: self.actor,
-                    sceneTag: self.sceneTag,
-                    website: self.website,
-                    folder: self.folder,
-                    recursive: self.recursive,
-                    playlist: self.playlist,
+                    // actorTag: self.actorTag,
+                    // isRunnerUp: self.runnerUp,
+                    // actor: self.actor,
+                    // sceneTag: self.sceneTag,
+                    // website: self.website,
+                    // folder: self.folder,
+                    // recursive: self.recursive,
+                    // playlist: self.playlist,
                     advSearch: self.advSearchString
 
 
@@ -263,7 +319,7 @@ angular.module('sceneList').component('sceneList', {
                 {name: 'Add To Queue', direction: "bottom"},
                 {name: 'Add To Playlist', direction: "top"},
                 {name: 'Delete From Db', direction: "bottom"},
-                {name: 'Delete From Disk', direction: "top"},
+                {name: 'Delete From Disk', direction: "top"}
 
 
             ];
@@ -298,7 +354,7 @@ angular.module('sceneList').component('sceneList', {
                             this.mdSelectedItem = null;
                             this.selectedScenes = selectedScenes;
                             this.playlistAutocompleteNeeded = false;
-                            this.advSearchString = "";
+
 
                             this.greeting = "";
 
@@ -343,9 +399,6 @@ angular.module('sceneList').component('sceneList', {
 
                             };
 
-                            this.advSearchOnSelect = function (selectedItem, selectedItemType) {
-                                this.advSearchString = "[" + selectedItemType + ":" + selectedItem.name + "]"
-                            };
 
                             // Setup some handlers
                             this.close = function () {
@@ -368,7 +421,7 @@ angular.module('sceneList').component('sceneList', {
             var submitAdvSearch = function (advSearchString) {
                 self.advSearchString = advSearchString;
 
-                self.dynamicItems.reset("actorLoaded");
+                self.dynamicItems.reset("submitAdvSearch");
                 self.dynamicItems.nextPage(0, false);
 
             };
@@ -382,18 +435,25 @@ angular.module('sceneList').component('sceneList', {
 
                         this.greeting = "";
                         this.advSearchDict = {};
-                        this.advSearchString = "";
+
+                        if (self.advSearchString == undefined) {
+                            this.advSearchString = "";
+                        } else {
+                            this.advSearchString = self.advSearchString;
+                        }
+
+
                         this.actorSearchText = "";
                         this.sceneTagSearchText = "";
                         this.selectedOption = '';
                         this.options = 'actors,scene_tags,websites'.split(',').map(function (option) {
                             return {abbrev: option}
                         });
-                        
+
                         this.remeberedQueries = helperService.getAdvSearchQueries();
 
 
-                        this.scene_properties = "name,path_to_file,date_added,date_last_played,date_runner_up,play_count,is_runner_up,rating,description,width,height,bit_rate,duration,size,codec_name,framerate,modified_date".split(',');
+                        this.scene_properties = "name,path_to_file,playlists,date_added,date_last_played,date_runner_up,play_count,is_runner_up,rating,description,width,height,bit_rate,duration,size,codec_name,framerate,modified_date".split(',');
                         this.actor_properties = "name,description,gender,official_pages,ethnicity,country_of_origin,tattoos,measurements,extra_text,actor_aliases,date_added,date_runner_up,date_of_birth,play_count,is_runner_up,rating,modified_date,height,weight".split(',');
 
                         this.advStringtoString = function () {
@@ -418,17 +478,17 @@ angular.module('sceneList').component('sceneList', {
 
                         this.onSelect = function (selctedItemType, selectedItem) {
 
-                            var ans ="";
+                            var ans = "";
 
-                            if ('scene_properties' == selectedItem){
-                                var x = 'scene_properties'+'_'+selctedItemType;
+                            if ('scene_properties' == selectedItem) {
+                                var x = 'scene_properties' + '_' + selctedItemType;
                                 ans = "{" + "\"" + x + "\"" + ':' + "\"" + "value" + "\"" + "}";
 
-                            }else if ('actor_properties' == selectedItem) {
-                                var x = 'actor_properties'+'_'+selctedItemType;
+                            } else if ('actor_properties' == selectedItem) {
+                                var x = 'actor_properties' + '_' + selctedItemType;
                                 ans = "{" + "\"" + x + "\"" + ':' + "\"" + "value" + "\"" + "}";
 
-                            }else if (selectedItem != null){
+                            } else if (selectedItem != null) {
                                 ans = "{" + "\"" + selctedItemType + "\"" + ':' + "\"" + selectedItem.name + "\"" + "}";
                             }
 
@@ -728,7 +788,10 @@ angular.module('sceneList').component('sceneList', {
 
             $scope.$on("actorLoaded", function (event, actor) {
 
-                self.actor = actor;
+                // self.actor = actor;
+                generateAdvSearchString('actors', actor, false);
+                // var actorToSearch = {'actors': actor.id};
+                // self.advSearchString = angular.toJson(actorToSearch);
                 // self.nextPage(0);
                 // pageNumberForInfScroll = 0;
                 self.dynamicItems.reset("actorLoaded");
@@ -744,9 +807,14 @@ angular.module('sceneList').component('sceneList', {
 
             $scope.$on("playlistLoaded", function (event, playlist) {
 
-                self.playlist = playlist;
+                // self.playlist = playlist;
                 // pageNumberForInfScroll = 0;
                 // self.nextPage(0);
+                // var playlistToSearch = {'playlists': playlist.id};
+                // self.advSearchString = angular.toJson(playlistToSearch);
+
+                generateAdvSearchString('playlists', playlist, false);
+
                 self.dynamicItems.reset("playlistLoaded");
                 self.dynamicItems.nextPage(0, false);
 
@@ -760,9 +828,15 @@ angular.module('sceneList').component('sceneList', {
 
 
             $scope.$on("sceneTagLoaded", function (event, sceneTag) {
-                self.sceneTag = sceneTag;
+                // self.sceneTag = sceneTag;
                 // self.nextPage(0);
                 // pageNumberForInfScroll = 0;
+
+                // var sceneTagToSearch= {'scene_tags': sceneTag.id};
+                // self.advSearchString = angular.toJson(sceneTagToSearch);
+
+                generateAdvSearchString('scene_tags', sceneTag, false);
+
                 self.dynamicItems.reset("sceneTagLoaded");
                 self.dynamicItems.nextPage(0, false);
                 sceneTagLoaded = true;
@@ -773,9 +847,10 @@ angular.module('sceneList').component('sceneList', {
             }
 
             $scope.$on("websiteLoaded", function (event, website) {
-                self.website = website;
+                // self.website = website;
                 // self.nextPage(0);
                 // pageNumberForInfScroll = 0;
+                generateAdvSearchString('websites', website, false);
                 self.dynamicItems.reset('websiteLoaded');
                 self.dynamicItems.nextPage(0, false);
                 websiteLoaded = true
@@ -790,8 +865,10 @@ angular.module('sceneList').component('sceneList', {
                 console.log("scene-list: folderOpened broadcast was caught");
                 self.scenes = [];
                 // self.infiniteScenes = [];
-                self.folder = folder['dir'];
-                self.recursive = folder['recursive'];
+                // self.folder = folder['dir'];
+                // self.recursive = folder['recursive'];
+
+                generateAdvSearchString('folders_in_tree', folder['dir'], false);
                 // alert(folder['recursive']);
                 // self.scenes = [];
                 // self.nextPage(0);
@@ -1166,8 +1243,12 @@ angular.module('sceneList').component('sceneList', {
                 if (searchTerm['sectionType'] == 'SceneList') {
                     self.scenes = [];
                     // self.infiniteScenes = [];
-                    self.searchTerm = searchTerm['searchTerm'];
-                    self.searchField = searchTerm['searchField'];
+                    // self.searchTerm = searchTerm['searchTerm'];
+                    // self.searchField = searchTerm['searchField'];
+
+                    var searchType = 'scene_properties_' + searchTerm['searchField'];
+                    var searchTerm = searchTerm['searchTerm'];
+                    generateAdvSearchString(searchType, searchTerm, true);
                     // self.nextPage(0);
                     // pageNumberForInfScroll = 0;
                     self.dynamicItems.reset('searchTermChanged');
@@ -1184,9 +1265,17 @@ angular.module('sceneList').component('sceneList', {
                     console.log("Sort Order Changed!");
                     self.scenes = [];
                     // self.infiniteScenes = [];
-                    self.runnerUp = runnerUp['runnerUp'];
+                    // self.runnerUp = runnerUp['runnerUp'];
                     // self.nextPage(0);
                     // pageNumberForInfScroll = 0;
+                    var temp;
+                    if (runnerUp['runnerUp']){
+                        temp = '1'
+                    }else{
+                        temp = ''
+                    }
+
+                    generateAdvSearchString('scene_properties_is_runner_up',temp,true);
                     self.dynamicItems.reset('runnerUpChanged');
                     self.dynamicItems.nextPage(0, false);
                 }

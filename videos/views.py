@@ -1224,6 +1224,25 @@ def append_to_name_of_first_key_in_dict(dictionary, string):
     return dictionary
 
 
+def get_q_object_for_related_field(key, value):
+    reverse_keyarg_dict = {}
+
+    if value == "":
+        reverse_keyarg = "{}__isnull".format(key)
+        reverse_keyarg_dict = {reverse_keyarg: True}
+
+    elif isinstance(value, int) or value.isdigit():
+        reverse_keyarg = "{}".format(key)
+        reverse_keyarg_dict = {reverse_keyarg: value}
+
+    else:
+        reverse_keyarg = "{}__name__icontains".format(key)
+        reverse_keyarg_dict = {reverse_keyarg: value}
+
+    q = Q(**reverse_keyarg_dict)
+    return q
+
+
 def get_q_object_from_literal(literal):
     literal = literal.strip()
 
@@ -1231,21 +1250,8 @@ def get_q_object_from_literal(literal):
 
     q = None
     for key in j:
-        if key == 'actors':
-            if j[key] == "":
-                q = Q(actors__isnull=True)
-            else:
-                q = Q(actors__name__icontains=j[key])
-        elif key == 'scene_tags':
-            if j[key] == "":
-                q = Q(scene_tags__isnull=True)
-            else:
-                q = Q(scene_tags__name__icontains=j[key])
-        elif key == 'websites':
-            if j[key] == "":
-                q = Q(websites__isnull=True)
-            else:
-                q = Q(websites__name__icontains=j[key])
+        if key in ['actors', 'scene_tags', 'websites', 'playlists','folders_in_tree']:
+            q = get_q_object_for_related_field(key, j[key])
 
         elif 'scene_properties_' in key:
 
@@ -1253,6 +1259,10 @@ def get_q_object_from_literal(literal):
                           'date_added', 'date_runner_up', 'date_last_played', 'is_runner_up', 'modified_date']
 
             str_fields = ['name', 'path_to_file', 'description', 'codec_name']
+
+            other_fields = ['playlists']
+
+            int_operators = ['<', '>', '>=', '<=']
 
             key_new = key.replace('scene_properties_', '')
 
@@ -1262,28 +1272,47 @@ def get_q_object_from_literal(literal):
 
             if key_new in int_fields:
 
-                if key_new == 'size':
-                    a = re.findall(r'\d+', j[key])
-                    t1 = int(a[0])
-                    t2 = t1 * 1000000
-                    t3 = str(t2)
-                    j[key] = j[key].replace(a[0], t3)
+                validated = False
 
-                elif key_new == 'duration':
-                    a = re.findall(r'\d+', j[key])
-                    t1 = int(a[0])
-                    t2 = t1 * 60
-                    t3 = str(t2)
-                    j[key] = j[key].replace(a[0], t3)
+                for op in int_operators:
+                    if (op in j[key]) and not validated:
+                        validated = True
+                        pass
 
-                elif key_new == 'bit_rate':
-                    a = re.findall(r'\d+', j[key])
-                    t1 = int(a[0])
-                    t2 = t1 * 1000
-                    t3 = str(t2)
-                    j[key] = j[key].replace(a[0], t3)
+                if j[key].isdigit():
+                    validated = True
 
-                reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
+                if validated:
+
+                    if key_new == 'size':
+                        a = re.findall(r'\d+', j[key])
+                        t1 = int(a[0])
+                        t2 = t1 * 1000000
+                        t3 = str(t2)
+                        j[key] = j[key].replace(a[0], t3)
+
+                    elif key_new == 'duration':
+                        a = re.findall(r'\d+', j[key])
+                        t1 = int(a[0])
+                        t2 = t1 * 60
+                        t3 = str(t2)
+                        j[key] = j[key].replace(a[0], t3)
+
+                    elif key_new == 'bit_rate':
+                        a = re.findall(r'\d+', j[key])
+                        t1 = int(a[0])
+                        t2 = t1 * 1000
+                        t3 = str(t2)
+                        j[key] = j[key].replace(a[0], t3)
+
+                    reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
+                else:
+                    # reverse_keyarg_dict = None
+                    break
+            elif key_new in other_fields:
+                temp = j[key].strip()
+                reverse_keyarg = key_new + "__name__icontains"
+                reverse_keyarg_dict = {reverse_keyarg: temp}
             else:
                 temp = j[key].strip()
                 reverse_keyarg = key_new + "__icontains"
@@ -1325,7 +1354,7 @@ def get_q_object_from_literal(literal):
 
 
 def evaluate_literal(literal, qs):
-    print(type(literal))
+    print("Evaluating literal {}".format(literal))
     if type(literal) == django.db.models.query.QuerySet:
         return literal
     else:
@@ -1418,7 +1447,10 @@ def advanced_search_recursive(adv_search_string, qs):
         if type(q) == django.db.models.query.QuerySet:
             qs = qs & q
         else:
-            qs = qs.filter(q)
+            try:
+                qs = qs.filter(q)
+            except TypeError:
+                print("Incorrect input...")
 
         return qs
 

@@ -41,10 +41,10 @@ angular.module('navBar', []).component('navBar', {
                 var itemsToUpdate = [];
                 if (multiple) {
                     itemsToUpdate = [];
-                    for (var i = 0 ; i < selectedScenes.length ; i++ ){
+                    for (var i = 0; i < selectedScenes.length; i++) {
                         itemsToUpdate.push(selectedScenes[i].id)
                     }
-                    
+
                 } else {
                     itemsToUpdate.push(entityToPatchId)
                 }
@@ -137,7 +137,7 @@ angular.module('navBar', []).component('navBar', {
                 return scene
             };
 
-            $rootScope.autoCompleteGetItems = function (searchedObjectType,val) {
+            $rootScope.autoCompleteGetItems = function (searchedObjectType, val) {
 
 
                 var actor_tagsURL = '/api/actor-tag/';
@@ -176,44 +176,44 @@ angular.module('navBar', []).component('navBar', {
 
                     if (self.object == 'search') {
                         return a
-                    }else{
+                    } else {
 
 
                         var b = [];
-                    var found = false;
-                    for (var i = 0; i < a.length; i++) {
-                        // console.log("Res to check:" + angular.toJson(a[i]));
+                        var found = false;
+                        for (var i = 0; i < a.length; i++) {
+                            // console.log("Res to check:" + angular.toJson(a[i]));
 
-                        if (self.object != undefined){
-                            for (var j = 0; j < self.object.length && !found; j++) {
-                            // console.log("To check against:" + angular.toJson(self.object[j]));
-                            if (a[i].id == self.object[j]) {
-                                console.log("Match found: " + angular.toJson(a[i]) + " Matches: " + angular.toJson(self.object[j]));
-                                found = true;
+                            if (self.object != undefined) {
+                                for (var j = 0; j < self.object.length && !found; j++) {
+                                    // console.log("To check against:" + angular.toJson(self.object[j]));
+                                    if (a[i].id == self.object[j]) {
+                                        console.log("Match found: " + angular.toJson(a[i]) + " Matches: " + angular.toJson(self.object[j]));
+                                        found = true;
 
+
+                                    }
+                                }
+                            }
+
+
+                            if (!found) {
+                                // console.log("Res to push:" + angular.toJson(a[i]));
+                                b.push(a[i]);
+                                // console.log("Res to array:" + angular.toJson(b));
 
                             }
+                            found = false;
                         }
+
+                        var createVal = {"id": -1, "name": "Create: " + "\"" + val + "\"", "value": val};
+                        if (searchedObjectType == "actors") {
+                            createVal['thumbnail'] = 'media/images/actor/Unknown/profile/profile.jpg'
                         }
+                        b.push(createVal);
 
-
-                        if (!found) {
-                            // console.log("Res to push:" + angular.toJson(a[i]));
-                            b.push(a[i]);
-                            // console.log("Res to array:" + angular.toJson(b));
-
-                        }
-                        found = false;
-                    }
-
-                    var createVal = {"id": -1, "name": "Create: " + "\"" + val + "\"", "value": val};
-                    if (searchedObjectType == "actors"){
-                        createVal['thumbnail'] = 'media/images/actor/Unknown/profile/profile.jpg'
-                    }
-                    b.push(createVal);
-
-                    // alert(angular.toJson(a));
-                    return b;
+                        // alert(angular.toJson(a));
+                        return b;
 
                     }
 
@@ -245,6 +245,61 @@ angular.module('navBar', []).component('navBar', {
                 }
 
             }
+
+            $rootScope.DynamicItems = function () {
+                /**
+                 * @type {!Object<?Array>} Data pages, keyed by page number (0-index).
+                 */
+                this.loadedPages = {};
+
+                this.isWorking = [0];
+
+                this.loadedItems = [[], []];
+
+                /** @type {number} Total number of items. */
+                this.numItems = 0;
+
+                /** @const {number} Number of items to fetch per request. */
+                if (helperService.getNumberOfItemsPerPaige() != undefined) {
+                    this.PAGE_SIZE = parseInt(helperService.getNumberOfItemsPerPaige());
+                } else {
+                    this.PAGE_SIZE = 10;
+                }
+
+
+                this.fetchNumItems_();
+            };
+
+            $rootScope.DynamicItems.prototype.reset = function (caller) {
+                this.loadedItems = [[], []];
+                this.numItems = 0;
+                console.log("DynamicItems reset was triggered by " + caller)
+
+            };
+
+            // Required.
+            $rootScope.DynamicItems.prototype.getItemAtIndex = function (index) {
+                var pageNumber = Math.floor(index / this.PAGE_SIZE);
+                // var page = this.loadedPages[pageNumber];
+                var itemToReturn = this.loadedItems[0][index];
+
+                // if (page) {
+                //     return page[index % this.PAGE_SIZE];
+                // } else if (page !== null) {
+                //     this.fetchPage_(pageNumber);
+                // }
+
+                // console.log("this.loadedItems[0]length is  " + this.loadedItems[0].length + " this.numItems is" + this.numItems);
+
+
+                if (itemToReturn) {
+                    return itemToReturn
+                } else if ((this.loadedItems[1][0] != 1) && (this.loadedItems[0].length != this.numItems)) {
+                    this.fetchPage_(pageNumber)
+                }
+
+
+            };
 
 
         }]
