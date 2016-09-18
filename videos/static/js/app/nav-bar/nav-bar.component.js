@@ -3,7 +3,13 @@ angular.module('navBar', []).component('navBar', {
     templateUrl: 'static/js/app/nav-bar/nav-bar.template.html',
     bindings: {},
     controller: ['$scope', '$rootScope', 'Actor', 'SceneTag', 'Website', 'ActorTag', 'helperService', '$http', 'Playlist',
-        function NavBarController($scope, $rootScope, Actor, SceneTag, Website, ActorTag, helperService, $http, Playlist) {
+        '$timeout', 'pagerService',
+        function NavBarController($scope, $rootScope, Actor, SceneTag, Website, ActorTag, helperService, $http, Playlist
+            , $timeout, pagerService) {
+
+
+            var self = this;
+            self.dynamicItmesNumOfItemsTemp = 0;
 
             // Global function to create new item
             $rootScope.createNewItem = function (typeOfItemToAdd, newItemName) {
@@ -250,6 +256,9 @@ angular.module('navBar', []).component('navBar', {
                 /**
                  * @type {!Object<?Array>} Data pages, keyed by page number (0-index).
                  */
+
+
+
                 this.loadedPages = {};
 
                 this.isWorking = [0];
@@ -266,6 +275,11 @@ angular.module('navBar', []).component('navBar', {
                     this.PAGE_SIZE = 10;
                 }
 
+                this.pageType = "";
+                // this.pageNumber = "";
+                this.sortBy = "";
+                this.advSearch = "";
+
 
                 this.fetchNumItems_();
             };
@@ -279,18 +293,9 @@ angular.module('navBar', []).component('navBar', {
 
             // Required.
             $rootScope.DynamicItems.prototype.getItemAtIndex = function (index) {
+                this.numItems = self.dynamicItmesNumOfItemsTemp;
                 var pageNumber = Math.floor(index / this.PAGE_SIZE);
-                // var page = this.loadedPages[pageNumber];
                 var itemToReturn = this.loadedItems[0][index];
-
-                // if (page) {
-                //     return page[index % this.PAGE_SIZE];
-                // } else if (page !== null) {
-                //     this.fetchPage_(pageNumber);
-                // }
-
-                // console.log("this.loadedItems[0]length is  " + this.loadedItems[0].length + " this.numItems is" + this.numItems);
-
 
                 if (itemToReturn) {
                     return itemToReturn
@@ -299,6 +304,116 @@ angular.module('navBar', []).component('navBar', {
                 }
 
 
+            };
+
+            $rootScope.DynamicItems.prototype.getLength = function () {
+                this.numItems = self.dynamicItmesNumOfItemsTemp;
+                return this.numItems;
+            };
+
+            $rootScope.DynamicItems.prototype.nextPage = function (pageNumber, wasCalledFromDynamicItems) {
+
+                // Marks that fetching is in progress, prevents of fetching more pages while this is set to 1.
+                this.loadedItems[1][0] = 1;
+
+                var loadedPages = this.loadedPages;
+                var lodeadItems = this.loadedItems;
+                self.dynamicItmesNumOfItemsTemp = this.numItems;
+
+
+                var input = {
+                    currentPage: pageNumber,
+                    pageType: this.pageType,
+                    sortBy: this.sortBy,
+                    advSearch: this.advSearch
+                };
+
+
+                self.actorsToadd = pagerService.getNextPage(input);
+                if (self.actorsToadd != undefined) {
+                    self.actorsToadd.$promise.then(function (res) {
+
+                        // self.actorsToadd = res[0];
+
+                        var paginationInfo = {
+                            pageType: input.pageType,
+                            pageInfo: res[1]
+                        };
+
+                        self.dynamicItmesNumOfItemsTemp = parseInt(paginationInfo.pageInfo.replace(/.*<(\d+)>; rel="count".*/, '$1'));
+
+
+                        var itemsFormServer = helperService.resourceToArray(res[0]);
+
+                        if (self.dynamicItmesNumOfItemsTemp == -6) {
+                            self.dynamicItmesNumOfItemsTemp = itemsFormServer.length;
+                        }
+
+                        if (wasCalledFromDynamicItems) {
+                            // for (var i = 0; i < self.websites.length; i++) {
+                            //     loadedPages[pageNumber].push(self.websites[i])
+                            // }
+
+
+                            lodeadItems[0] = lodeadItems[0].concat(itemsFormServer);
+                            this.loadedItems = lodeadItems;
+
+                            // this.loadedPages = loadedPages;
+                            // this.isWorking[0] = 0;
+                        }
+
+                        lodeadItems[1][0] = 0;
+                        this.loadedItems = lodeadItems;
+
+
+                    });
+                }
+
+            };
+
+            $rootScope.DynamicItems.prototype.fetchPage_ = function (pageNumber) {
+                // Set the page to null so we know it is already being fetched.
+                // this.loadedPages[pageNumber] = null;
+                // this.isWorking[0] = 1;
+
+                // var pageOffset = pageNumber * this.PAGE_SIZE;
+                // var limit = pageOffset + this.PAGE_SIZE;
+                //     for (var i = pageOffset; i < limit ; i++) {
+                //       // this.loadedPages[pageNumber].push(i);
+                //         this.loadedItems.push(null);
+                //
+                //     }
+
+                this.loadedItems[1][0] = 1;
+
+
+                // For demo purposes, we simulate loading more items with a timed
+                // promise. In real code, this function would likely contain an
+                // $http request.
+                $timeout(angular.noop, 300).then(angular.bind(this, function () {
+                    this.loadedPages[pageNumber] = [];
+
+                    this.nextPage(pageNumber, true);
+
+
+                    // var pageOffset = pageNumber * this.PAGE_SIZE;
+                    // for (var i = pageOffset; i < pageOffset + this.PAGE_SIZE; i++) {
+                    //   this.loadedPages[pageNumber].push(i);
+                    // }
+                }));
+            };
+
+            $rootScope.DynamicItems.prototype.fetchNumItems_ = function () {
+                // For demo purposes, we simulate loading the item count with a timed
+                // promise. In real code, this function would likely contain an
+                // $http request.
+
+                $timeout(angular.noop, 500).then(angular.bind(this, function () {
+                    if (self.totalItems == -6) {
+                        self.totalItems = self.itemsFormServer.length;
+                    }
+                    this.numItems = self.totalItems;
+                }));
             };
 
 

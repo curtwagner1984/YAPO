@@ -86,6 +86,368 @@ def lambda_attrgetter(string, x):
     return y(x)
 
 
+def operator_contents(string, open_parenthsis, close_parenthsis):
+    """Generate parenthesized contents in string as pairs (level, contents)."""
+
+    adv_search_dict = list()
+    stack = []
+    inside_parenthsis = False
+    operators = {'&&', '||', '!!'}
+    single_operator = {'!!'}
+    start = 0
+    found_operator = False
+
+    for i, c in enumerate(string):
+
+        if i < len(string):
+
+            temp_str = string[i: i + 2]
+            # print("string i:i+1 is '{}'".format(temp_str))
+            if (not inside_parenthsis) and (
+                        temp_str in operators):
+                if temp_str not in single_operator:
+                    adv_search_dict.append(string[start:i])
+                adv_search_dict.append(temp_str)
+                found_operator = True
+
+                start = i + 2
+
+        if c == open_parenthsis:
+            stack.append(i)
+            inside_parenthsis = True
+        elif c == close_parenthsis and stack:
+            stack.pop()
+
+        if not stack:
+            inside_parenthsis = False
+
+    if not found_operator:
+        return None
+    else:
+        adv_search_dict.append(string[start:])
+        return adv_search_dict
+
+
+def parenthetic_contents(string, open_parenthsis, close_parenthsis):
+    """Generate parenthesized contents in string as pairs (level, contents)."""
+    stack = []
+    for i, c in enumerate(string):
+        if c == open_parenthsis:
+            stack.append(i)
+        elif c == close_parenthsis and stack:
+            start = stack.pop()
+            yield (len(stack), string[start + 1: i])
+
+
+def has_parenthesis(string):
+    stack = []
+    first = None
+    last = None
+    found_first = False
+    for i, c in enumerate(string):
+        if c == '(':
+            stack.append(i)
+            if not found_first:
+                first = i
+                found_first = True
+        elif c == ')' and stack:
+            stack.pop()
+            if not stack:
+                last = i
+    if (first != None) and (last != None):
+        return {first, last}
+    else:
+        return None
+
+
+def remove_parenthesis_at_index(string, indexes):
+    ans = ""
+    for i, c in enumerate(string):
+        if i not in indexes:
+            ans = ans + c
+
+    return ans
+
+
+def remove_and_strip(string, string_to_remove):
+    string = string.replace(string_to_remove, '')
+    string = string.strip()
+    return string
+
+
+def get_reverse_keyargs_for_int_values(value_stripped, key_value, key_new):
+    if '>=' in value_stripped:
+        temp = remove_and_strip(key_value, '>=')
+        reverse_keyarg = key_new + "__gte"
+
+    elif '<=' in value_stripped:
+        temp = remove_and_strip(key_value, '<=')
+        reverse_keyarg = key_new + "__lte"
+
+    elif '>' in value_stripped:
+        temp = remove_and_strip(key_value, '>')
+        reverse_keyarg = key_new + "__gt"
+
+    elif '<' in value_stripped:
+        temp = remove_and_strip(key_value, '<')
+        reverse_keyarg = key_new + "__lt"
+
+    else:
+        temp = key_value.strip()
+        reverse_keyarg = key_new
+
+    return {reverse_keyarg: temp}
+
+
+def append_to_name_of_first_key_in_dict(dictionary, string):
+    key = next(dictionary.__iter__())
+    key_name = key
+    new_key_name = string + key_name
+    dictionary[new_key_name] = dictionary.pop(key_name)
+
+    return dictionary
+
+
+def get_q_object_for_related_field(key, value):
+    reverse_keyarg_dict = {}
+
+    if value == "":
+        reverse_keyarg = "{}__isnull".format(key)
+        reverse_keyarg_dict = {reverse_keyarg: True}
+
+    elif isinstance(value, int) or value.isdigit():
+        reverse_keyarg = "{}".format(key)
+        reverse_keyarg_dict = {reverse_keyarg: value}
+
+    else:
+        reverse_keyarg = "{}__name__icontains".format(key)
+        reverse_keyarg_dict = {reverse_keyarg: value}
+
+    q = Q(**reverse_keyarg_dict)
+    return q
+
+
+def get_q_object_from_literal(literal):
+    literal = literal.strip()
+
+    j = json.loads(literal)
+
+    q = None
+    for key in j:
+        if key in ['actors', 'scene_tags', 'websites', 'playlists', 'folders_in_tree']:
+            q = get_q_object_for_related_field(key, j[key])
+
+        elif 'scene_properties_' in key:
+
+            int_fields = ['play_count', 'rating', 'width', 'height', 'bit_rate', 'duration', 'size', 'framerate',
+                          'date_added', 'date_runner_up', 'date_last_played', 'is_runner_up', 'modified_date']
+
+            str_fields = ['name', 'path_to_file', 'description', 'codec_name']
+
+            other_fields = ['playlists']
+
+            int_operators = ['<', '>', '>=', '<=']
+
+            key_new = key.replace('scene_properties_', '')
+
+            value_stripped = j[key].strip()
+            reverse_keyarg = ""
+            temp = ""
+
+            if key_new in int_fields:
+
+                validated = False
+
+                for op in int_operators:
+                    if (op in j[key]) and not validated:
+                        validated = True
+                        pass
+
+                if j[key].isdigit():
+                    validated = True
+
+                if validated:
+
+                    if key_new == 'size':
+                        a = re.findall(r'\d+', j[key])
+                        t1 = int(a[0])
+                        t2 = t1 * 1000000
+                        t3 = str(t2)
+                        j[key] = j[key].replace(a[0], t3)
+
+                    elif key_new == 'duration':
+                        a = re.findall(r'\d+', j[key])
+                        t1 = int(a[0])
+                        t2 = t1 * 60
+                        t3 = str(t2)
+                        j[key] = j[key].replace(a[0], t3)
+
+                    elif key_new == 'bit_rate':
+                        a = re.findall(r'\d+', j[key])
+                        t1 = int(a[0])
+                        t2 = t1 * 1000
+                        t3 = str(t2)
+                        j[key] = j[key].replace(a[0], t3)
+
+                    reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
+                else:
+                    # reverse_keyarg_dict = None
+                    break
+            elif key_new in other_fields:
+                temp = j[key].strip()
+                reverse_keyarg = key_new + "__name__icontains"
+                reverse_keyarg_dict = {reverse_keyarg: temp}
+            else:
+                temp = j[key].strip()
+                reverse_keyarg = key_new + "__icontains"
+                reverse_keyarg_dict = {reverse_keyarg: temp}
+
+            q = Q(**reverse_keyarg_dict)
+
+        elif 'actor_properties_' in key:
+
+            int_fields = ['date_added', 'date_runner_up', 'date_of_birth', 'play_count', 'is_runner_up', 'rating',
+                          'modified_date', 'height', 'weight']
+
+            str_fields = ['name', 'description', 'gender', 'official_pages', 'ethnicity', 'country_of_origin',
+                          'tattoos', 'measurements', 'extra_text']
+
+            other_fields = ['actor_aliases']
+
+            key_new = key.replace('actor_properties_', '')
+
+            value_stripped = j[key].strip()
+            reverse_keyarg = ""
+            temp = ""
+
+            if key_new in int_fields:
+                reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
+                reverse_keyarg_dict = append_to_name_of_first_key_in_dict(reverse_keyarg_dict, "actors__")
+            elif key_new in other_fields:
+                temp = j[key].strip()
+                reverse_keyarg = "actors__" + key_new + "__name__icontains"
+                reverse_keyarg_dict = {reverse_keyarg: temp}
+            else:
+                temp = j[key].strip()
+                reverse_keyarg = "actors__" + key_new + "__icontains"
+                reverse_keyarg_dict = {reverse_keyarg: temp}
+
+            q = Q(**reverse_keyarg_dict)
+
+    return q
+
+
+def evaluate_literal(literal, qs):
+    print("Evaluating literal {}".format(literal))
+    if type(literal) == django.db.models.query.QuerySet:
+        return literal
+    else:
+        literal = literal.strip()
+        parenthesis_index = has_parenthesis(literal)
+        if parenthesis_index:
+            literal_without_outer_parenthesis = remove_parenthesis_at_index(literal, parenthesis_index)
+            qs = advanced_search_recursive(literal_without_outer_parenthesis, qs)
+            return qs
+
+    q = get_q_object_from_literal(literal)
+
+    return q
+
+
+def evaluate_binary_operations(q1, q2, operation, qs):
+    if operation == '&&':
+
+        if type(q1) == django.db.models.query.QuerySet and not type(q2) == django.db.models.query.QuerySet:
+            qs = q1.filter(q2)
+        elif type(q2) == django.db.models.query.QuerySet and not type(q1) == django.db.models.query.QuerySet:
+            qs = q2.filter(q1)
+        elif type(q2) == django.db.models.query.QuerySet and type(q1) == django.db.models.query.QuerySet:
+            qs = q1 & q2
+        else:
+            qs = qs.filter(q1)
+            qs = qs.filter(q2)
+
+    elif operation == '||':
+        if type(q1) == django.db.models.query.QuerySet and not type(q2) == django.db.models.query.QuerySet:
+            temp = Scene.objects.filter(q2)
+            qs = q1 | temp
+        elif type(q2) == django.db.models.query.QuerySet and not type(q1) == django.db.models.query.QuerySet:
+            temp = Scene.objects.filter(q1)
+            qs = q2 | temp
+        elif type(q2) == django.db.models.query.QuerySet and type(q1) == django.db.models.query.QuerySet:
+            qs = q1 | q2
+        else:
+            qs = qs.filter(q1 | q2)
+    return qs
+
+
+def evaluate_single_operator(q1, op, qs):
+    if op == "!!":
+
+        if type(q1) == django.db.models.query.QuerySet:
+            all_scenes = Scene.objects.all()
+            # qs = all_scenes & ~q1
+            q = Q(id__in=q1)
+            qs = all_scenes.exclude(q)
+        else:
+            q1 = q1.strip()
+            parenthesis_index = has_parenthesis(q1)
+            if parenthesis_index:
+                literal_without_outer_parenthesis = remove_parenthesis_at_index(q1, parenthesis_index)
+                rec_result = advanced_search_recursive(literal_without_outer_parenthesis, qs)
+                qs = evaluate_single_operator(rec_result, op, qs)
+            else:
+                q = get_q_object_from_literal(q1)
+                all_scenes = Scene.objects.all()
+                qs = all_scenes.filter(~q)
+
+    return qs
+
+
+def advanced_search_recursive(adv_search_string, qs):
+    binary_operators = {'&&', '||'}
+    single_operators = {'!!'}
+    a = operator_contents(adv_search_string, '(', ')')
+
+    if a:
+        while len(a) > 1:
+            if a[0] in single_operators:
+                q_not = evaluate_single_operator(a[1], a[0], qs)
+                del a[0]
+                del a[0]
+                a.insert(0, q_not)
+
+            elif a[1] in binary_operators:
+                q1 = evaluate_literal(a[0], qs)
+                q2 = evaluate_literal(a[2], qs)
+                evl = evaluate_binary_operations(q1, q2, a[1], qs)
+                del a[0]
+                del a[0]
+                del a[0]
+                a.insert(0, evl)
+    else:
+        q = evaluate_literal(adv_search_string, qs)
+
+        if type(q) == django.db.models.query.QuerySet:
+            qs = qs & q
+        else:
+            try:
+                qs = qs.filter(q)
+            except TypeError:
+                print("Incorrect input...")
+
+        return qs
+
+    return a[0]
+
+
+def advanced_search(adv_search_string):
+    scenes = Scene.objects.all()
+    scenes = advanced_search_recursive(adv_search_string, scenes)
+
+    return scenes
+
+
 def search_in_get_queryset(original_queryset, request):
     qs_list = list()
     term_is_not_null = False
@@ -892,21 +1254,9 @@ def play_in_vlc(request):
             scene_id = request.query_params['sceneId']
             scene = Scene.objects.get(pk=scene_id)
             random = False
-        elif 'actor' in request.query_params and request.query_params['actor'] != '-6':
-            actor_id = request.query_params['actor']
-            scene = Scene.objects.filter(actors=actor_id).order_by('?').first()
-        elif 'sceneTag' in request.query_params and request.query_params['sceneTag'] != '-6':
-            scene_tag_id = request.query_params['sceneTag']
-            scene = Scene.objects.filter(scene_tags=scene_tag_id).order_by('?').first()
-        elif 'website' in request.query_params and request.query_params['website'] != '-6':
-            website_id = request.query_params['website']
-            scene = Scene.objects.filter(websites=website_id).order_by('?').first()
-        elif 'folder' in request.query_params and request.query_params['folder'] != '-6':
-            folder_id = request.query_params['folder']
-            scene = Scene.objects.filter(folders_in_tree=folder_id).order_by('?').first()
-        elif 'playlist' in request.query_params and request.query_params['playlist'] != '-6':
-            playlist_id = request.query_params['playlist']
-            scene = Scene.objects.filter(playlists=playlist_id).order_by('?').first()
+        elif 'advSearch' in request.query_params and request.query_params['advSearch'] != '-6':
+            objects = Scene.objects.all()
+            scene = advanced_search_recursive(request.query_params['advSearch'], objects).order_by('?').first()
         else:
             scene = Scene.objects.order_by('?').first()
 
@@ -1100,388 +1450,6 @@ class SceneTagViewSet(viewsets.ModelViewSet):
 
     queryset = SceneTag.objects.all()
     serializer_class = SceneTagSerializer
-
-
-def operator_contents(string, open_parenthsis, close_parenthsis):
-    """Generate parenthesized contents in string as pairs (level, contents)."""
-
-    adv_search_dict = list()
-    stack = []
-    inside_parenthsis = False
-    operators = {'&&', '||', '!!'}
-    single_operator = {'!!'}
-    start = 0
-    found_operator = False
-
-    for i, c in enumerate(string):
-
-        if i < len(string):
-
-            temp_str = string[i: i + 2]
-            # print("string i:i+1 is '{}'".format(temp_str))
-            if (not inside_parenthsis) and (
-                        temp_str in operators):
-                if temp_str not in single_operator:
-                    adv_search_dict.append(string[start:i])
-                adv_search_dict.append(temp_str)
-                found_operator = True
-
-                start = i + 2
-
-        if c == open_parenthsis:
-            stack.append(i)
-            inside_parenthsis = True
-        elif c == close_parenthsis and stack:
-            stack.pop()
-
-        if not stack:
-            inside_parenthsis = False
-
-    if not found_operator:
-        return None
-    else:
-        adv_search_dict.append(string[start:])
-        return adv_search_dict
-
-
-def parenthetic_contents(string, open_parenthsis, close_parenthsis):
-    """Generate parenthesized contents in string as pairs (level, contents)."""
-    stack = []
-    for i, c in enumerate(string):
-        if c == open_parenthsis:
-            stack.append(i)
-        elif c == close_parenthsis and stack:
-            start = stack.pop()
-            yield (len(stack), string[start + 1: i])
-
-
-def has_parenthesis(string):
-    stack = []
-    first = None
-    last = None
-    found_first = False
-    for i, c in enumerate(string):
-        if c == '(':
-            stack.append(i)
-            if not found_first:
-                first = i
-                found_first = True
-        elif c == ')' and stack:
-            stack.pop()
-            if not stack:
-                last = i
-    if (first != None) and (last != None):
-        return {first, last}
-    else:
-        return None
-
-
-def remove_parenthesis_at_index(string, indexes):
-    ans = ""
-    for i, c in enumerate(string):
-        if i not in indexes:
-            ans = ans + c
-
-    return ans
-
-
-def remove_and_strip(string, string_to_remove):
-    string = string.replace(string_to_remove, '')
-    string = string.strip()
-    return string
-
-
-def get_reverse_keyargs_for_int_values(value_stripped, key_value, key_new):
-    if '>=' in value_stripped:
-        temp = remove_and_strip(key_value, '>=')
-        reverse_keyarg = key_new + "__gte"
-
-    elif '<=' in value_stripped:
-        temp = remove_and_strip(key_value, '<=')
-        reverse_keyarg = key_new + "__lte"
-
-    elif '>' in value_stripped:
-        temp = remove_and_strip(key_value, '>')
-        reverse_keyarg = key_new + "__gt"
-
-    elif '<' in value_stripped:
-        temp = remove_and_strip(key_value, '<')
-        reverse_keyarg = key_new + "__lt"
-
-    else:
-        temp = key_value.strip()
-        reverse_keyarg = key_new
-
-    return {reverse_keyarg: temp}
-
-
-def append_to_name_of_first_key_in_dict(dictionary, string):
-    key = next(dictionary.__iter__())
-    key_name = key
-    new_key_name = string + key_name
-    dictionary[new_key_name] = dictionary.pop(key_name)
-
-    return dictionary
-
-
-def get_q_object_for_related_field(key, value):
-    reverse_keyarg_dict = {}
-
-    if value == "":
-        reverse_keyarg = "{}__isnull".format(key)
-        reverse_keyarg_dict = {reverse_keyarg: True}
-
-    elif isinstance(value, int) or value.isdigit():
-        reverse_keyarg = "{}".format(key)
-        reverse_keyarg_dict = {reverse_keyarg: value}
-
-    else:
-        reverse_keyarg = "{}__name__icontains".format(key)
-        reverse_keyarg_dict = {reverse_keyarg: value}
-
-    q = Q(**reverse_keyarg_dict)
-    return q
-
-
-def get_q_object_from_literal(literal):
-    literal = literal.strip()
-
-    j = json.loads(literal)
-
-    q = None
-    for key in j:
-        if key in ['actors', 'scene_tags', 'websites', 'playlists','folders_in_tree']:
-            q = get_q_object_for_related_field(key, j[key])
-
-        elif 'scene_properties_' in key:
-
-            int_fields = ['play_count', 'rating', 'width', 'height', 'bit_rate', 'duration', 'size', 'framerate',
-                          'date_added', 'date_runner_up', 'date_last_played', 'is_runner_up', 'modified_date']
-
-            str_fields = ['name', 'path_to_file', 'description', 'codec_name']
-
-            other_fields = ['playlists']
-
-            int_operators = ['<', '>', '>=', '<=']
-
-            key_new = key.replace('scene_properties_', '')
-
-            value_stripped = j[key].strip()
-            reverse_keyarg = ""
-            temp = ""
-
-            if key_new in int_fields:
-
-                validated = False
-
-                for op in int_operators:
-                    if (op in j[key]) and not validated:
-                        validated = True
-                        pass
-
-                if j[key].isdigit():
-                    validated = True
-
-                if validated:
-
-                    if key_new == 'size':
-                        a = re.findall(r'\d+', j[key])
-                        t1 = int(a[0])
-                        t2 = t1 * 1000000
-                        t3 = str(t2)
-                        j[key] = j[key].replace(a[0], t3)
-
-                    elif key_new == 'duration':
-                        a = re.findall(r'\d+', j[key])
-                        t1 = int(a[0])
-                        t2 = t1 * 60
-                        t3 = str(t2)
-                        j[key] = j[key].replace(a[0], t3)
-
-                    elif key_new == 'bit_rate':
-                        a = re.findall(r'\d+', j[key])
-                        t1 = int(a[0])
-                        t2 = t1 * 1000
-                        t3 = str(t2)
-                        j[key] = j[key].replace(a[0], t3)
-
-                    reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
-                else:
-                    # reverse_keyarg_dict = None
-                    break
-            elif key_new in other_fields:
-                temp = j[key].strip()
-                reverse_keyarg = key_new + "__name__icontains"
-                reverse_keyarg_dict = {reverse_keyarg: temp}
-            else:
-                temp = j[key].strip()
-                reverse_keyarg = key_new + "__icontains"
-                reverse_keyarg_dict = {reverse_keyarg: temp}
-
-            q = Q(**reverse_keyarg_dict)
-
-        elif 'actor_properties_' in key:
-
-            int_fields = ['date_added', 'date_runner_up', 'date_of_birth', 'play_count', 'is_runner_up', 'rating',
-                          'modified_date', 'height', 'weight']
-
-            str_fields = ['name', 'description', 'gender', 'official_pages', 'ethnicity', 'country_of_origin',
-                          'tattoos', 'measurements', 'extra_text']
-
-            other_fields = ['actor_aliases']
-
-            key_new = key.replace('actor_properties_', '')
-
-            value_stripped = j[key].strip()
-            reverse_keyarg = ""
-            temp = ""
-
-            if key_new in int_fields:
-                reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
-                reverse_keyarg_dict = append_to_name_of_first_key_in_dict(reverse_keyarg_dict, "actors__")
-            elif key_new in other_fields:
-                temp = j[key].strip()
-                reverse_keyarg = "actors__" + key_new + "__name__icontains"
-                reverse_keyarg_dict = {reverse_keyarg: temp}
-            else:
-                temp = j[key].strip()
-                reverse_keyarg = "actors__" + key_new + "__icontains"
-                reverse_keyarg_dict = {reverse_keyarg: temp}
-
-            q = Q(**reverse_keyarg_dict)
-
-    return q
-
-
-def evaluate_literal(literal, qs):
-    print("Evaluating literal {}".format(literal))
-    if type(literal) == django.db.models.query.QuerySet:
-        return literal
-    else:
-        literal = literal.strip()
-        parenthesis_index = has_parenthesis(literal)
-        if parenthesis_index:
-            literal_without_outer_parenthesis = remove_parenthesis_at_index(literal, parenthesis_index)
-            qs = advanced_search_recursive(literal_without_outer_parenthesis, qs)
-            return qs
-
-    q = get_q_object_from_literal(literal)
-
-    return q
-
-
-def evaluate_binary_operations(q1, q2, operation, qs):
-    if operation == '&&':
-
-        if type(q1) == django.db.models.query.QuerySet and not type(q2) == django.db.models.query.QuerySet:
-            qs = q1.filter(q2)
-        elif type(q2) == django.db.models.query.QuerySet and not type(q1) == django.db.models.query.QuerySet:
-            qs = q2.filter(q1)
-        elif type(q2) == django.db.models.query.QuerySet and type(q1) == django.db.models.query.QuerySet:
-            qs = q1 & q2
-        else:
-            qs = qs.filter(q1)
-            qs = qs.filter(q2)
-
-    elif operation == '||':
-        if type(q1) == django.db.models.query.QuerySet and not type(q2) == django.db.models.query.QuerySet:
-            temp = Scene.objects.filter(q2)
-            qs = q1 | temp
-        elif type(q2) == django.db.models.query.QuerySet and not type(q1) == django.db.models.query.QuerySet:
-            temp = Scene.objects.filter(q1)
-            qs = q2 | temp
-        elif type(q2) == django.db.models.query.QuerySet and type(q1) == django.db.models.query.QuerySet:
-            qs = q1 | q2
-        else:
-            qs = qs.filter(q1 | q2)
-    return qs
-
-
-def evaluate_single_operator(q1, op, qs):
-    if op == "!!":
-
-        if type(q1) == django.db.models.query.QuerySet:
-            all_scenes = Scene.objects.all()
-            # qs = all_scenes & ~q1
-            q = Q(id__in=q1)
-            qs = all_scenes.exclude(q)
-        else:
-            q1 = q1.strip()
-            parenthesis_index = has_parenthesis(q1)
-            if parenthesis_index:
-                literal_without_outer_parenthesis = remove_parenthesis_at_index(q1, parenthesis_index)
-                rec_result = advanced_search_recursive(literal_without_outer_parenthesis, qs)
-                qs = evaluate_single_operator(rec_result, op, qs)
-            else:
-                q = get_q_object_from_literal(q1)
-                all_scenes = Scene.objects.all()
-                qs = all_scenes.filter(~q)
-
-    return qs
-
-
-def advanced_search_recursive(adv_search_string, qs):
-    binary_operators = {'&&', '||'}
-    single_operators = {'!!'}
-    a = operator_contents(adv_search_string, '(', ')')
-
-    if a:
-        while len(a) > 1:
-            if a[0] in single_operators:
-                q_not = evaluate_single_operator(a[1], a[0], qs)
-                del a[0]
-                del a[0]
-                a.insert(0, q_not)
-
-            elif a[1] in binary_operators:
-                q1 = evaluate_literal(a[0], qs)
-                q2 = evaluate_literal(a[2], qs)
-                evl = evaluate_binary_operations(q1, q2, a[1], qs)
-                del a[0]
-                del a[0]
-                del a[0]
-                a.insert(0, evl)
-    else:
-        q = evaluate_literal(adv_search_string, qs)
-
-        if type(q) == django.db.models.query.QuerySet:
-            qs = qs & q
-        else:
-            try:
-                qs = qs.filter(q)
-            except TypeError:
-                print("Incorrect input...")
-
-        return qs
-
-    return a[0]
-
-
-def advanced_search(adv_search_string):
-    scenes = Scene.objects.all()
-
-    # a = list(parenthetic_contents(adv_search_string, '(', ')'))
-    # if a:
-    #     while len(a) > 1:
-    #         if a[1] in binary_operators:
-    #             q1 = evaluate_literal(a[0])
-    #             q2 = evaluate_literal(a[2])
-    #             evl = evaluate_binary_operations(q1, q2, a[1], scenes)
-    #             del a[0]
-    #             del a[0]
-    #             del a[0]
-    #             a.insert(0, evl)
-    #
-    #     scenes = a[0]
-    #
-    # else:
-    #     print("No operators found in string '{}'".format(adv_search_string))
-    #     q = evaluate_literal(adv_search_string)
-    #     scenes = Scene.objects.filter(q)
-
-    scenes = advanced_search_recursive(adv_search_string, scenes)
-
-    return scenes
 
 
 class SceneViewSet(viewsets.ModelViewSet):

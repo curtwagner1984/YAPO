@@ -146,7 +146,7 @@
                             <label>Scene Properties</label>
                             <md-select ng-model="dialog.selectedOption"
                                        md-on-close="dialog.onSelect(dialog.selectedOption,'scene_properties')">
-                                <md-option ng-repeat="option in dialog.scene_properties" ng-value="option"
+                                <md-option ng-repeat="option in dialog.scene_properties track by $index" ng-value="option"
                                 >
                                     {{ option }}
                                 </md-option>
@@ -157,7 +157,7 @@
                             <label>Actor Properties</label>
                             <md-select ng-model="dialog.selectedOption"
                                        md-on-close="dialog.onSelect(dialog.selectedOption,'actor_properties')">
-                                <md-option ng-repeat="option in dialog.actor_properties" ng-value="option"
+                                <md-option ng-repeat="option in dialog.actor_properties track by $index" ng-value="option"
                                 >
                                     {{ option }}
                                 </md-option>
