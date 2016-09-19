@@ -427,14 +427,15 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
                 itemsToAdd = Actor.query({
                     offset: _pageOffset,
                     limit: _pageLimit,
-                    search: _searchTerm,
-                    searchField: _searchField,
-                    actor_tags: _actorTagId,
-                    scenes: _sceneId,
-                    pk: _pk,
+                    // search: _searchTerm,
+                    // searchField: _searchField,
+                    // actor_tags: _actorTagId,
+                    // scenes: _sceneId,
+                    // pk: _pk,
                     sortBy: _sortBy,
-                    is_runner_up: _runnerUp,
-                    pageType: _pageType
+                    // is_runner_up: _runnerUp,
+                    pageType: _pageType,
+                    advSearch: _advSearch
                     // ordering: _ordering
                 });
 
@@ -484,23 +485,25 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
                 itemsToAdd = SceneTag.query({
                     offset: _pageOffset,
                     limit: _pageLimit,
-                    actors: _actorId,
-                    scenes: _sceneId,
-                    search: _searchTerm,
-                    searchField: _searchField,
+                    // actors: _actorId,
+                    // scenes: _sceneId,
+                    // search: _searchTerm,
+                    // searchField: _searchField,
                     sortBy: _sortBy,
-                    is_runner_up: _runnerUp,
+                    advSearch: _advSearch,
+                    // is_runner_up: _runnerUp,
                     pageType: _pageType
                 })
             } else if (_pageType == 'Website') {
                 itemsToAdd = Website.query({
                     offset: _pageOffset,
                     limit: _pageLimit,
-                    scenes: _sceneId,
-                    search: _searchTerm,
-                    searchField: _searchField,
+                    // scenes: _sceneId,
+                    // search: _searchTerm,
+                    // searchField: _searchField,
                     sortBy: _sortBy,
-                    is_runner_up: _runnerUp,
+                    // is_runner_up: _runnerUp,
+                    advSearch: _advSearch,
                     pageType: _pageType
                 })
             } else if (_pageType == 'DbFolder') {

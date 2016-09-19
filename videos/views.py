@@ -175,25 +175,25 @@ def remove_and_strip(string, string_to_remove):
     return string
 
 
-def get_reverse_keyargs_for_int_values(value_stripped, key_value, key_new):
+def get_reverse_keyargs_for_int_values(value_stripped, key_new):
     if '>=' in value_stripped:
-        temp = remove_and_strip(key_value, '>=')
+        temp = remove_and_strip(value_stripped, '>=')
         reverse_keyarg = key_new + "__gte"
 
     elif '<=' in value_stripped:
-        temp = remove_and_strip(key_value, '<=')
+        temp = remove_and_strip(value_stripped, '<=')
         reverse_keyarg = key_new + "__lte"
 
     elif '>' in value_stripped:
-        temp = remove_and_strip(key_value, '>')
+        temp = remove_and_strip(value_stripped, '>')
         reverse_keyarg = key_new + "__gt"
 
     elif '<' in value_stripped:
-        temp = remove_and_strip(key_value, '<')
+        temp = remove_and_strip(value_stripped, '<')
         reverse_keyarg = key_new + "__lt"
 
     else:
-        temp = key_value.strip()
+        temp = value_stripped.strip()
         reverse_keyarg = key_new
 
     return {reverse_keyarg: temp}
@@ -227,7 +227,40 @@ def get_q_object_for_related_field(key, value):
     return q
 
 
-def get_q_object_from_literal(literal):
+def get_reverse_keyarg_dict_for_key(sending_object, current_object, key_new, key_value, int_fields, str_fields,
+                                    other_fields):
+    reverse_keyarg_dict = {}
+
+    if key_new in int_fields:
+        reverse_keyarg_dict = get_reverse_keyargs_for_int_values(key_value, key_new)
+        if sending_object != current_object:
+            reverse_keyarg_dict = append_to_name_of_first_key_in_dict(reverse_keyarg_dict,
+                                                                      "{}__".format(sending_object))
+    elif key_new in other_fields:
+        temp = key_value.strip()
+        if sending_object != current_object:
+            if temp.isdigit():
+                reverse_keyarg = "{}__".format(sending_object) + key_new
+            else:
+                reverse_keyarg = "{}__".format(sending_object) + key_new + "__name__icontains"
+        else:
+            if temp.isdigit():
+                reverse_keyarg = key_new
+            else:
+                reverse_keyarg = key_new + "__name__icontains"
+        reverse_keyarg_dict = {reverse_keyarg: temp}
+    else:
+        temp = key_value.strip()
+        if sending_object != current_object:
+            reverse_keyarg = "{}__".format(sending_object) + key_new + "__icontains"
+        else:
+            reverse_keyarg = key_new + "__icontains"
+        reverse_keyarg_dict = {reverse_keyarg: temp}
+
+    return reverse_keyarg_dict
+
+
+def get_q_object_from_literal(literal, sending_object):
     literal = literal.strip()
 
     j = json.loads(literal)
@@ -289,18 +322,8 @@ def get_q_object_from_literal(literal):
                         t3 = str(t2)
                         j[key] = j[key].replace(a[0], t3)
 
-                    reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
-                else:
-                    # reverse_keyarg_dict = None
-                    break
-            elif key_new in other_fields:
-                temp = j[key].strip()
-                reverse_keyarg = key_new + "__name__icontains"
-                reverse_keyarg_dict = {reverse_keyarg: temp}
-            else:
-                temp = j[key].strip()
-                reverse_keyarg = key_new + "__icontains"
-                reverse_keyarg_dict = {reverse_keyarg: temp}
+            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'scene', key_new, j[key],
+                                                                  int_fields, str_fields, other_fields)
 
             q = Q(**reverse_keyarg_dict)
 
@@ -312,7 +335,7 @@ def get_q_object_from_literal(literal):
             str_fields = ['name', 'description', 'gender', 'official_pages', 'ethnicity', 'country_of_origin',
                           'tattoos', 'measurements', 'extra_text']
 
-            other_fields = ['actor_aliases']
+            other_fields = ['actor_aliases', 'actor_tags']
 
             key_new = key.replace('actor_properties_', '')
 
@@ -320,24 +343,55 @@ def get_q_object_from_literal(literal):
             reverse_keyarg = ""
             temp = ""
 
-            if key_new in int_fields:
-                reverse_keyarg_dict = get_reverse_keyargs_for_int_values(value_stripped, j[key], key_new)
-                reverse_keyarg_dict = append_to_name_of_first_key_in_dict(reverse_keyarg_dict, "actors__")
-            elif key_new in other_fields:
-                temp = j[key].strip()
-                reverse_keyarg = "actors__" + key_new + "__name__icontains"
-                reverse_keyarg_dict = {reverse_keyarg: temp}
-            else:
-                temp = j[key].strip()
-                reverse_keyarg = "actors__" + key_new + "__icontains"
-                reverse_keyarg_dict = {reverse_keyarg: temp}
+            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'actor', key_new, j[key],
+                                                                  int_fields, str_fields, other_fields)
+
+            q = Q(**reverse_keyarg_dict)
+
+        elif 'website_properties_' in key:
+
+            int_fields = ['date_added', 'date_runner_up', 'play_count', 'is_runner_up', 'rating',
+                          'modified_date']
+
+            str_fields = ['name', 'website_alias']
+
+            other_fields = ['scene_tags']
+
+            key_new = key.replace('website_properties_', '')
+
+            value_stripped = j[key].strip()
+            reverse_keyarg = ""
+            temp = ""
+
+            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'website', key_new, j[key],
+                                                                  int_fields, str_fields, other_fields)
+
+            q = Q(**reverse_keyarg_dict)
+
+        elif 'scene_tag_properties_' in key:
+
+            int_fields = ['date_added', 'date_runner_up', 'play_count', 'is_runner_up', 'rating',
+                          'modified_date']
+
+            str_fields = ['name', 'scene_tag_alias']
+
+            other_fields = ['scene_tags']
+
+            key_new = key.replace('scene_tag_properties_', '')
+
+            value_stripped = j[key].strip()
+            reverse_keyarg = ""
+            temp = ""
+
+            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'scene_tag', key_new, j[key],
+                                                                  int_fields, str_fields, other_fields)
 
             q = Q(**reverse_keyarg_dict)
 
     return q
 
 
-def evaluate_literal(literal, qs):
+def evaluate_literal(literal, qs, sending_object):
     print("Evaluating literal {}".format(literal))
     if type(literal) == django.db.models.query.QuerySet:
         return literal
@@ -346,15 +400,15 @@ def evaluate_literal(literal, qs):
         parenthesis_index = has_parenthesis(literal)
         if parenthesis_index:
             literal_without_outer_parenthesis = remove_parenthesis_at_index(literal, parenthesis_index)
-            qs = advanced_search_recursive(literal_without_outer_parenthesis, qs)
+            qs = advanced_search_recursive(literal_without_outer_parenthesis, qs, sending_object)
             return qs
 
-    q = get_q_object_from_literal(literal)
+    q = get_q_object_from_literal(literal, sending_object)
 
     return q
 
 
-def evaluate_binary_operations(q1, q2, operation, qs):
+def evaluate_binary_operations(q1, q2, operation, qs, sending_object):
     if operation == '&&':
 
         if type(q1) == django.db.models.query.QuerySet and not type(q2) == django.db.models.query.QuerySet:
@@ -381,7 +435,7 @@ def evaluate_binary_operations(q1, q2, operation, qs):
     return qs
 
 
-def evaluate_single_operator(q1, op, qs):
+def evaluate_single_operator(q1, op, qs, sending_object):
     if op == "!!":
 
         if type(q1) == django.db.models.query.QuerySet:
@@ -394,17 +448,17 @@ def evaluate_single_operator(q1, op, qs):
             parenthesis_index = has_parenthesis(q1)
             if parenthesis_index:
                 literal_without_outer_parenthesis = remove_parenthesis_at_index(q1, parenthesis_index)
-                rec_result = advanced_search_recursive(literal_without_outer_parenthesis, qs)
-                qs = evaluate_single_operator(rec_result, op, qs)
+                rec_result = advanced_search_recursive(literal_without_outer_parenthesis, qs, sending_object)
+                qs = evaluate_single_operator(rec_result, op, qs, sending_object)
             else:
-                q = get_q_object_from_literal(q1)
+                q = get_q_object_from_literal(q1, sending_object)
                 all_scenes = Scene.objects.all()
                 qs = all_scenes.filter(~q)
 
     return qs
 
 
-def advanced_search_recursive(adv_search_string, qs):
+def advanced_search_recursive(adv_search_string, qs, sending_object):
     binary_operators = {'&&', '||'}
     single_operators = {'!!'}
     a = operator_contents(adv_search_string, '(', ')')
@@ -412,21 +466,21 @@ def advanced_search_recursive(adv_search_string, qs):
     if a:
         while len(a) > 1:
             if a[0] in single_operators:
-                q_not = evaluate_single_operator(a[1], a[0], qs)
+                q_not = evaluate_single_operator(a[1], a[0], qs, sending_object)
                 del a[0]
                 del a[0]
                 a.insert(0, q_not)
 
             elif a[1] in binary_operators:
-                q1 = evaluate_literal(a[0], qs)
-                q2 = evaluate_literal(a[2], qs)
-                evl = evaluate_binary_operations(q1, q2, a[1], qs)
+                q1 = evaluate_literal(a[0], qs, sending_object)
+                q2 = evaluate_literal(a[2], qs, sending_object)
+                evl = evaluate_binary_operations(q1, q2, a[1], qs, sending_object)
                 del a[0]
                 del a[0]
                 del a[0]
                 a.insert(0, evl)
     else:
-        q = evaluate_literal(adv_search_string, qs)
+        q = evaluate_literal(adv_search_string, qs, sending_object)
 
         if type(q) == django.db.models.query.QuerySet:
             qs = qs & q
@@ -439,13 +493,6 @@ def advanced_search_recursive(adv_search_string, qs):
         return qs
 
     return a[0]
-
-
-def advanced_search(adv_search_string):
-    scenes = Scene.objects.all()
-    scenes = advanced_search_recursive(adv_search_string, scenes)
-
-    return scenes
 
 
 def search_in_get_queryset(original_queryset, request):
@@ -1254,9 +1301,9 @@ def play_in_vlc(request):
             scene_id = request.query_params['sceneId']
             scene = Scene.objects.get(pk=scene_id)
             random = False
-        elif 'advSearch' in request.query_params and request.query_params['advSearch'] != '-6':
+        elif 'advSearch' in request.query_params and request.query_params['advSearch'] != '':
             objects = Scene.objects.all()
-            scene = advanced_search_recursive(request.query_params['advSearch'], objects).order_by('?').first()
+            scene = advanced_search_recursive(request.query_params['advSearch'], objects, 'scene').order_by('?').first()
         else:
             scene = Scene.objects.order_by('?').first()
 
@@ -1267,14 +1314,14 @@ def play_in_vlc(request):
             return Response(status=500)
 
 
-class PlayInVlc(views.APIView):
-    def get(self, request, format=None):
-        scene_id = request.query_params['sceneId']
-        scene = Scene.objects.get(pk=scene_id)
-
-        play_scene_vlc(scene)
-
-        return Response(status=200)
+# class PlayInVlc(views.APIView):
+#     def get(self, request, format=None):
+#         scene_id = request.query_params['sceneId']
+#         scene = Scene.objects.get(pk=scene_id)
+#
+#         play_scene_vlc(scene)
+#
+#         return Response(status=200)
 
 
 def open_file_cross_platform(path):
@@ -1416,6 +1463,13 @@ class WebsiteViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Website.objects.all()
 
+        sending_object = 'website'
+        if 'advSearch' in self.request.query_params:
+            if self.request.query_params['advSearch'] != '':
+                adv_search_string = self.request.query_params['advSearch']
+                print("Adv search string is {}".format(adv_search_string))
+                queryset = advanced_search_recursive(adv_search_string, queryset, sending_object)
+
         return search_in_get_queryset(queryset, self.request)
 
     def get_serializer_class(self):
@@ -1434,6 +1488,13 @@ class WebsiteViewSet(viewsets.ModelViewSet):
 class SceneTagViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = SceneTag.objects.all()
+        sending_object = 'scene_tag'
+
+        if 'advSearch' in self.request.query_params:
+            if self.request.query_params['advSearch'] != '':
+                adv_search_string = self.request.query_params['advSearch']
+                print("Adv search string is {}".format(adv_search_string))
+                queryset = advanced_search_recursive(adv_search_string, queryset, sending_object)
 
         return search_in_get_queryset(queryset, self.request)
 
@@ -1455,11 +1516,12 @@ class SceneTagViewSet(viewsets.ModelViewSet):
 class SceneViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Scene.objects.all()
+        sending_object = 'scene'
         if 'advSearch' in self.request.query_params:
             if self.request.query_params['advSearch'] != '':
                 adv_search_string = self.request.query_params['advSearch']
                 print("Adv search string is {}".format(adv_search_string))
-                queryset = advanced_search(adv_search_string)
+                queryset = advanced_search_recursive(adv_search_string, queryset, sending_object)
 
         # queryset = self.get_serializer_class().setup_eager_loading(queryset,queryset)
         # queryset = SceneListSerializer.setup_eager_loading(queryset, queryset)
@@ -1525,8 +1587,13 @@ class ActorViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # random order
         # queryset = Actor.objects.all().order_by('?')
-
         queryset = Actor.objects.all()
+        sending_object = 'actor'
+        if 'advSearch' in self.request.query_params:
+            if self.request.query_params['advSearch'] != '':
+                adv_search_string = self.request.query_params['advSearch']
+                print("Adv search string is {}".format(adv_search_string))
+                queryset = advanced_search_recursive(adv_search_string, queryset, sending_object)
 
         # **{term: term}
         res_qs = search_in_get_queryset(queryset, self.request)

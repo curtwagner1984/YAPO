@@ -5,8 +5,8 @@ angular.module('sceneTagList').component('sceneTagList', {
     bindings: {
         mainPage: '='
     },
-    controller: ['$scope', 'SceneTag', 'scopeWatchService', 'pagerService', 'helperService',
-        function SceneTagListController($scope, SceneTag, scopeWatchService, pagerService, helperService) {
+    controller: ['$scope', 'SceneTag', 'scopeWatchService', 'pagerService', 'helperService','$rootScope',
+        function SceneTagListController($scope, SceneTag, scopeWatchService, pagerService, helperService ,$rootScope) {
 
             var self = this;
             var didSectionListWrapperLoad = false;
@@ -14,61 +14,55 @@ angular.module('sceneTagList').component('sceneTagList', {
             self.pageType = 'SceneTag';
 
 
-
-            self.nextPage = function (currentPage) {
-
-
-                var input = {
-                    currentPage: currentPage,
-                    pageType: self.pageType,
-                    scene: self.scene,
-                    searchTerm: self.searchTerm,
-                    searchField: self.searchField,
-                    sortBy: self.sortBy
-
-                };
-
-                self.actorsToadd = pagerService.getNextPage(input);
-
-                self.actorsToadd.$promise.then(function (res) {
-
-                    // self.actorsToadd = res[0];
-
-                    var paginationInfo = {
-                        pageType: input.pageType,
-                        pageInfo: res[1]
-                    };
-
-                    scopeWatchService.paginationInit(paginationInfo);
-
-                    self.tags = helperService.resourceToArray(res[0]);
+            self.advSearchString = undefined;
+            self.advSearchObject = {};
 
 
-                });
+            // Wrapper for the Dynamic Items object in nav-bar.component.
+            // It's responsible for the infinite scroll.
 
+            var DynamicItems = function () {
+                this.dI = new $rootScope.DynamicItems();
+            };
 
+            DynamicItems.prototype.updateQuery_ = function () {
+                this.dI.pageType = self.pageType;
+                this.dI.advSearch = self.advSearchString;
+                this.dI.sortBy = self.sortBy;
+            };
+
+            DynamicItems.prototype.reset = function (caller) {
+                this.dI.reset(caller);
+            };
+
+            DynamicItems.prototype.getItemAtIndex = function (index) {
+                return this.dI.getItemAtIndex(index)
+            };
+
+            DynamicItems.prototype.getLength = function () {
+                return this.dI.getLength()
+            };
+
+            DynamicItems.prototype.nextPage = function (pageNumber, isCalledFromDynamicItems) {
+                this.updateQuery_();
+                this.dI.nextPage(pageNumber, isCalledFromDynamicItems)
             };
 
 
-            // if (self.mainPage) {
-            //     console.log("main page is true! + " + self.mainPage);
-            //     self.nextPage(0);
-            // }
+            this.dynamicItems = new DynamicItems();
+            this.dynamicItems.updateQuery_();
+
+
 
             $scope.$on("sceneLoaded", function (event, scene) {
                 self.scene = scene;
-                self.nextPage(0);
+                self.dynamicItems.reset();
+                self.dynamicItems.nextPage(0, false);
 
 
             });
 
-            $scope.$on("paginationChange", function (event, pageInfo) {
-                if (pageInfo.pageType == self.pageType){
-                    self.nextPage(pageInfo.page)
-                }
-
-
-            });
+            
 
 
             $scope.$on("addSceneTagToList", function (event, sceneTag) {
@@ -78,9 +72,13 @@ angular.module('sceneTagList').component('sceneTagList', {
             $scope.$on("searchTermChanged", function (event, searchTerm) {
                 if (searchTerm['sectionType'] == 'SceneTagList'){
                     self.tags = [];
-                    self.searchTerm = searchTerm['searchTerm'];
-                    self.searchField = searchTerm['searchField'];
-                    self.nextPage(0);    
+                    
+                    var searchedItem = searchTerm['searchTerm'];
+                    var searchType = 'scene_tag_properties_' + searchTerm['searchField'];
+
+                    self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,searchType,searchedItem, true);
+                    self.dynamicItems.reset();
+                    self.dynamicItems.nextPage(0, false);  
                 }
                 
 
@@ -92,7 +90,8 @@ angular.module('sceneTagList').component('sceneTagList', {
                     self.tags = [];
                     self.sortBy = sortOrder['sortBy'];
                      if (sortOrder.mainPage == undefined || sortOrder.mainPage == true ) {
-                        self.nextPage(0);
+                        self.dynamicItems.reset();
+                        self.dynamicItems.nextPage(0, false);
                     }
                     didSectionListWrapperLoad = true;
                 }

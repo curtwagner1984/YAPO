@@ -408,12 +408,47 @@ angular.module('navBar', []).component('navBar', {
                 // promise. In real code, this function would likely contain an
                 // $http request.
 
-                $timeout(angular.noop, 500).then(angular.bind(this, function () {
-                    if (self.totalItems == -6) {
-                        self.totalItems = self.itemsFormServer.length;
+                // $timeout(angular.noop, 500).then(angular.bind(this, function () {
+                //     if (self.totalItems == -6) {
+                //         self.totalItems = this.itemsFormServer.length;
+                //     }
+                //     this.numItems = self.totalItems;
+                // }));
+            };
+            
+            
+            $rootScope.generateAdvSearchString = function (currentAdvSearchObject, searchType, searchedItem, append) {
+                if (!append) {
+                    currentAdvSearchObject = {};
+                }
+
+                if (angular.isObject(searchedItem)) {
+                    currentAdvSearchObject[searchType] = searchedItem.id;
+                } else {
+                    currentAdvSearchObject[searchType] = searchedItem;
+                }
+
+
+                var ans = "";
+                var first = true;
+
+                for (var key in currentAdvSearchObject) {
+                    if (currentAdvSearchObject.hasOwnProperty(key)) {
+                        if (currentAdvSearchObject[key] != "") {
+                            var temp = "{\"" + key + "\":\"" + currentAdvSearchObject[key] + "\"}";
+                            if (first) {
+                                ans = temp;
+                                first = false
+                            } else {
+                                var temp1 = "(" + ans + ")";
+                                var temp2 = "(" + temp + ")";
+                                ans = temp1 + "&&" + temp2;
+                            }
+                        }
                     }
-                    this.numItems = self.totalItems;
-                }));
+                }
+                return ans;
+
             };
 
 

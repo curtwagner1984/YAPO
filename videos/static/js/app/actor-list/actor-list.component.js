@@ -24,8 +24,10 @@ angular.module('actorList').component('actorList', {
 
     }],
 
-    controller: ['$scope', 'Actor', 'pagerService', 'Scene', 'ActorTag', 'scopeWatchService', 'helperService', '$timeout',
-        function ActorListController($scope, Actor, pagerService, Scene, ActorTag, scopeWatchService, helperService, $timeout) {
+    controller: ['$scope', 'Actor', 'pagerService', 'Scene', 'ActorTag', 'scopeWatchService', 'helperService',
+        '$timeout', '$rootScope',
+        function ActorListController($scope, Actor, pagerService, Scene, ActorTag, scopeWatchService, helperService,
+                                     $timeout, $rootScope) {
 
 
             var self = this;
@@ -34,151 +36,48 @@ angular.module('actorList').component('actorList', {
             var didActorTagLoad = false;
             var didSectionListWrapperLoad = false;
 
-
-            // AM deferred loading wrapper https://material.angularjs.org/latest/demo/virtualRepeat
-
-            // In this example, we set up our model using a class.
-            // Using a plain object works too. All that matters
-            // is that we implement getItemAtIndex and getLength.
-            var DynamicItems = function () {
-                /**
-                 * @type {!Object<?Array>} Data pages, keyed by page number (0-index).
-                 */
-                this.loadedPages = {};
-
-                /** @type {number} Total number of items. */
-                this.numItems = 0;
-
-                /** @const {number} Number of items to fetch per request. */
-                if (helperService.getNumberOfItemsPerPaige() != undefined) {
-                    this.PAGE_SIZE = helperService.getNumberOfItemsPerPaige();
-                } else {
-                    this.PAGE_SIZE = 10;
-                }
-
-
-                this.fetchNumItems_();
-            };
-
-
-            DynamicItems.prototype.reset = function () {
-                this.loadedPages = {};
-                this.numItems = 0;
-
-            };
-
-            // Required.
-            DynamicItems.prototype.getItemAtIndex = function (index) {
-                var pageNumber = Math.floor(index / this.PAGE_SIZE);
-                var page = this.loadedPages[pageNumber];
-
-                if (page) {
-                    return page[index % this.PAGE_SIZE];
-                } else if (page !== null) {
-                    this.fetchPage_(pageNumber);
-                }
-            };
-
-            // Required.
-            DynamicItems.prototype.getLength = function () {
-                return this.numItems;
-            };
-
-            DynamicItems.prototype.nextPage = function (pageNumber, wasCalledFromDynamicItems) {
-
-                var loadedPages = this.loadedPages;
-
-                var input = {
-                    currentPage: pageNumber,
-                    pageType: self.pageType,
-                    scene: self.scene,
-                    searchTerm: self.searchTerm,
-                    searchField: self.searchField,
-                    sortBy: self.sortBy,
-                    actorTag: self.actorTag,
-                    isRunnerUp: self.runnerUp
-
-
-                };
-
-                self.actorsToadd = pagerService.getNextPage(input);
-                if (self.actorsToadd != undefined) {
-                    self.actorsToadd.$promise.then(function (res) {
-
-                        // self.actorsToadd = res[0];
-
-                        var paginationInfo = {
-                            pageType: input.pageType,
-                            pageInfo: res[1]
-                        };
-
-                        self.totalItems = parseInt(paginationInfo.pageInfo.replace(/.*<(\d+)>; rel="count".*/, '$1'));
-
-                        scopeWatchService.paginationInit(paginationInfo);
-
-                        self.websites = helperService.resourceToArray(res[0]);
-
-                        if (wasCalledFromDynamicItems) {
-                            for (var i = 0; i < self.websites.length; i++) {
-                                loadedPages[pageNumber].push(self.websites[i])
-                            }
-
-                            this.loadedPages = loadedPages;
-                        } else {
-                            if (self.totalItems == -6) {
-                                self.totalItems = self.websites.length;
-                            }
-
-                            self.dynamicItems.numItems = self.totalItems;
-
-                        }
-
-
-                    });
-                }
-
-            };
-
-            DynamicItems.prototype.fetchPage_ = function (pageNumber) {
-                // Set the page to null so we know it is already being fetched.
-                this.loadedPages[pageNumber] = null;
-
-                // For demo purposes, we simulate loading more items with a timed
-                // promise. In real code, this function would likely contain an
-                // $http request.
-                $timeout(angular.noop, 300).then(angular.bind(this, function () {
-                    this.loadedPages[pageNumber] = [];
-
-                    this.nextPage(pageNumber, true);
-
-
-                    // var pageOffset = pageNumber * this.PAGE_SIZE;
-                    // for (var i = pageOffset; i < pageOffset + this.PAGE_SIZE; i++) {
-                    //   this.loadedPages[pageNumber].push(i);
-                    // }
-                }));
-            };
-
-            DynamicItems.prototype.fetchNumItems_ = function () {
-                // For demo purposes, we simulate loading the item count with a timed
-                // promise. In real code, this function would likely contain an
-                // $http request.
-
-                $timeout(angular.noop, 500).then(angular.bind(this, function () {
-                    this.numItems = self.totalItems;
-                }));
-            };
-
-            this.dynamicItems = new DynamicItems();
-
-
             self.actors = [];
-
+            self.gridView = false;
             self.ordering = "name";
             self.pageType = 'Actor';
 
+            self.advSearchString = undefined;
+            self.advSearchObject = {};
 
-            self.gridView = false;
+
+            // Wrapper for the Dynamic Items object in nav-bar.component.
+            // It's responsible for the infinite scroll.
+
+            var DynamicItems = function () {
+                this.dI = new $rootScope.DynamicItems();
+            };
+
+            DynamicItems.prototype.updateQuery_ = function () {
+                this.dI.pageType = self.pageType;
+                this.dI.advSearch = self.advSearchString;
+                this.dI.sortBy = self.sortBy;
+            };
+
+            DynamicItems.prototype.reset = function (caller) {
+                this.dI.reset(caller);
+            };
+
+            DynamicItems.prototype.getItemAtIndex = function (index) {
+                return this.dI.getItemAtIndex(index)
+            };
+
+            DynamicItems.prototype.getLength = function () {
+                return this.dI.getLength()
+            };
+
+            DynamicItems.prototype.nextPage = function (pageNumber, isCalledFromDynamicItems) {
+                this.updateQuery_();
+                this.dI.nextPage(pageNumber, isCalledFromDynamicItems)
+            };
+
+
+            this.dynamicItems = new DynamicItems();
+            this.dynamicItems.updateQuery_();
 
 
             var checkGridOption = function () {
@@ -194,54 +93,6 @@ angular.module('actorList').component('actorList', {
             });
 
 
-            // self.nextPage = function (currentPage) {
-            //
-            //
-            //     input = {
-            //         currentPage: currentPage,
-            //         pageType: self.pageType,
-            //         actorTag: self.actorTag,
-            //         scene: self.scene,
-            //         searchTerm: self.searchTerm,
-            //         searchField: self.searchField,
-            //         sortBy: self.sortBy,
-            //         isRunnerUp: self.runnerUp
-            //
-            //     };
-            //
-            //
-            //     self.actorsToadd = pagerService.getNextPage(input);
-            //
-            //     self.actorsToadd.$promise.then(function (res) {
-            //
-            //         // self.actorsToadd = res[0];
-            //
-            //         var paginationInfo = {
-            //             pageType: input.pageType,
-            //             pageInfo: res[1]
-            //         };
-            //
-            //         scopeWatchService.paginationInit(paginationInfo);
-            //
-            //         self.actors = helperService.resourceToArray(res[0]);
-            //
-            //
-            //     });
-            //
-            //
-            // };
-
-            // if (self.mainPage) {
-            //     console.log("main page is true! + " + self.mainPage);
-            //     self.actorsToadd = self.nextPage(0);
-            // }
-
-            $scope.$on("paginationChange", function (event, pageInfo) {
-                if (pageInfo.pageType == self.pageType) {
-                    // self.nextPage(pageInfo.page)
-                }
-            });
-
             $scope.$on("addActorToList", function (event, changedActor) {
                 self.actors.push((changedActor));
             });
@@ -249,6 +100,8 @@ angular.module('actorList').component('actorList', {
             $scope.$on("actorTagLoaded", function (event, loadedActorTag) {
                 self.actors = [];
                 self.actorTag = loadedActorTag;
+                
+                self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,'actor_properties_actor_tags',loadedActorTag, true);
                 self.dynamicItems.reset();
                 self.dynamicItems.nextPage(0, false);
 
@@ -285,6 +138,45 @@ angular.module('actorList').component('actorList', {
 
             });
 
+            $scope.$on("searchTermChanged", function (event, searchTerm) {
+                if (searchTerm['sectionType'] == 'ActorList') {
+                    self.actors = [];
+                    self.dynamicItems.reset();
+                    var searchedItem = searchTerm['searchTerm'];
+                    var searchType = 'actor_properties_' + searchTerm['searchField'];
+
+                    self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,searchType,searchedItem, true);
+
+
+                    // self.nextPage(0);
+                    self.dynamicItems.nextPage(0, false)
+                }
+
+
+            });
+
+
+            $scope.$on("runnerUpChanged", function (event, runnerUp) {
+                if (runnerUp['sectionType'] == 'ActorList') {
+                    console.log("Runner up Changed!");
+                    self.actors = [];
+                    self.dynamicItems.reset();
+                    self.runnerUp = runnerUp['runnerUp'];
+
+                    var temp;
+                    if (runnerUp['runnerUp']) {
+                        temp = '1'
+                    } else {
+                        temp = ''
+                    }
+
+                    self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,'actor_properties_is_runner_up', temp, true);
+                    self.dynamicItems.reset('runnerUpChanged');
+                    self.dynamicItems.nextPage(0, false);
+                }
+
+            });
+
             if (!didSceneLoad) {
                 scopeWatchService.didSceneLoad('a')
             }
@@ -298,39 +190,9 @@ angular.module('actorList').component('actorList', {
             }
 
 
-            $scope.$on("searchTermChanged", function (event, searchTerm) {
-                if (searchTerm['sectionType'] == 'ActorList') {
-                    self.actors = [];
-                    self.dynamicItems.reset();
-                    self.searchTerm = searchTerm['searchTerm'];
-                    self.searchField = searchTerm['searchField'];
-                    // self.nextPage(0);
-                    self.dynamicItems.nextPage(0, false)
-                }
-
-
-            });
-
-
-            $scope.$on("runnerUpChanged", function (event, runnerUp) {
-                if (runnerUp['sectionType'] == 'ActorList') {
-                    console.log("Sort Order Changed!");
-                    self.actors = [];
-                    self.dynamicItems.reset();
-                    self.runnerUp = runnerUp['runnerUp'];
-                    // self.nextPage(0);
-                    self.dynamicItems.nextPage(0, false)
-                }
-
-            });
-
             self.removeActorFromScene = function (actorToRemove) {
                 console.log("actor-list: function removeActorFromScene was triggered");
                 if (angular.isObject(self.scene)) {
-                    // self.pk.splice(self.pk.indexOf(aliasToDelete.id), 1);
-                    // alert(angular.toJson(self.actor.actor_tags));
-                    // alert(angular.toJson(tagToDelete));
-                    // alert(angular.toJson(self.actor.actor_tags.indexOf(tagToDelete.id)));
                     var resId = [];
                     var resObj = [];
 
@@ -347,11 +209,7 @@ angular.module('actorList').component('actorList', {
                     scopeWatchService.sceneChanged(self.scene);
 
                     self.actors = resObj;
-                    // self.pk = res;
 
-
-                    // self.actor.actor_tags.splice(self.actor.actor_tags.indexOf(tagToDelete.id,1));
-                    // alert(angular.toJson(self.actor.actor_tags));
                 }
             };
 
@@ -359,20 +217,6 @@ angular.module('actorList').component('actorList', {
                 Actor.remove({actorId: actorToRemove.id});
 
                 var ans = helperService.removeObjectFromArrayOfObjects(actorToRemove, self.actors);
-                // var resId = [];
-                //     var resObj = [];
-                //
-                //     for (var i = 0; i < self.actors.length; i++) {
-                //         if (self.actors[i].id != actorToRemove.id) {
-                //             resId.push(self.actors[i].id);
-                //             resObj.push(self.actors[i]);
-                //         }
-                //     }
-                //
-                //
-                //     // self.scene.actors = resId;
-                //
-                //     // scopeWatchService.sceneChanged(self.scene);
 
                 self.actors = ans['resObject'];
             };
