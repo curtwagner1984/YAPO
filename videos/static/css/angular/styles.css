@@ -332,25 +332,28 @@ input:checked + .slider:before {
 .virtualRepeatdemoDeferredLoading #vertical-container {
   height: 750px;
   width: 100%;
-  max-width: 1600px; }
+  max-width: 1900px;
+}
 
 .virtualRepeatdemoDeferredLoading .repeated-item {
-  border-bottom: 1px solid #ddd;
-  box-sizing: border-box;
-  height: 70px;
-  padding-top: 10px; }
+    /*border-bottom: 1px solid #ddd;*/
+    /*box-sizing: border-box;*/
+    /*height: 70px;*/
+    /*padding-top: 10px; }*/
+}
 
 .virtualRepeatdemoDeferredLoading .repeated-item-actor {
   border-bottom: 1px solid #ddd;
   box-sizing: border-box;
-  height: 150px;
+  height: 200px;
   padding-top: 10px; }
 
 .virtualRepeatdemoDeferredLoading .repeated-item-scene {
   border-bottom: 1px solid #ddd;
   box-sizing: border-box;
-  height: 250px;
-  padding-top: 10px; }
+  height: 300px;
+  padding-top: 60px;
+}
 
 .virtualRepeatdemoDeferredLoading md-content {
   margin: 16px; }

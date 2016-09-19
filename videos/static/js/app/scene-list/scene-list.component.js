@@ -28,6 +28,9 @@ angular.module('sceneList').component('sceneList', {
             var didSectionListWrapperLoad = false;
             var didSectionListWrapperLoadIsMainPage = false;
             var playlistLoaded = false;
+            
+            //for chip test
+            self.chipTest = ['blond','blue.eyes','oscar.winner','devil.advocate','prometheus','mad.max.fury.road'];
 
             self.sceneArray = [];
             self.scenesToAdd = [];

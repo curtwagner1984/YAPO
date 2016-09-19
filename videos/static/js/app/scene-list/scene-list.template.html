@@ -1,6 +1,3 @@
-<span>
-<pagination page-type="'Scene'"></pagination>
-</span>
 <div ng-if="!$ctrl.gridView">
     <button type="button" ng-click="$ctrl.multiTag()" class="btn btn-default btn-sm">
         Tag/Delete Multiple Scenes
@@ -29,136 +26,8 @@
                 <div layout="column">
                     <div md-virtual-repeat="scene in $ctrl.dynamicItems" md-on-demand="" flex=""
                          class="repeated-item-scene">
+                        <div ng-include="'static/js/app/scene-list/single-item/list.html'"></div>
 
-                        <div layout="row" layout-align="space-around center">
-                            <div flex="2">
-                            <span>{{$index + 1}}
-                                 <md-checkbox ng-if="$ctrl.tagMultiple" ng-model="scene.selected"
-                                              ng-click="$ctrl.sceneSelectToggle(scene)" aria-label="Checkbox 1">
-                                 </md-checkbox>
-                        </span>
-                            </div>
-                            <div flex="15">
-                                <a href="/#!/scene/{{ scene.id }}">
-                                    <img src="{{ scene.thumbnail }}" style="width: 240px"/>
-                                </a>
-                            </div>
-                            <div layout="column">
-                                <div flex><a href="/#!/scene/{{ scene.id }}">{{ scene.name }}</a></div>
-
-                                <div flex>
-                                    <md-chips ng-model="scene.actors"
-                                              md-autocomplete-snap
-                                              md-on-add="$ctrl.chipOnAdd($chip,'actors',scene)"
-                                              md-on-remove="$ctrl.chipOnRemove($chip,'actors',scene)"
-                                              md-on-select="$ctrl.chipOnSelect($chip,'actors')"
-                                              md-transform-chip="$ctrl.transformChip($chip,'actors',scene)">
-                                        <md-autocomplete
-                                                md-search-text="searchText"
-                                                md-items="item in $root.autoCompleteGetItems('actors',searchText)"
-                                                md-item-text="item.name"
-                                                md-autoselect="true"
-                                                md-select-on-match="true"
-                                                md-no-cache="true"
-                                                placeholder="Add an Actor">
-
-                                            <md-item-template>
-                                  <span class="item-title">
-                                    <img ng-src="{{ item.thumbnail }}" class="md-avatar" style="width: 32px">
-                                    <span md-highlight-text="searchText" md-highlight-flags="gi">{{ item.name }}</span>
-                                  </span>
-
-                                            </md-item-template>
-
-
-                                        </md-autocomplete>
-                                        <md-chip-template>
-                                            <img ng-src="{{$chip.thumbnail}}" style="width: 16px">
-                                            <span>{{$chip.name}}</span>
-                                        </md-chip-template>
-                                    </md-chips>
-                                </div>
-
-                                <div flex>
-                                    <md-chips ng-model="scene.scene_tags"
-                                              md-autocomplete-snap
-                                              md-on-add="$ctrl.chipOnAdd($chip,'scene_tags',scene)"
-                                              md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags',scene)"
-                                              md-on-select="$ctrl.chipOnSelect($chip,'scene_tags')"
-                                              md-transform-chip="$ctrl.transformChip($chip,'scene_tags',scene)">
-
-                                        <md-autocomplete
-                                                md-search-text="searchText"
-                                                md-items="item in $root.autoCompleteGetItems('scene_tags',searchText)"
-                                                md-item-text="item.name"
-                                                md-autoselect="true"
-                                                md-select-on-match="true"
-                                                md-no-cache="false"
-                                                placeholder="Add Scene Tag">
-                                            <span md-highlight-text="searchText">{{ item.name }}</span>
-                                        </md-autocomplete>
-                                        <md-chip-template>
-                                            <span>{{$chip.name}}</span>
-                                        </md-chip-template>
-                                    </md-chips>
-                                </div>
-
-                                <div flex=>
-                                    <md-chips ng-model="scene.websites"
-                                              md-autocomplete-snap
-                                              md-on-add="$ctrl.chipOnAdd($chip,'websites',scene)"
-                                              md-on-remove="$ctrl.chipOnRemove($chip,'websites',scene)"
-                                              md-on-select="$ctrl.chipOnSelect($chip,'websites')"
-                                              md-transform-chip="$ctrl.transformChip($chip,'websites',scene)">
-                                        <md-autocomplete
-                                                md-search-text="searchText"
-                                                md-items="item in $root.autoCompleteGetItems('websites',searchText)"
-                                                md-item-text="item.name"
-                                                md-autoselect="true"
-                                                md-select-on-match="true"
-                                                md-no-cache="true"
-                                                placeholder="Add a website">
-
-                                            <span md-highlight-text="searchText">{{ item.name }}</span>
-                                        </md-autocomplete>
-                                        <md-chip-template>
-                                            <span>{{$chip.name}}</span>
-                                        </md-chip-template>
-                                    </md-chips>
-
-                                </div>
-
-
-                            </div>
-                            <div layout="column">
-                                <div flex>
-
-                                    <md-menu>
-                                        <md-button class="md-raised" ng-click="$ctrl.openMenu($mdOpenMenu, $event)">
-                                            Button
-                                        </md-button>
-                                        <md-menu-content width="4">
-
-
-                                            <md-menu-item ng-repeat="item in $ctrl.actionList">
-                                                <md-button
-                                                        ng-click="$ctrl.actionClicked($event, item, scene, $ctrl.selectedScenes)">
-                                                    {{ item.name }}
-                                                </md-button>
-                                            </md-menu-item>
-
-                                        </md-menu-content>
-                                    </md-menu>
-                                </div>
-                                <div flex>
-                                    <md-button class="md-raised" ng-click="$ctrl.playScene(scene)">
-                                        Play Scene
-                                    </md-button>
-                                </div>
-                            </div>
-
-
-                        </div>
                     </div>
 
 
@@ -171,6 +40,15 @@
 
 
 </div>
+
+<div ng-if="$ctrl.gridView">
+
+    
+
+</div>
+
+
+<!--
 
 <div class="col-md-12" id="big-scroll-item" ng-if="$ctrl.gridView">
     <div class="row-fluid" id="scene-list-grid">
@@ -190,3 +68,4 @@
         </div>
     </div>
 </div>
+-->
