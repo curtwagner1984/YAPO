@@ -249,6 +249,26 @@ angular.module('sectionListWrapper').component('sectionListWrapper', {
 
 
                 };
+                
+                var playListOrderFields = {
+
+                    "name": "Name Asc",
+                    "-name": "Name Dsc",
+                    "date_added": "Date Added Asc",
+                    "-date_added": "Date Added Dsc",
+                    "random": "Random"
+
+
+                };
+                
+                var playListSearchInFields = {
+
+                    "name": "Name"
+                    
+
+                };
+                
+                
 
 
                 var getSortBy = function (section) {
@@ -349,9 +369,16 @@ angular.module('sectionListWrapper').component('sectionListWrapper', {
                     $rootScope.title = "Folders";
                     self.sortBy = getSortBy('DbFolder');
                     self.mainPageInit();
+                    
+                    
+                }else if (self.sectionType == 'PlaylistList') {
+                    self.orderFields = playListOrderFields;
+                    self.searchInFields = playListSearchInFields;
+                    $rootScope.title = "Playlists";
+                    self.sortBy = getSortBy('Playlist');
+                    self.mainPageInit();
 
-
-                }
+                }   
 
                 sectionListWrapperLoaded = true;
 

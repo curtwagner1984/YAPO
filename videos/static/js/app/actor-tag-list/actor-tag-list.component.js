@@ -1,12 +1,12 @@
 // Register `phoneList` component, along with its associated controller and template
 angular.module('actorTagList').component('actorTagList', {
     // Note: The URL is relative to our `index.html` file
-    templateUrl: 'static/js/app/actor-tag-list/actor-tag-list.template.html',
+    templateUrl: 'static/partials/lists/general-list/general-list-template.html',
     bindings: {
         mainPage: '='
     },
-    controller: ['$scope', 'ActorTag', 'pagerService', 'scopeWatchService', 'helperService',
-        function ActorTagListController($scope, ActorTag, pagerService, scopeWatchService, helperService) {
+    controller: ['$scope', 'ActorTag', 'pagerService', 'scopeWatchService', 'helperService','$rootScope',
+        function ActorTagListController($scope, ActorTag, pagerService, scopeWatchService, helperService, $rootScope) {
 
             // this.tags = ActorTag.query();
 
@@ -16,60 +16,55 @@ angular.module('actorTagList').component('actorTagList', {
             self.pageType = 'ActorTag';
 
 
-            self.nextPage = function (currentPage) {
+            self.advSearchString = undefined;
+            self.advSearchObject = {};
 
 
-                var input = {
-                    currentPage: currentPage,
-                    pageType: self.pageType,
-                    actor: self.actor,
-                    searchTerm: self.searchTerm,
-                    searchField: self.searchField,
-                    sortBy: self.sortBy
-                };
+            // Wrapper for the Dynamic Items object in nav-bar.component.
+            // It's responsible for the infinite scroll.
 
-                self.actorsToadd = pagerService.getNextPage(input);
-                if (self.actorsToadd != undefined) {
-                    self.actorsToadd.$promise.then(function (res) {
-
-                        // self.actorsToadd = res[0];
-
-                        var paginationInfo = {
-                            pageType: input.pageType,
-                            pageInfo: res[1]
-                        };
-
-                        scopeWatchService.paginationInit(paginationInfo);
-
-                        self.tags = helperService.resourceToArray(res[0]);
-
-
-                    });
-                }
-
+            var DynamicItems = function () {
+                this.dI = new $rootScope.DynamicItems();
             };
 
-            // if (self.mainPage) {
-            //     console.log("main page is true! + " + self.mainPage);
-            //     self.nextPage(0);
-            // }
+            DynamicItems.prototype.updateQuery_ = function () {
+                this.dI.pageType = self.pageType;
+                this.dI.advSearch = self.advSearchString;
+                this.dI.sortBy = self.sortBy;
+            };
+
+            DynamicItems.prototype.reset = function (caller) {
+                this.dI.reset(caller);
+            };
+
+            DynamicItems.prototype.getItemAtIndex = function (index) {
+                return this.dI.getItemAtIndex(index)
+            };
+
+            DynamicItems.prototype.getLength = function () {
+                return this.dI.getLength()
+            };
+
+            DynamicItems.prototype.nextPage = function (pageNumber, isCalledFromDynamicItems) {
+                this.updateQuery_();
+                this.dI.nextPage(pageNumber, isCalledFromDynamicItems)
+            };
+
+
+            this.dynamicItems = new DynamicItems();
+            this.dynamicItems.updateQuery_();
 
 
             $scope.$on("actorLoaded", function (event, actor) {
                 self.actor = actor;
 
-                self.nextPage(0);
+                self.dynamicItems.reset();
+                self.dynamicItems.nextPage(0, false);
 
 
             });
 
-            $scope.$on("paginationChange", function (event, pageInfo) {
-                if (pageInfo.pageType == self.pageType) {
-                    self.nextPage(pageInfo.page)
-                }
 
-
-            });
 
             $scope.$on("addActorTagToList", function (event, actorTag) {
                 self.tags.push(actorTag)
@@ -80,9 +75,12 @@ angular.module('actorTagList').component('actorTagList', {
             $scope.$on("searchTermChanged", function (event, searchTerm) {
                 if (searchTerm['sectionType'] == 'ActorTagList') {
                     self.tags = [];
-                    self.searchTerm = searchTerm['searchTerm'];
-                    self.searchField = searchTerm['searchField'];
-                    self.nextPage(0);
+                    var searchedItem = searchTerm['searchTerm'];
+                    var searchType = 'actor_tag_properties_' + searchTerm['searchField'];
+
+                    self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,searchType,searchedItem, true);
+                    self.dynamicItems.reset();
+                    self.dynamicItems.nextPage(0, false);
                 }
 
             });
@@ -93,7 +91,8 @@ angular.module('actorTagList').component('actorTagList', {
                     self.tags = [];
                     self.sortBy = sortOrder['sortBy'];
                     if (sortOrder.mainPage == undefined || sortOrder.mainPage == true) {
-                        self.nextPage(0);
+                        self.dynamicItems.reset();
+                        self.dynamicItems.nextPage(0, false);
                     }
                     didSectionListWrapperLoad = true;
                 }

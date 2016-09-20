@@ -235,14 +235,14 @@ def get_reverse_keyarg_dict_for_key(sending_object, current_object, key_new, key
         reverse_keyarg_dict = get_reverse_keyargs_for_int_values(key_value, key_new)
         if sending_object != current_object:
             reverse_keyarg_dict = append_to_name_of_first_key_in_dict(reverse_keyarg_dict,
-                                                                      "{}__".format(sending_object))
+                                                                      "{}__".format(current_object))
     elif key_new in other_fields:
         temp = key_value.strip()
         if sending_object != current_object:
             if temp.isdigit():
-                reverse_keyarg = "{}__".format(sending_object) + key_new
+                reverse_keyarg = "{}__".format(current_object) + key_new
             else:
-                reverse_keyarg = "{}__".format(sending_object) + key_new + "__name__icontains"
+                reverse_keyarg = "{}__".format(current_object) + key_new + "__name__icontains"
         else:
             if temp.isdigit():
                 reverse_keyarg = key_new
@@ -252,7 +252,7 @@ def get_reverse_keyarg_dict_for_key(sending_object, current_object, key_new, key
     else:
         temp = key_value.strip()
         if sending_object != current_object:
-            reverse_keyarg = "{}__".format(sending_object) + key_new + "__icontains"
+            reverse_keyarg = "{}__".format(current_object) + key_new + "__icontains"
         else:
             reverse_keyarg = key_new + "__icontains"
         reverse_keyarg_dict = {reverse_keyarg: temp}
@@ -322,7 +322,7 @@ def get_q_object_from_literal(literal, sending_object):
                         t3 = str(t2)
                         j[key] = j[key].replace(a[0], t3)
 
-            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'scene', key_new, j[key],
+            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'scenes', key_new, j[key],
                                                                   int_fields, str_fields, other_fields)
 
             q = Q(**reverse_keyarg_dict)
@@ -343,7 +343,7 @@ def get_q_object_from_literal(literal, sending_object):
             reverse_keyarg = ""
             temp = ""
 
-            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'actor', key_new, j[key],
+            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'actors', key_new, j[key],
                                                                   int_fields, str_fields, other_fields)
 
             q = Q(**reverse_keyarg_dict)
@@ -363,7 +363,7 @@ def get_q_object_from_literal(literal, sending_object):
             reverse_keyarg = ""
             temp = ""
 
-            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'website', key_new, j[key],
+            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'websites', key_new, j[key],
                                                                   int_fields, str_fields, other_fields)
 
             q = Q(**reverse_keyarg_dict)
@@ -383,10 +383,51 @@ def get_q_object_from_literal(literal, sending_object):
             reverse_keyarg = ""
             temp = ""
 
-            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'scene_tag', key_new, j[key],
+            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'scene_tags', key_new, j[key],
                                                                   int_fields, str_fields, other_fields)
 
             q = Q(**reverse_keyarg_dict)
+
+        elif 'actor_tag_properties_' in key:
+
+            int_fields = ['date_added', 'date_runner_up', 'play_count', 'is_runner_up', 'rating',
+                          'modified_date']
+
+            str_fields = ['name', 'actor_tag_alias']
+
+            other_fields = ['scene_tags']
+
+            key_new = key.replace('actor_tag_properties_', '')
+
+            value_stripped = j[key].strip()
+            reverse_keyarg = ""
+            temp = ""
+
+            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'actor_tags', key_new, j[key],
+                                                                  int_fields, str_fields, other_fields)
+
+            q = Q(**reverse_keyarg_dict)
+
+        elif 'playlist_properties_' in key:
+
+            int_fields = ['date_added', 'date_runner_up', 'is_runner_up', 'rating',
+                          'modified_date']
+
+            str_fields = ['name']
+
+            other_fields = ['scenes']
+
+            key_new = key.replace('playlist_properties_', '')
+
+            value_stripped = j[key].strip()
+            reverse_keyarg = ""
+            temp = ""
+
+            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'playlists', key_new, j[key],
+                                                                  int_fields, str_fields, other_fields)
+
+            q = Q(**reverse_keyarg_dict)
+
 
     return q
 
@@ -1432,7 +1473,17 @@ class ActorAliasHTMLRest(generics.GenericAPIView):
 
 
 class PlaylistViewSet(viewsets.ModelViewSet):
-    queryset = Playlist.objects.all()
+    def get_queryset(self):
+        queryset = Playlist.objects.all()
+
+        sending_object = 'playlists'
+        if 'advSearch' in self.request.query_params:
+            if self.request.query_params['advSearch'] != '':
+                adv_search_string = self.request.query_params['advSearch']
+                print("Adv search string is {}".format(adv_search_string))
+                queryset = advanced_search_recursive(adv_search_string, queryset, sending_object)
+
+        return search_in_get_queryset(queryset, self.request)
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -1442,6 +1493,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    queryset = Playlist.objects.all()
 
 
 class LocalSceneFoldersViewSet(viewsets.ModelViewSet):
@@ -1463,7 +1515,7 @@ class WebsiteViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Website.objects.all()
 
-        sending_object = 'website'
+        sending_object = 'websites'
         if 'advSearch' in self.request.query_params:
             if self.request.query_params['advSearch'] != '':
                 adv_search_string = self.request.query_params['advSearch']
@@ -1488,7 +1540,7 @@ class WebsiteViewSet(viewsets.ModelViewSet):
 class SceneTagViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = SceneTag.objects.all()
-        sending_object = 'scene_tag'
+        sending_object = 'scene_tags'
 
         if 'advSearch' in self.request.query_params:
             if self.request.query_params['advSearch'] != '':
@@ -1516,7 +1568,7 @@ class SceneTagViewSet(viewsets.ModelViewSet):
 class SceneViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Scene.objects.all()
-        sending_object = 'scene'
+        sending_object = 'scenes'
         if 'advSearch' in self.request.query_params:
             if self.request.query_params['advSearch'] != '':
                 adv_search_string = self.request.query_params['advSearch']
@@ -1543,6 +1595,12 @@ class SceneViewSet(viewsets.ModelViewSet):
 class ActorTagViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = ActorTag.objects.all()
+        sending_object = 'actor_tags'
+        if 'advSearch' in self.request.query_params:
+            if self.request.query_params['advSearch'] != '':
+                adv_search_string = self.request.query_params['advSearch']
+                print("Adv search string is {}".format(adv_search_string))
+                queryset = advanced_search_recursive(adv_search_string, queryset, sending_object)
 
         return search_in_get_queryset(queryset, self.request)
 
@@ -1588,7 +1646,7 @@ class ActorViewSet(viewsets.ModelViewSet):
         # random order
         # queryset = Actor.objects.all().order_by('?')
         queryset = Actor.objects.all()
-        sending_object = 'actor'
+        sending_object = 'actors'
         if 'advSearch' in self.request.query_params:
             if self.request.query_params['advSearch'] != '':
                 adv_search_string = self.request.query_params['advSearch']

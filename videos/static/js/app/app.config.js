@@ -27,6 +27,10 @@ app.config(['$sceProvider', '$locationProvider', '$routeProvider', '$httpProvide
             template: '<section-list-wrapper main-page="true"section-type="\'WebsiteList\'"></section-list-wrapper>'
         }).when('/website/:websiteId', {
             template: '<website-detail></website-detail>'
+        }).when('/playlist/', {
+            template: '<section-list-wrapper main-page="true"section-type="\'PlaylistList\'"></section-list-wrapper>'
+        }).when('/playlist/:playlistId', {
+            template: '<playlist-detail>'
         }).when('/folder/', {
             template: '<section-list-wrapper main-page="true"section-type="\'DbFolder\'"></section-list-wrapper>'
             // template: '<db-folder-tree></db-folder-tree>'
@@ -37,10 +41,6 @@ app.config(['$sceProvider', '$locationProvider', '$routeProvider', '$httpProvide
             template: '<add-items></add-items>'
         }).when('/settings/', {
             template: '<settings></settings>'
-        }).when('/playlist/', {
-            template: '<playlist-list></playlist-list>'
-        }).when('/playlist/:playlistId', {
-            template: '<playlist-detail></playlist-detail>'
         }).otherwise('/'), {
             template: '<br><br><br><br><h1> This is temp index</h1>'
 

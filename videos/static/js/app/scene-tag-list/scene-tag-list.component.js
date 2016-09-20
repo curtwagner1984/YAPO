@@ -1,7 +1,8 @@
 // Register `phoneList` component, along with its associated controller and template
 angular.module('sceneTagList').component('sceneTagList', {
     // Note: The URL is relative to our `index.html` file
-    templateUrl: 'static/js/app/scene-tag-list/scene-tag-list.template.html',
+    // templateUrl: 'static/js/app/scene-tag-list/scene-tag-list.template.html',
+    templateUrl: 'static/partials/lists/general-list/general-list-template.html',
     bindings: {
         mainPage: '='
     },
@@ -13,7 +14,8 @@ angular.module('sceneTagList').component('sceneTagList', {
             // self.tags = [];
             self.pageType = 'SceneTag';
 
-
+            self.linkAid = "scene-tag";
+            
             self.advSearchString = undefined;
             self.advSearchObject = {};
 

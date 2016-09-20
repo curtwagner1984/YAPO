@@ -1,0 +1,29 @@
+Total Items {{ $ctrl.totalItems }}
+<div class="virtualRepeatdemoDeferredLoading">
+    <md-content layout="column">
+
+        <md-virtual-repeat-container id="vertical-container">
+            <div layout="column">
+                <div md-virtual-repeat="item in $ctrl.dynamicItems" md-on-demand="" flex class="repeated-item">
+                    <div layout="row">
+                        <div flex="1">{{$index + 1}}</div>
+                        <div flex="30"><a href="/#!/{{ $ctrl.linkAid }}/{{ item.id }}">{{ item.name }}</a></div>
+                        <div layout="column">
+                            <div flex>Uses: {{ item.usage_count }}</div>
+                            <div flex>Play Count: {{ item.play_count }}</div>
+                            <div flex>Date Added: {{ item.date_added | date:'dd MMMM yyyy':'z'}}</div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </md-virtual-repeat-container>
+
+
+    </md-content>
+</div>
+
+
+

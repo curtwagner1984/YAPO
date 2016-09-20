@@ -1,7 +1,8 @@
 // Register `phoneList` component, along with its associated controller and template
 angular.module('websiteList').component('websiteList', {
     // Note: The URL is relative to our `index.html` file
-    templateUrl: 'static/js/app/website-list/website-list.template.html',
+    // templateUrl: 'static/js/app/website-list/website-list.template.html',
+    templateUrl: 'static/partials/lists/general-list/general-list-template.html',
     bindings: {
         mainPage: '='
     },
@@ -12,6 +13,8 @@ angular.module('websiteList').component('websiteList', {
             var self = this;
             var didSectionListWrapperLoad = false;
             self.pageType = 'Website';
+            
+            self.linkAid = "website";
 
             self.advSearchString = undefined;
             self.advSearchObject = {};

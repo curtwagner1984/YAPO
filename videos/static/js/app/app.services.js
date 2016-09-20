@@ -215,7 +215,7 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
 
 
 angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias, ActorTag, Scene, SceneTag, Website,
-                                                              DbFolder, helperService) {
+                                                              DbFolder, helperService, Playlist) {
 
         var _prevPage = "";
         var _nextPage = "";
@@ -455,12 +455,13 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
                 itemsToAdd = ActorTag.query({
                     offset: _pageOffset,
                     limit: _pageLimit,
-                    actors: _actorId,
-                    search: _searchTerm,
-                    searchField: _searchField,
+                    // actors: _actorId,
+                    // search: _searchTerm,
+                    // searchField: _searchField,
                     sortBy: _sortBy,
-                    is_runner_up: _runnerUp,
-                    pageType: _pageType
+                    // is_runner_up: _runnerUp,
+                    pageType: _pageType,
+                    advSearch: _advSearch
                     // ordering: _ordering
                 })
             } else if (_pageType == 'Scene') {
@@ -516,6 +517,16 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
                     sortBy: _sortBy,
                     is_runner_up: _runnerUp,
                     pageType: _pageType
+
+                })
+            }else if (_pageType == 'Playlist') {
+                itemsToAdd = Playlist.query({
+                    offset: _pageOffset,
+                    limit: _pageLimit,
+                    is_runner_up: _runnerUp,
+                    pageType: _pageType,
+                    sortBy: _sortBy,
+                    advSearch: _advSearch
 
                 })
             }
@@ -754,7 +765,7 @@ angular.module('scopeWatch', []).factory('scopeWatchService', function ($rootSco
 
     function didSectionListWrapperLoaded(callingSection) {
 
-        console.log("app-service-scopeWatch: gridViewOptionChnaged was triggered! ");
+        console.log("app-service-scopeWatch: didSectionListWrapperLoaded was triggered! ");
         $rootScope.$broadcast("didSectionListWrapperLoaded", callingSection);
 
     }

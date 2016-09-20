@@ -330,7 +330,7 @@ input:checked + .slider:before {
 
 
 .virtualRepeatdemoDeferredLoading #vertical-container {
-  height: 750px;
+  height: 850px;
   width: 100%;
   max-width: 1900px;
 }
@@ -354,6 +354,16 @@ input:checked + .slider:before {
   height: 300px;
   padding-top: 60px;
 }
+
+.virtualRepeatdemoDeferredLoading .scene-image {
+    /*!*padding-left: 3em;*!*/
+    /*!*border: solid 1px;*!*/
+}
+
+/*.virtualRepeatdemoDeferredLoading img {*/
+    /*margin: 1em;*/
+    /*align-content: center;*/
+/*}*/
 
 .virtualRepeatdemoDeferredLoading md-content {
   margin: 16px; }
