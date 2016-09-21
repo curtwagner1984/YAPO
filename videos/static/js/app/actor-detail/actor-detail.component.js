@@ -10,6 +10,9 @@ angular.module('actorDetail').component('actorDetail', {
         'helperService',
         '$rootScope',
         'scopeWatchService',
+        '$mdSidenav',
+        '$timeout',
+        '$location',
         function ActorDetailController($routeParams,
                                        Actor,
                                        ActorAlias,
@@ -18,7 +21,10 @@ angular.module('actorDetail').component('actorDetail', {
                                        $scope,
                                        helperService,
                                        $rootScope,
-                                       scopeWatchService) {
+                                       scopeWatchService,
+                                       $mdSidenav,
+                                       $timeout,
+                                       $location) {
 
 
             var self = this;
@@ -26,21 +32,43 @@ angular.module('actorDetail').component('actorDetail', {
             var gotPromise = false;
             var changingView = false;
 
+
+            $scope.toggleLeft = buildToggler('left');
+            $scope.toggleRight = buildToggler('right');
+
+            function buildToggler(componentId) {
+                return function () {
+                    $mdSidenav(componentId).toggle();
+                }
+            }
+
             self.birthdate = null;
 
-            $scope.popup1 = {
-                opened: false
+            // $scope.popup1 = {
+            //     opened: false
+            // };
+            //
+            // $scope.open1 = function () {
+            //     $scope.popup1.opened = true;
+            // };
+
+            var addNewItem = function (typeOfItemToAdd, itemToAdd) {
+
+                var patchData = [];
+
+                var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
+                newItem.$save().then(function (res) {
+                    self.actor = $rootScope.addItemToScene(self.actor, res, typeOfItemToAdd);
+                    patchData.push(res.id);
+                    $rootScope.patchEntity('actor', self.actor.id, typeOfItemToAdd, patchData, 'add', false, false, null)
+                });
+
             };
 
-            $scope.open1 = function () {
-                $scope.popup1.opened = true;
-            };
+            self.addItem = function (itemToAdd, typeOfItemToAdd) {
 
+                var patchData = [];
 
-            self.addItem = function (actor, itemToAdd, typeOfItemToAdd) {
-
-               var patchData = [];
-               
 
                 if (itemToAdd.id != '-1') {
                     patchData.push(itemToAdd.id);
@@ -48,25 +76,19 @@ angular.module('actorDetail').component('actorDetail', {
                     // function (sceneToPatchId, patchType, patchData, addOrRemove, multiple, permDelete)
                     $rootScope.patchEntity('actor', self.actor.id, typeOfItemToAdd, patchData, 'add', false, false, null)
                 } else {
-                    var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
-                    newItem.$save().then(function (res) {
-                        self.scene = $rootScope.addItemToScene(self.actor, res, typeOfItemToAdd);
-                        patchData.push(res.id);
-                        $rootScope.patchEntity('actor', self.actor.id, typeOfItemToAdd, patchData, 'add', false, false, null)
-                    });
+
+                    addNewItem(typeOfItemToAdd, itemToAdd)
 
                 }
 
             };
-            
-             self.removeItem = function (itemToRemove, typeOfItemToRemove) {
+
+            self.removeItem = function (itemToRemove, typeOfItemToRemove) {
                 var patchData = [];
                 patchData.push(itemToRemove.id);
-                self.actor = $rootScope.removeItemFromScene(self.actor,itemToRemove,typeOfItemToRemove);
-                $rootScope.patchEntity('actor',self.actor.id,typeOfItemToRemove,patchData,'remove',false,false,null)
+                self.actor = $rootScope.removeItemFromScene(self.actor, itemToRemove, typeOfItemToRemove);
+                $rootScope.patchEntity('actor', self.actor.id, typeOfItemToRemove, patchData, 'remove', false, false, null)
             };
-            
-            
 
 
             self.hideDetail = false;
@@ -123,7 +145,7 @@ angular.module('actorDetail').component('actorDetail', {
 
             $scope.$on("actorTagSelected", function (event, actorTag) {
                 // alert(angular.toJson(actorTag));
-                self.addItem(self.actor,actorTag,'actor_tags');
+                self.addItem(self.actor, actorTag, 'actor_tags');
                 self.actorTagSelect(actorTag);
 
 
@@ -176,6 +198,12 @@ angular.module('actorDetail').component('actorDetail', {
                     // alert(self.birthdate);
 
                     gotPromise = true;
+                    self.generateLinks();
+                    $timeout(angular.noop, 1000).then(function () {
+                        $scope.toggleRight();
+                    });
+
+
                     // $scope.actor = res;
                 });
             };
@@ -202,7 +230,7 @@ angular.module('actorDetail').component('actorDetail', {
                 actor.date_of_birth = yyyy + '-' + mm + '-' + dd;
 
                 $rootScope.patchEntity('actor', self.actor.id, 'date_of_birth', $ctrl.actor.date_of_birth, 'add',
-                                              false, false, null)
+                    false, false, null)
 
             };
 
@@ -372,19 +400,6 @@ angular.module('actorDetail').component('actorDetail', {
                 // return self.states;
             };
 
-            self.actorNameDelimiter = function (delimiter, imageSearch) {
-                if (gotPromise) {
-                    var newName = self.actor.name.replace(/ /g, delimiter);
-                    // console.log("Name with delimeter " + delimiter + " is " + newName);
-                    if (imageSearch) {
-                        newName = newName + delimiter + "pornstar";
-                    }
-
-                    // console.log("Name with delimiter is:" + newName);
-                    return newName;
-                }
-
-            };
 
             self.isNotEmpty = function (fieldToCheck) {
                 if (gotPromise) {
@@ -461,6 +476,135 @@ angular.module('actorDetail').component('actorDetail', {
                 return (pounds)
 
             };
+
+            self.transformChip = function (chip, typeOfItemToAdd, originalItem) {
+
+                // If it is an object, it's already a known chip
+                if (angular.isObject(chip)) {
+                    if (chip.id == -1) {
+                        addNewItem(typeOfItemToAdd, chip);
+                        return null
+                    }
+                    return chip;
+                } else {
+                    var newItem = {};
+                    newItem.value = chip;
+
+                    addNewItem(typeOfItemToAdd, newItem);
+                    return null
+                }
+            };
+
+            self.chipOnSelect = function (chip, selectedChipType) {
+
+                var dest_path = "";
+
+                if (selectedChipType == 'websites') {
+                    dest_path = '/website/' + chip.id;
+                } else if (selectedChipType == 'actors') {
+                    dest_path = '/actor/' + chip.id;
+                } else if (selectedChipType == 'scene_tags') {
+                    dest_path = '/scene-tag/' + chip.id;
+                } else if (selectedChipType == 'actor_tags') {
+                    dest_path = '/actor-tag/' + chip.id;
+                }
+
+                $timeout(angular.noop, 300).then(function () {
+                    $location.path(dest_path);
+                });
+
+
+                // $location.replace();
+
+            };
+
+            self.chipOnAdd = function (chip, addedChipType) {
+                // alert("Triggered on add");
+                self.addItem(chip, addedChipType);
+            };
+
+            self.chipOnRemove = function (chip, removedChipType) {
+                // self.removeItem (chip, removedChipType)
+                console.log("Triggered on remove");
+                self.removeItem(chip, removedChipType);
+            };
+
+            self.isOneWord = function (alias) {
+
+                return !(alias.name.indexOf(' ') > -1)
+
+            };
+
+            self.actorNameDelimiter = function (delimiter, imageSearch) {
+
+                var newName = self.actor.name.replace(/ /g, delimiter);
+
+                // console.log("Name with delimeter " + delimiter + " is " + newName);
+                if (imageSearch) {
+                    newName = newName + delimiter + "pornstar";
+                }
+
+                // console.log("Name with delimiter is:" + newName);
+
+                return newName.toLowerCase();
+
+
+            };
+
+            self.links = [];
+
+            self.generateLinks = function () {
+
+                if (self.actor.official_pages != "") {
+                    var of_array = self.actor.official_pages.split(',');
+                    for ( var i = 0 ; i < of_array.length ; i++){
+                        if (of_array[i].indexOf('twitter') !== -1){
+                            var official_page = {name: 'Twitter', url: of_array[i]};
+                            self.links.push(official_page)
+                        }else{
+                            var official_page = {name: of_array[i], url: of_array[i]};
+                            self.links.push(official_page)    
+                        }
+                        
+                    }
+
+                }
+                if (self.actor.tmdb_id != null) {
+                    var tmdb = {name: 'TMdB', url: 'https://www.themoviedb.org/person/' + self.actor.tmdb_id};
+                    self.links.push(tmdb)
+                }
+
+                if (self.actor.imdb_id != null) {
+                    var imdb = {name: 'IMDB', url: 'http://www.imdb.com/name/' + self.actor.imdb_id};
+                    self.links.push(imdb)
+                }
+
+                var pornhub = {
+                    name: 'Pornhub',
+                    url: 'http://www.pornhub.com/pornstar/' + self.actorNameDelimiter('-', false)
+                };
+                self.links.push(pornhub);
+                var emp = {
+                    name: 'EMP',
+                    url: 'http://www.empornium.me/torrents.php?taglist=' + self.actorNameDelimiter('.', false)
+                };
+                self.links.push(emp);
+                var xvid = {name: 'XVIDEOS', url: 'http://www.xvideos.com/?k=' + self.actorNameDelimiter('.', false)};
+                self.links.push(xvid);
+                var duck = {
+                    name: 'DuckDuckGo',
+                    url: 'https://duckduckgo.com/?q=' + self.actorNameDelimiter('+', true) + '&iax=1&ia=images&iaf=size%3Al'
+                };
+                self.links.push(duck);
+                var google = {
+                    name: 'Google',
+                    url: 'https://www.google.com/search?as_st=y&tbm=isch&as_q=' + self.actorNameDelimiter('+', true) + '&as_epq=&as_oq=&as_eq=&cr=&as_sitesearch=&safe=images&tbs=isz:l,iar:t'
+                };
+                self.links.push(google);
+
+
+            };
+
 
         }
     ]

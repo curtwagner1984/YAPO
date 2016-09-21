@@ -1,0 +1,258 @@
+<md-toolbar class="md-theme-indigo">
+    <h1 class="md-toolbar-tools">{{ $ctrl.actor.name }} (Has {{ $ctrl.actor.scenes.length }} scenes in the
+        database.)</h1>
+</md-toolbar>
+
+<md-content layout-margin="">
+
+    <md-content>
+        <md-tabs md-dynamic-height="" md-border-bottom="">
+
+            <md-tab label="Main">
+                <md-content class="md-padding">
+                    <div layout="column" layout-align="center center">
+
+                        <div layout="row" layout-align="center center">
+                            <md-button ng-click="$ctrl.scrapeActor('TMDb')">
+                                <span class="glyphicon glyphicon-plus"></span> Scrape TMDb
+                            </md-button>
+                            <md-button ng-click="$ctrl.scrapeActor('Freeones')">
+                                <span class="glyphicon glyphicon-plus"></span> Scrape Freeones
+                            </md-button>
+                            <div>
+                                <md-checkbox ng-model="$ctrl.forceScrape">Overwrite existing fields?</md-checkbox>
+                            </div>
+
+
+                        </div>
+
+                        <detail-profile-image ng-if="$ctrl.updateImage" actor="$ctrl.actor"></detail-profile-image>
+
+                        <div>
+                            <h2 class="md-display-2"><a href="#" editable-text="$ctrl.actor.name"
+                                                        onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'name', $ctrl.actor.name, 'add',
+                                              false, false, null)" style="cursor:text">
+                                {{ $ctrl.actor.name || 'NA' }}
+                            </a>
+
+                            </h2>
+                        </div>
+
+
+                        <div>
+                            <uib-rating ng-model="$ctrl.actor.rating" max="10" read-only="isReadonly"
+                                        on-hover="hoveringOver(value)"
+                                        on-leave="overStar = null" titles="['one','two','three']"
+                                        aria-labelledby="default-rating"
+                                        ng-change="$root.patchEntity('actor', $ctrl.actor.id, 'rating', $ctrl.actor.rating, 'add',
+                                              false, false, null)">
+                        </div>
+
+                        <div>
+                            <md-switch ng-model="$ctrl.actor.is_runner_up"
+                                       ng-change="$root.patchEntity('actor', $ctrl.actor.id, 'is_runner_up', $ctrl.actor.is_runner_up, 'add',
+                                              false, false, null)">
+                                Runner Up
+                            </md-switch>
+                        </div>
+
+                        <div>
+                            <md-chips ng-model="$ctrl.actor.actor_tags"
+                                      md-autocomplete-snap
+                                      md-on-add="$ctrl.chipOnAdd($chip,'actor_tags')"
+                                      md-on-remove="$ctrl.chipOnRemove($chip,'actor_tags')"
+                                      md-on-select="$ctrl.chipOnSelect($chip,'actor_tags')"
+                                      md-transform-chip="$ctrl.transformChip($chip,'actor_tags',$ctrl.actor)">
+                                <md-autocomplete
+                                        md-search-text="searchText"
+                                        md-items="item in $root.autoCompleteGetItems('actor_tags',searchText)"
+                                        md-item-text="item.name"
+                                        md-autoselect="true"
+                                        md-select-on-match="true"
+                                        md-no-cache="true"
+                                        placeholder="Actor Tags">
+
+                                    <md-item-template>
+                                  <span class="item-title">
+                                    <span md-highlight-text="searchText" md-highlight-flags="gi">{{ item.name }}</span>
+                                  </span>
+
+                                    </md-item-template>
+
+
+                                </md-autocomplete>
+                                <md-chip-template>
+                                    <span>{{$chip.name}}</span>
+                                </md-chip-template>
+                            </md-chips>
+                        </div>
+
+                    </div>
+                </md-content>
+            </md-tab>
+
+            <md-tab label="Info">
+                <md-content class="md-padding">
+                    <div layout="column">
+                        <span><h3 align="center">Bio</h3></span>
+                        <div><p><a href="#" editable-textarea="$ctrl.actor.description" e-rows="5" e-cols="65"
+                                   onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'description', $ctrl.actor.description, 'add',
+                                              false, false, null)">
+                            {{ $ctrl.actor.description || 'no description' }}
+                        </a></p></div>
+
+                    </div>
+
+                    <div layout="column" layout-align="space-around none">
+                        <span><h3 align="center">Stats</h3></span>
+                        <div layout="row">
+                            <span flex-offset="30" flex="20">Ethnicity</span>
+                            <span>
+                                <a href="#" editable-text="$ctrl.actor.ethnicity"
+                                   onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'ethnicity', $ctrl.actor.ethnicity, 'add',
+                                          false, false, null)">
+                                        {{ $ctrl.actor.ethnicity || 'NA' }}
+                                </a>
+                            </span>
+                        </div>
+
+                        <div layout="row">
+                            <span flex-offset="30" flex="20">Height</span>
+                            <span>
+                                <a href="#" editable-text="$ctrl.actor.height"
+                                   onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'height', $ctrl.actor.height, 'add',
+                                          false, false, null)">
+                                        {{ $ctrl.actor.height || 'NA' }}
+                                </a>
+                                <span ng-if="$ctrl.actor != undefined && $ctrl.actor.height != undefined">
+                                     ({{ $ctrl.heightConvertInches($ctrl.actor.height)['feet'] }} feet {{ $ctrl.heightConvertInches($ctrl.actor.height)['inches']}} inches)
+                                </span>
+
+                            </span>
+                        </div>
+
+                        <div layout="row">
+                            <span flex-offset="30" flex="20">Weight</span>
+                            <span>
+                                <a href="#" editable-text="$ctrl.actor.weight"
+                                   onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'weight', $ctrl.actor.weight, 'add',
+                                          false, false, null)">
+                                        {{ $ctrl.actor.weight || 'NA' }}
+                                </a>
+                                <span ng-if="$ctrl.actor != undefined && $ctrl.actor.weight != undefined">
+                            ({{ $ctrl.weightConvertPounds($ctrl.actor.weight)}} pounds)
+                                </span>
+
+                            </span>
+                        </div>
+
+                        <div layout="row">
+                            <span flex-offset="30" flex="20">Country Of Origin</span>
+                            <span>
+                                <a href="#" editable-text="$ctrl.actor.country_of_origin"
+                                   onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'country_of_origin', $ctrl.actor.country_of_origin, 'add',
+                                          false, false, null)">
+                                        {{ $ctrl.actor.country_of_origin || 'NA' }}
+                                </a>
+
+
+                            </span>
+                        </div>
+
+                        <div layout="row">
+                            <span flex-offset="30" flex="20">Measurements</span>
+                            <span>
+                                <a href="#" editable-text="$ctrl.actor.measurements"
+                                   onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'country_of_origin', $ctrl.actor.measurements, 'add',
+                                          false, false, null)">
+                                        {{ $ctrl.actor.measurements || 'NA' }}
+                                </a>
+                            </span>
+                        </div>
+
+                        <div layout="row">
+                            <span flex-offset="30" flex="20">Gender</span>
+                            <span>
+                                <a href="#" editable-text="$ctrl.actor.gender"
+                                   onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'gender', $ctrl.actor.gender, 'add',
+                                          false, false, null)">
+                                        {{ $ctrl.actor.gender || 'NA' }}
+                                </a>
+                            </span>
+                        </div>
+
+                        <div layout="row">
+                            <span flex-offset="30" flex="20">Tattoos</span>
+                            <span>
+                                <a href="#" editable-text="$ctrl.actor.tattoos"
+                                   onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'gender', $ctrl.actor.tattoos, 'add',
+                                          false, false, null)">
+                                        {{ $ctrl.actor.tattoos || 'NA' }}
+                                </a>
+                            </span>
+                        </div>
+
+
+                    </div>
+
+                    <div layout="column">
+                        <span><h3 align="center">Dates</h3></span>
+                        <div layout="row">
+                            <span flex-offset="15" flex="20"><h4>Date Of Birth</h4></span>
+                            <span>
+                                <md-datepicker ng-model="$ctrl.birthdate" ng-change="$ctrl.updateBirthday($ctrl.actor)"
+                                               md-placeholder="Enter date"></md-datepicker>
+                                <span ng-if="$ctrl.actor != undefined && $ctrl.actor.date_of_birth != undefined">
+                                                ({{ $ctrl.howOld($ctrl.actor.date_of_birth)}} Years Old)
+                                </span>
+                            </span>
+                        </div>
+
+
+                    </div>
+
+                    <div layout="column">
+                        <span><h3 align="center">Alias</h3></span>
+                        <p>(Tick the checkbox if you want to allow the alias to be autotagged even though it's one word)
+                        </p>
+                        <div layout="row">
+                            <md-chips ng-model="$ctrl.actor.actor_aliases"
+                                      name="fruitName"
+                                      md-transform-chip="$ctrl.transformChip($chip,'actor_aliases',$ctrl.actor)"
+                                      md-on-add="$ctrl.chipOnAdd($chip,'actor_aliases')"
+                                      md-on-remove="$ctrl.chipOnRemove($chip,'actor_aliases')"
+
+                            >
+                                <md-chip-template>
+                                    {{$chip.name}}
+                                    <md-checkbox ng-if="$ctrl.isOneWord($chip)"
+                                                 ng-model="$chip.is_exempt_from_one_word_search">
+                                    </md-checkbox>
+
+                                </md-chip-template>
+                            </md-chips>
+                        </div>
+                    </div>
+
+                    <div layout="column">
+                        <span><h3 align="center">Links</h3></span>
+                        <div ng-repeat="item in $ctrl.links">
+                            <a href="{{ item.url }}" target="_blank">{{ item.name }}</a>
+                        </div>
+
+
+                    </div>
+
+                </md-content>
+            </md-tab>
+
+
+        </md-tabs>
+
+    </md-content>
+
+
+    <md-button ng-click="toggleRight()" class="md-accent">
+        Close this Sidenav
+    </md-button>
+</md-content>

@@ -41,6 +41,9 @@ def search_person(actor_in_question, alias, force):
             person = tmdb.People(str(s['id']))
             person_info = person.info()
 
+            actor_in_question.tmdb_id = person_info['id']
+            actor_in_question.imdb_id = person_info['imdb_id']
+
             person_aka = person_info['also_known_as']
             if person_info['biography'] is not None:
                 actor_in_question.description = person_info['biography']
@@ -59,11 +62,11 @@ def search_person(actor_in_question, alias, force):
                     actor_in_question.gender = 'F'
                     print("Added Gender to: " + actor_in_question.name)
             if person_info['homepage']:
-                actor_in_question.official_pages = person_info['homepage']
+                if actor_in_question.official_pages != '':
+                    actor_in_question.official_pages = actor_in_question.official_pages + ',' + person_info['homepage']
+                else:
+                    actor_in_question.official_pages = person_info['homepage']
                 print("Added Homepage to: " + actor_in_question.name)
-
-                actor_in_question.tmdb_id = person_info['id']
-                actor_in_question.imdb_id = person_info['imdb_id']
 
             if actor_in_question.thumbnail == const.UNKNOWN_PERSON_IMAGE_PATH or force:
                 if person_info['profile_path'] is not None:

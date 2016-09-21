@@ -1,5 +1,8 @@
+
 <uib-alert ng-repeat="alert in $ctrl.alerts" class="enter" type="{{ alert.type }}" close="$ctrl.closeAlert($index)"
            dismiss-on-timeout="{{ alert.timeout }}">{{ alert.msg }}</uib-alert>
+
+<!--
 <h1 align="center">
     <a href="#" editable-text="$ctrl.actor.name"
        onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'name', $ctrl.actor.name, 'add',
@@ -19,7 +22,6 @@
     <button type="button" ng-click="$ctrl.hideDetailClick()" class="btn btn-default btn-sm">
         {{ $ctrl.hideDetailButtomLable }}
     </button>
-</h2>
 
 <ul>
     <li><span>Favorite:
@@ -56,6 +58,24 @@
     </li>
 </ul>
 
+
+</h2>
+-->
+
+<md-button ng-click="toggleRight()" class="md-raised">
+            Toggle Sidenav
+          </md-button>
+
+<md-sidenav class="md-sidenav-right" md-component-id="right" md-disable-backdrop="" md-whiteframe="4">
+
+      <div ng-include="'static/js/app/actor-detail/side-nav-content.html'"></div>
+
+</md-sidenav>
+
+
+
+
+
 <!--
 <div class="col-md-8">
             <div class="scene-list">
@@ -65,13 +85,16 @@
         </div>
 -->
 
+<section-list-wrapper main-page="false" section-type="'SceneList'"></section-list-wrapper>
 
+
+<!--
 <div class="row">
     <div ng-if="$ctrl.hideDetail" class="col-md-12 ">
 
         <h3>{{ $ctrl.actor.name }} has {{ $ctrl.actor.scenes.length }} scenes: </h3>
 
-        <section-list-wrapper main-page="false" section-type="'SceneList'"></section-list-wrapper>
+
 
 
     </div>
@@ -85,276 +108,13 @@
     </div>
     <div ng-if="!$ctrl.hideDetail" class="col-md-1 pull-right">
 
-        <table class="actor-detail">
-            <tr>
-                <td colspan="2">
 
-
-                    <div class="alcenter">
-                        <button type="button" ng-click="$ctrl.scrapeActor('TMDb')" class="btn btn-default btn-sm">
-                            <span class="glyphicon glyphicon-plus"></span> Scrape TMDb
-                        </button>
-
-                        <button type="button" ng-click="$ctrl.scrapeActor('Freeones')"
-                                class="btn btn-default btn-sm">
-                            <span class="glyphicon glyphicon-plus"></span> Scrape Freeones
-                        </button>
-                        <input type="checkbox" ng-model="$ctrl.forceScrape"
-                               uib-popover-html="'Override existing values while scraping with selected scraper'"
-                               popover-trigger="mouseenter" popover-placement="top">
-
-                    </div>
-                    <detail-profile-image ng-if="$ctrl.updateImage" actor="$ctrl.actor"></detail-profile-image>
-
-
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <div class="actor-bio">
-                        <a href="#" editable-textarea="$ctrl.actor.description" e-rows="5" e-cols="100"
-                           onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'description', $ctrl.actor.description, 'add',
-                                              false, false, null)">
-                            {{ $ctrl.actor.description || 'no description' }}
-                        </a>
-                    </div>
-                </td>
-
-
-            </tr>
-
-            <tr>
-                <td>
-                    Date of Birth:
-                </td>
-                <td class="alright">
-                    <div>
-                        <p class="input-group">
-                            <input type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy"
-                                   ng-model="$ctrl.birthdate"
-                                   is-open="popup1.opened" datepicker-options="dateOptions" ng-required="true"
-                                   close-text="Close" alt-input-formats="altInputFormats"
-                                   ng-change="$ctrl.updateBirthday($ctrl.actor)"/>
-                            <span class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="open1()"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
-                            </span>
-                        </p>
-
-                        <br>
-                        <span ng-if="$ctrl.actor != undefined && $ctrl.actor.date_of_birth != undefined">
-                            ({{ $ctrl.howOld($ctrl.actor.date_of_birth)}} Years Old)
-                        </span>
-
-                    </div>
-
-
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Ethnicity:
-                </td>
-                <td class="alright">
-                    <a href="#" editable-text="$ctrl.actor.ethnicity"
-                       onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'ethnicity', $ctrl.actor.ethnicity, 'add',
-                                              false, false, null)">
-                        {{ $ctrl.actor.ethnicity || 'NA' }}
-                    </a>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Aliases:
-                    <input type="text" name="name" ng-model="aliasToInsert"/>
-                    <button type="button" ng-click="$ctrl.aliasInput(aliasToInsert)"
-                            class="btn btn-default btn-sm">
-                        <span class="glyphicon glyphicon-plus"></span> Add
-                    </button>
-                </td>
-                <td>
-
-                    <actor-alias-list pk="$ctrl.actor.actor_aliases"></actor-alias-list>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Tags:
-                    <async-typeahead object="$ctrl.actor.actor_tags"
-                                     object-type='actor_tags'
-                                     sending-object="$ctrl.actor"
-                                     sending-object-type='Actor'
-                                     selected-object="$ctrl.selectedActorTag = $event.selected"
-                    ></async-typeahead>
-                </td>
-                <td class="alright">
-                    <ul class="tags">
-
-                        <li ng-repeat="tag in $ctrl.actor.actor_tags">
-                            <a href="/#!/actor-tag/{{ tag.id }}">{{ tag.name }} [{{ tag.usage_count }}]</a> <span
-                                ng-click="$ctrl.removeItem(tag,'actor_tags')"
-                                class="glyphicon glyphicon-remove"></span>
-
-
-
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Height:
-
-                </td>
-                <td class="alright">
-                    <span>
-                    <a href="#!" editable-text="$ctrl.actor.height"
-                       onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'height', $ctrl.actor.height, 'add',
-                                              false, false, null)">
-                        {{ $ctrl.actor.height || 'NA' }} cm</a>
-                    </span>
-                </td>
-            </tr>
-
-            <tr>
-                <td></td>
-                <td class="alright">
-                    <span ng-if="$ctrl.actor != undefined && $ctrl.actor.height != undefined">
-                            ({{ $ctrl.heightConvertInches($ctrl.actor.height)['feet'] }} feet {{ $ctrl.heightConvertInches($ctrl.actor.height)['inches']}} inches)
-                    </span>
-                </td>
-            </tr>
-
-
-            <tr>
-                <td>
-                    Weight:
-
-                </td>
-                <td class="alright">
-                    <span>
-                    <a href="#!" editable-text="$ctrl.actor.weight"
-                       onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'weight', $ctrl.actor.weight, 'add',
-                                              false, false, null)">
-                        {{ $ctrl.actor.weight || 'NA' }} Kg</a>
-                     </span>
-                </td>
-            </tr>
-
-            <tr>
-                <td></td>
-                <td class="alright">
-                    <span ng-if="$ctrl.actor != undefined && $ctrl.actor.weight != undefined">
-                            ({{ $ctrl.weightConvertPounds($ctrl.actor.weight)}} pounds)
-                    </span>
-                </td>
-            </tr>
-
-            <tr>
-                <td>
-                    Measurements:
-
-                </td>
-                <td class="alright">
-                    <span>
-                    <a href="#" editable-text="$ctrl.actor.measurements"
-                       onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'measurements', $ctrl.actor.measurements, 'add',
-                                              false, false, null)">
-                        {{ $ctrl.actor.measurements || 'NA' }}
-                        </a>
-                     </span>
-                </td>
-            </tr>
-
-            <tr>
-                <td>
-                    Gender:
-
-                </td>
-                <td class="alright">
-                    <span>
-                        <a href="#" editable-text="$ctrl.actor.gender"
-                           onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'gender', $ctrl.actor.gender, 'add',
-                                              false, false, null)">
-                        {{ $ctrl.actor.gender || 'NA' }}
-                        </a>
-
-                    </span>
-                </td>
-            </tr>
-
-            <tr>
-                <td>
-                    Country Of Birth:
-
-                </td>
-                <td class="alright">
-                    <span>
-                       <a href="#" editable-text="$ctrl.actor.country_of_origin"
-                          onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'country_of_origin', $ctrl.actor.country_of_origin, 'add',
-                                              false, false, null)">
-                           {{ $ctrl.actor.country_of_origin || 'NA' }}
-                       </a>
-
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    {{ $ctrl.actor.name }} on the web:
-                </td>
-                <td>
-                    <ul>
-
-                        <li ng-if="$ctrl.isNotEmpty('official_pages')"><a
-                                href="{{ $ctrl.actor.official_pages }}"
-                                target="_blank"> {{ actor.name }} official page</a></li>
-
-
-                        <li ng-if="$ctrl.isNotEmpty('tmdb_id')"><a
-                                href="https://www.themoviedb.org/person/{{ $ctrl.actor.tmdb_id }}"
-                                target="_blank"> {{ actor.name }} at
-                            TMDb</a></li>
-
-                        <li ng-if="$ctrl.isNotEmpty('imdb_id')"><a
-                                href="http://www.imdb.com/name/{{ $ctrl.actor.imdb_id }}"
-                                target="_blank"> {{ actor.name }} at
-                            IMDb</a>
-                        </li>
-
-                        <li><a href="http://www.pornhub.com/pornstar/{{ $ctrl.actorNameDelimiter('-',false) }}"
-                               target="_blank">{{ actor.name }} at Pornhub</a></li>
-
-                        <li><a href="http://www.empornium.me/torrents.php?taglist=
-                                {{  $ctrl.actorNameDelimiter('.',false) }}"
-                               target="_blank">{{ actor.name }} at Empornium</a></li>
-
-                        <li><a href="http://www.xvideos.com/?k={{ $ctrl.actorNameDelimiter('.',false) }}"
-                               target="_blank">{{ actor.name }} at XVIDEOS </a></li>
-
-                        <li><a href="https://duckduckgo.com/?q=
-                            {{$ctrl.actorNameDelimiter('&#43;',true)}}&iax=1&ia=images&iaf=size%3Al"
-                               target="_blank">{{ actor.name }} at DuckDuckGo Image Search </a></li>
-
-
-                        <li><a
-                                href="https://www.google.com/search?as_st=y&tbm=isch&as_q=
-                                        {{  $ctrl.actorNameDelimiter('&#43;',true) }}&as_epq=&as_oq=&as_eq=&cr=&as_sitesearch=&safe=images&tbs=isz:l,iar:t
-                            "
-                                target="_blank">{{ actor.name }} at Google Image Search </a></li>
-
-
-                    </ul>
-
-                </td>
-            </tr>
-        </table>
 
 
     </div>
 
 </div>
-
+-->
 
 
 

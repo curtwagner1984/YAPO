@@ -3,9 +3,9 @@ angular.module('navBar', []).component('navBar', {
     templateUrl: 'static/js/app/nav-bar/nav-bar.template.html',
     bindings: {},
     controller: ['$scope', '$rootScope', 'Actor', 'SceneTag', 'Website', 'ActorTag', 'helperService', '$http', 'Playlist',
-        '$timeout', 'pagerService',
+        '$timeout', 'pagerService', 'ActorAlias',
         function NavBarController($scope, $rootScope, Actor, SceneTag, Website, ActorTag, helperService, $http, Playlist
-            , $timeout, pagerService) {
+            , $timeout, pagerService, ActorAlias) {
 
 
             var self = this;
@@ -31,6 +31,10 @@ angular.module('navBar', []).component('navBar', {
                 } else if (typeOfItemToAdd == 'playlists') {
                     newItem = new Playlist;
                     newItem.scenes = []
+                }else if (typeOfItemToAdd == 'actor_aliases') {
+                    newItem = new ActorAlias;
+                    newItem.name = newItemName;
+                    newItem.is_exempt_from_one_word_search = false
                 }
 
                 newItem.name = newItemName;
@@ -250,7 +254,7 @@ angular.module('navBar', []).component('navBar', {
                     scopeWatchService.playlistSelected(ans)
                 }
 
-            }
+            };
 
             $rootScope.DynamicItems = function () {
                 /**

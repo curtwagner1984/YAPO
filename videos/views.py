@@ -428,7 +428,6 @@ def get_q_object_from_literal(literal, sending_object):
 
             q = Q(**reverse_keyarg_dict)
 
-
     return q
 
 
@@ -1018,6 +1017,31 @@ def tag_multiple_items(request):
                         actor_to_update.save()
                         print("Removed Actor Tag '{}' to actor {}".format(actor_tag_to_add.name,
                                                                           actor_to_update.name))
+            elif params['patchType'] == 'actor_aliases':
+                id = params['patchData'][0]
+                actor_alias_to_add = ActorAlias.objects.get(pk=id)
+                actors_to_update = params['itemsToUpdate']
+
+                if params['addOrRemove'] == 'add':
+
+                    for x in actors_to_update:
+                        actor_to_update = Actor.objects.get(pk=x)
+                        actor_to_update.actor_aliases.add(actor_alias_to_add)
+                        actor_to_update.save()
+                        print("Added Actor Alias '{}' to actor {}".format(actor_alias_to_add.name,
+                                                                          actor_to_update.name))
+                elif params['addOrRemove'] == 'remove':
+
+                    for x in actors_to_update:
+                        actor_to_update = Actor.objects.get(pk=x)
+                        actor_to_update.actor_aliases.remove(actor_alias_to_add)
+                        actor_to_update.save()
+                        print("Removed Actor Alias '{}' from actor {}".format(actor_alias_to_add.name,
+                                                                              actor_to_update.name))
+                        actor_alias_to_add.delete()
+                        print("Deleted Actor Alias '{}' from db".format(actor_alias_to_add.name))
+
+
             else:
                 actors_to_update = params['itemsToUpdate']
                 for x in actors_to_update:

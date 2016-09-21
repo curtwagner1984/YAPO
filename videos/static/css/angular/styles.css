@@ -355,6 +355,13 @@ input:checked + .slider:before {
   padding-top: 60px;
 }
 
+.virtualRepeatdemoDeferredLoading .repeated-item-general {
+  border-bottom: 2px solid #ddd;
+  box-sizing: border-box;
+  height: 80px;
+  padding-top: 10px;
+}
+
 .virtualRepeatdemoDeferredLoading .scene-image {
     /*!*padding-left: 3em;*!*/
     /*!*border: solid 1px;*!*/
@@ -374,6 +381,12 @@ input:checked + .slider:before {
 .virtualRepeatdemoDeferredLoading .md-virtual-repeat-container .md-virtual-repeat-offsetter div {
   padding-left: 16px; }
 
+/*Sidenav width size*/
+md-sidenav, md-sidenav.md-locked-open, md-sidenav.md-closed.md-locked-open-add-active {
+ min-width: 200px !important;
+ width: 650px !important;
+ max-width: 650px !important;
+}
 
 /*
 Copyright 2016 Google Inc. All Rights Reserved.

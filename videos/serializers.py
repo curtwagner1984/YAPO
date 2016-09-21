@@ -163,6 +163,7 @@ class ActorSerializer(serializers.ModelSerializer):
     # actor_tags = ActorIdNameSerializer(many=True, read_only=True)
 
     actor_tags = ActorTagListSerializer(many=True, read_only=True)
+    actor_aliases = ActorAliasSerializer(many=True, read_only=True)
 
     class Meta:
         model = Actor
