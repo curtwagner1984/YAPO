@@ -50,6 +50,15 @@ angular.module('sceneTagList').component('sceneTagList', {
                 this.dI.nextPage(pageNumber, isCalledFromDynamicItems)
             };
 
+            DynamicItems.prototype.getLoadedItems = function () {
+
+              return this.dI.getLoadedItems();
+            };
+
+            DynamicItems.prototype.setLoadedItems = function (loadedItemsToSet) {
+              this.dI.setLoadedItems(loadedItemsToSet)
+            };
+
 
             this.dynamicItems = new DynamicItems();
             this.dynamicItems.updateQuery_();
@@ -127,15 +136,19 @@ angular.module('sceneTagList').component('sceneTagList', {
                 }
             };
             
-            self.deleteSceneTagFromDb = function (tagToDelete) {
-                
-                SceneTag.remove({sceneTagId: tagToDelete.id});
 
-                var ans = helperService.removeObjectFromArrayOfObjects(tagToDelete,self.tags);
 
-                self.tags = ans['resObject'];
-                
-            }
+            self.deleteFromDb = function (itemToDelete) {
+
+
+                var ans = helperService.removeObjectFromArrayOfObjects(itemToDelete, self.dynamicItems.getLoadedItems());
+
+                self.dynamicItems.setLoadedItems(ans['resObject']);
+
+                SceneTag.remove({sceneTagId: itemToDelete.id});
+
+
+            };
 
         }
     ]

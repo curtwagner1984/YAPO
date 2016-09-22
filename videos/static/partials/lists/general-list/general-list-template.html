@@ -14,9 +14,7 @@ Total Items {{ $ctrl.totalItems }}
                             <div flex>Date Added: {{ item.date_added | date:'dd MMMM yyyy':'z'}}</div>
 
                         </div>
-                        <div>
-                            <md-button>Delete</md-button>
-                        </div>
+                       <md-button ng-click="$ctrl.deleteFromDb(item)">Delete</md-button>
                     </div>
                 </div>
 

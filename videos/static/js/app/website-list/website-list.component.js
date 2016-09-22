@@ -49,9 +49,18 @@ angular.module('websiteList').component('websiteList', {
                 this.dI.nextPage(pageNumber, isCalledFromDynamicItems)
             };
 
+            DynamicItems.prototype.getLoadedItems = function () {
 
-            this.dynamicItems = new DynamicItems();
-            this.dynamicItems.updateQuery_();
+              return this.dI.getLoadedItems();
+            };
+
+            DynamicItems.prototype.setLoadedItems = function (loadedItemsToSet) {
+              this.dI.setLoadedItems(loadedItemsToSet)
+            };
+
+
+            self.dynamicItems = new DynamicItems();
+            self.dynamicItems.updateQuery_();
 
 
 
@@ -122,13 +131,15 @@ angular.module('websiteList').component('websiteList', {
                 }
             };
 
-            self.deleteWebsiteFromDb = function (siteToDelete) {
+            self.deleteFromDb = function (siteToDelete) {
+
+
+                var ans = helperService.removeObjectFromArrayOfObjects(siteToDelete, self.dynamicItems.getLoadedItems());
+
+                self.dynamicItems.setLoadedItems(ans['resObject']);
 
                 Website.remove({websiteId: siteToDelete.id});
-
-                var ans = helperService.removeObjectFromArrayOfObjects(siteToDelete, self.websites);
-
-                self.websites = ans['resObject'];
+                
 
             };
 

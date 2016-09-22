@@ -294,6 +294,15 @@ angular.module('navBar', []).component('navBar', {
                 console.log("DynamicItems reset was triggered by " + caller)
 
             };
+            
+            $rootScope.DynamicItems.prototype.getLoadedItems = function () {
+              return this.loadedItems[0];  
+            };
+            
+            $rootScope.DynamicItems.prototype.setLoadedItems = function (loadedItemsToSet) {
+              this.loadedItems[0] = loadedItemsToSet;  
+            };
+            
 
             // Required.
             $rootScope.DynamicItems.prototype.getItemAtIndex = function (index) {

@@ -50,6 +50,15 @@ angular.module('actorTagList').component('actorTagList', {
                 this.dI.nextPage(pageNumber, isCalledFromDynamicItems)
             };
 
+            DynamicItems.prototype.getLoadedItems = function () {
+
+              return this.dI.getLoadedItems();
+            };
+
+            DynamicItems.prototype.setLoadedItems = function (loadedItemsToSet) {
+              this.dI.setLoadedItems(loadedItemsToSet)
+            };
+
 
             this.dynamicItems = new DynamicItems();
             this.dynamicItems.updateQuery_();
@@ -137,18 +146,17 @@ angular.module('actorTagList').component('actorTagList', {
                 }
             };
 
-            self.deleteActorTagFromDb = function (tagToDelete) {
-
-                // var index = helperService.getObjectIndexFromArrayOfObjects(tagToDelete,self.tags);
-
-                ActorTag.remove({actorTagId: tagToDelete.id});
-
-                var ans = helperService.removeObjectFromArrayOfObjects(tagToDelete, self.tags);
-
-                self.tags = ans['resObject'];
+             self.deleteFromDb = function (itemToDelete) {
 
 
-            }
+                var ans = helperService.removeObjectFromArrayOfObjects(itemToDelete, self.dynamicItems.getLoadedItems());
+
+                self.dynamicItems.setLoadedItems(ans['resObject']);
+
+                 ActorTag.remove({actorTagId: itemToDelete.id});
+
+
+            };
 
 
         }

@@ -59,6 +59,15 @@ angular.module('playlistList').component('playlistList', {
                 this.dI.nextPage(pageNumber, isCalledFromDynamicItems)
             };
 
+             DynamicItems.prototype.getLoadedItems = function () {
+
+              return this.dI.getLoadedItems();
+            };
+
+            DynamicItems.prototype.setLoadedItems = function (loadedItemsToSet) {
+              this.dI.setLoadedItems(loadedItemsToSet)
+            };
+
 
             this.dynamicItems = new DynamicItems();
             this.dynamicItems.updateQuery_();
@@ -99,30 +108,19 @@ angular.module('playlistList').component('playlistList', {
             
             
             
-            
-            // $http.get('api/playlist/', {}).then(function (response) {
-            //     // alert(angular.toJson(response));
-            //     self.playlists = response.data;
-            //     self.response = response;
-            //     // alert("Got response from server: " + self.pathToFolderToAdd);
-            // }, function errorCallback(response) {
-            //     alert("Something went wrong!");
-            // });
 
 
-            self.removePlaylist = function (playlistToRemove) {
-
-                Playlist.remove({playlistId: playlistToRemove.id});
-
-                var found = helperService.getObjectIndexFromArrayOfObjects(playlistToRemove,self.playlists);
-
-                if(found != null){
-                    self.playlists.splice(found,1)
-                }
+            self.deleteFromDb = function (itemToDelete) {
 
 
+                var ans = helperService.removeObjectFromArrayOfObjects(itemToDelete, self.dynamicItems.getLoadedItems());
 
-            }
+                self.dynamicItems.setLoadedItems(ans['resObject']);
+
+                Playlist.remove({playlistId: itemToDelete.id});
+
+
+            };
 
         }]
 });
