@@ -198,6 +198,7 @@ angular.module('actorDetail').component('actorDetail', {
                     // alert(self.birthdate);
 
                     gotPromise = true;
+                    self.links = [];
                     self.generateLinks();
                     $timeout(angular.noop, 1000).then(function () {
                         $scope.toggleRight();

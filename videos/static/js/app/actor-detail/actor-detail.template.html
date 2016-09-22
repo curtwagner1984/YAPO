@@ -2,65 +2,7 @@
 <uib-alert ng-repeat="alert in $ctrl.alerts" class="enter" type="{{ alert.type }}" close="$ctrl.closeAlert($index)"
            dismiss-on-timeout="{{ alert.timeout }}">{{ alert.msg }}</uib-alert>
 
-<!--
-<h1 align="center">
-    <a href="#" editable-text="$ctrl.actor.name"
-       onaftersave="$root.patchEntity('actor', $ctrl.actor.id, 'name', $ctrl.actor.name, 'add',
-                                              false, false, null)" style="cursor:text">
-        {{ $ctrl.actor.name || 'NA' }}
-    </a>
-</h1>
-<h2 align="center">
-    <uib-rating ng-model="$ctrl.actor.rating" max="10" read-only="isReadonly" on-hover="hoveringOver(value)"
-                on-leave="overStar = null" titles="['one','two','three']"
-                aria-labelledby="default-rating"
-                ng-change="$root.patchEntity('actor', $ctrl.actor.id, 'rating', $ctrl.actor.rating, 'add',
-                                              false, false, null)">
 
-    </uib-rating>
-    <br>
-    <button type="button" ng-click="$ctrl.hideDetailClick()" class="btn btn-default btn-sm">
-        {{ $ctrl.hideDetailButtomLable }}
-    </button>
-
-<ul>
-    <li><span>Favorite:
-        <label class="switch-header">
-  <input type="checkbox" class="hidden-box" ng-model="$ctrl.actor.is_fav"
-         ng-change="$root.patchEntity('actor', $ctrl.actor.id, 'is_fav', $ctrl.actor.is_fav, 'add',
-                                              false, false, null)">
-  <div class="slider round"></div></span>
-        </label>
-
-    </li>
-    <li>Runner up:
-        <label class="switch-header">
-            <input type="checkbox" class="hidden-box" ng-model="$ctrl.actor.is_runner_up"
-                   ng-change="$root.patchEntity('actor', $ctrl.actor.id, 'is_runner_up', $ctrl.actor.is_runner_up, 'add',
-                                              false, false, null)">
-            <div class="slider round"></div>
-        </label>
-
-    </li>
-    <li>Allow one word name when auto-tagging:
-        <label class="switch-header" uib-popover-html="'By default actors with a one word name (Ex: &quot;Stoya&quot; )
-            are ignored when autotagging scenes. If checked this will allow this actor to be autotagged even though
-            their name consists of one word only. <i>Use only on actors whose names are unique as not to cause incorrect tagging.</i>'"
-               popover-trigger="mouseenter" popover-placement="right-top">
-            <input type="checkbox" class="hidden-box" ng-model="$ctrl.actor.is_exempt_from_one_word_search"
-                   ng-change="$root.patchEntity('actor', $ctrl.actor.id, 'is_exempt_from_one_word_search', $ctrl.actor.is_exempt_from_one_word_search, 'add',
-                                              false, false, null)">
-            <div class="slider round"
-
-            ></div>
-        </label>
-
-    </li>
-</ul>
-
-
-</h2>
--->
 
 <md-button ng-click="toggleRight()" class="md-raised">
             Toggle Sidenav
@@ -74,47 +16,10 @@
 
 
 
-
-
-<!--
-<div class="col-md-8">
-            <div class="scene-list">
-                <h3>Scenes:</h3>
-                <scene-list pk="$ctrl.actor.scenes"></scene-list>
-            </div>
-        </div>
--->
-
 <section-list-wrapper main-page="false" section-type="'SceneList'"></section-list-wrapper>
 
 
-<!--
-<div class="row">
-    <div ng-if="$ctrl.hideDetail" class="col-md-12 ">
 
-        <h3>{{ $ctrl.actor.name }} has {{ $ctrl.actor.scenes.length }} scenes: </h3>
-
-
-
-
-    </div>
-    <div ng-if="!$ctrl.hideDetail" class="col-md-10 ">
-
-        <h3>{{ $ctrl.actor.name }} has {{ $ctrl.actor.scenes.length }} scenes: </h3>
-
-        <section-list-wrapper main-page="false" section-type="'SceneList'"></section-list-wrapper>
-
-
-    </div>
-    <div ng-if="!$ctrl.hideDetail" class="col-md-1 pull-right">
-
-
-
-
-    </div>
-
-</div>
--->
 
 
 

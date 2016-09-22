@@ -1,23 +1,12 @@
-<h1 align="center">
-    <a href="#" editable-text="$ctrl.actorTag.name"
-       onaftersave="$ctrl.update()" style="cursor:text">
-        {{ $ctrl.actorTag.name || 'NA' }}
-    </a>
-</h1>
-<div align="center">
-<h2 >
-    <uib-rating ng-model="$ctrl.actorTag.rating" max="10" read-only="isReadonly" on-hover="hoveringOver(value)"
-                on-leave="overStar = null" titles="['one','two','three']"
-                aria-labelledby="default-rating" ng-change="$ctrl.update()"></uib-rating>
-    <br>
-   <h3>This tag is used {{$ctrl.actorTag.actors.length}} times </h3>
+<md-button ng-click="toggleRight()" class="md-raised">
+            Toggle Sidenav
+          </md-button>
 
-    </h2>
-    
-</div>
+<md-sidenav class="md-sidenav-right" md-component-id="right" md-disable-backdrop="" md-whiteframe="4">
 
+      <div ng-include="'static/js/app/actor-tag-detail/side-nav-content.html'"></div>
 
-<p>{{$ctrl.actorTag.description}}</p>
+</md-sidenav>
 
 <section-list-wrapper main-page="false" section-type="'ActorList'"></section-list-wrapper>
 

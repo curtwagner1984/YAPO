@@ -14,7 +14,7 @@ angular.module('actorTagList').component('actorTagList', {
             var self = this;
             var didSectionListWrapperLoad = false;
             self.pageType = 'ActorTag';
-
+            self.linkAid = "actor-tag";
 
             self.advSearchString = undefined;
             self.advSearchObject = {};

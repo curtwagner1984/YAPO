@@ -1,0 +1,80 @@
+<md-toolbar class="md-theme-indigo">
+    <h1 class="md-toolbar-tools">{{ $ctrl.website.name }} (Tag is used {{$ctrl.website.scenes.length}} times.)</h1>
+</md-toolbar>
+
+<md-content layout-margin="">
+
+    <md-content>
+        <md-tabs md-dynamic-height="" md-border-bottom="">
+
+            <md-tab label="Main">
+                <md-content class="md-padding">
+                    <div layout="column" layout-align="center center">
+                        <h1>
+                            <a href="#" editable-text="$ctrl.website.name"
+                               onaftersave="$ctrl.update()" style="cursor:text">
+                                {{ $ctrl.website.name || 'NA' }}
+                            </a>
+                        </h1>
+
+
+                        <h2>
+                            <uib-rating ng-model="$ctrl.website.rating" max="10" read-only="isReadonly"
+                                        on-hover="hoveringOver(value)"
+                                        on-leave="overStar = null" titles="['one','two','three']"
+                                        aria-labelledby="default-rating" ng-change="$ctrl.update()"></uib-rating>
+
+
+                        </h2>
+
+
+                    </div>
+                    <div layout="column" layout-align="center center">
+                        <span ><h3>Tags</h3></span>
+                        <md-chips ng-model="$ctrl.website.scene_tags_with_names"
+                                      md-autocomplete-snap
+                                      md-on-add="$ctrl.addTag($chip)"
+                                      md-on-remove="$ctrl.removeSceneTag($chip)"
+                                      md-on-select="$ctrl.addTag($chip)"
+                                      md-transform-chip="$ctrl.transformChip($chip)"
+
+                                      >
+                                <md-autocomplete
+                                        md-search-text="searchText"
+                                        md-items="item in $root.autoCompleteGetItems('scene_tags',searchText)"
+                                        md-item-text="item.name"
+                                        md-autoselect="true"
+                                        md-select-on-match="true"
+                                        md-no-cache="true"
+                                        placeholder="Scene Tags">
+
+                                    <md-item-template>
+                                  <span class="item-title">
+                                    <span md-highlight-text="searchText" md-highlight-flags="gi">{{ item.name }}</span>
+                                  </span>
+
+                                    </md-item-template>
+
+
+                                </md-autocomplete>
+                                <md-chip-template>
+                                    <span>{{$chip.name}}</span>
+                                </md-chip-template>
+                            </md-chips>
+                    </div>
+                    <div layout="column" layout-align="center center">
+                        <span ><h3>Alias</h3></span>
+                        <md-chips ng-model="$ctrl.websiteAliasContainer"
+                                  md-on-add="$ctrl.chipUpdate()"
+                                  md-on-remove="$ctrl.chipUpdate()"
+                                  placeholder="Website Alias"
+                        ></md-chips>
+                    </div>
+                </md-content>
+            </md-tab>
+        </md-tabs>
+    </md-content>
+    <md-button ng-click="toggleRight()" class="md-accent">
+        Close this Sidenav
+    </md-button>
+</md-content>

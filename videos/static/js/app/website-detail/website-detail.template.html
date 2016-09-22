@@ -1,47 +1,13 @@
-<h1 align="center">
-    <a href="#" editable-text="$ctrl.website.name"
-       onaftersave="$ctrl.update()" style="cursor:text">
-        {{ $ctrl.website.name || 'NA' }}
-    </a>
-</h1>
-<div align="center">
-    <h2>
-        <uib-rating ng-model="$ctrl.website.rating" max="10" read-only="isReadonly" on-hover="hoveringOver(value)"
-                    on-leave="overStar = null" titles="['one','two','three']"
-                    aria-labelledby="default-rating" ng-change="$ctrl.update()"></uib-rating>
-        <br>
-        <h3>This website is used {{$ctrl.website.scenes.length}} times </h3>
 
-    </h2>
-    <label
-            uib-popover-html="'Aliases that will be used when auto-tagging scenes. You can specify multiple aliases by separating them with a comma.
-            Also &quot;.&quot; is used to represent any character so an alias such as &quot;P.O.V&quot; will match &quot;pov&quot;,&quot;p1o2v&quot;,&quot;po?v&quot; etc...'"
-            popover-trigger="mouseenter" popover-placement="right">
-        Website Aliases:
-        <a href="#" editable-textarea="$ctrl.website.website_alias" e-rows="5" e-cols="100"
-           onaftersave="$ctrl.update()">
-            {{ $ctrl.website.website_alias || 'no alias' }}
-        </a>
-    </label>
-    <br>
-    <label>
-        Website Scene Tags:
-    </label>
-    <async-typeahead object="$ctrl.website.scene_tags"
-                     object-type='scene_tags'
-                     sending-object="$ctrl.scene"
-                     sending-object-type='Website-Detail'
-                     selected-object="$ctrl.selectedSceneTag = $event.selected"
-    ></async-typeahead>
+<md-button ng-click="toggleRight()" class="md-raised">
+    Toggle Sidenav
+</md-button>
 
-    <span ng-repeat="tag in $ctrl.website.scene_tags_with_names"> <a
-            href="/#!/scene-tag/{{ tag.id }}">  {{ tag.name }}</a> <span
-            class="glyphicon glyphicon-remove"
-            ng-click="$ctrl.removeSceneTag(tag)"></span> {{$last ? '' : ', '}} </span>
-    </span>
+<md-sidenav class="md-sidenav-right" md-component-id="right" md-disable-backdrop="" md-whiteframe="4">
 
+    <div ng-include="'static/js/app/website-detail/side-nav-content.html'"></div>
 
-</div>
+</md-sidenav>
 
 <section-list-wrapper main-page="false" section-type="'SceneList'"></section-list-wrapper>
 

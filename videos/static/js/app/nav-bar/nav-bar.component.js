@@ -31,7 +31,7 @@ angular.module('navBar', []).component('navBar', {
                 } else if (typeOfItemToAdd == 'playlists') {
                     newItem = new Playlist;
                     newItem.scenes = []
-                }else if (typeOfItemToAdd == 'actor_aliases') {
+                } else if (typeOfItemToAdd == 'actor_aliases') {
                     newItem = new ActorAlias;
                     newItem.name = newItemName;
                     newItem.is_exempt_from_one_word_search = false
@@ -419,8 +419,8 @@ angular.module('navBar', []).component('navBar', {
                 //     this.numItems = self.totalItems;
                 // }));
             };
-            
-            
+
+
             $rootScope.generateAdvSearchString = function (currentAdvSearchObject, searchType, searchedItem, append) {
                 if (!append) {
                     currentAdvSearchObject = {};
@@ -454,6 +454,35 @@ angular.module('navBar', []).component('navBar', {
                 return ans;
 
             };
+
+            $rootScope.arrayToCsv = function (array) {
+                var first = true;
+                var temp = "";
+
+                for (var i = 0; i < array.length; i++) {
+                    if (first) {
+                        temp = array[i];
+                        first = false;
+                    } else {
+                        temp = temp + "," + self.array[i]
+                    }
+
+                }
+
+                return temp;
+                
+            };
+            
+            $rootScope.csvToArray = function (csv) {
+                var ans = [];
+                if (csv != '') {
+                    var inputArray = csv.split(',');
+                    for (var i = 0; i < inputArray.length; i++) {
+                        ans.push(inputArray[i])
+                    }
+                }
+                return ans;
+            }
 
 
         }]
