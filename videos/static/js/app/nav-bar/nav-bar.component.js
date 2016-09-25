@@ -3,13 +3,76 @@ angular.module('navBar', []).component('navBar', {
     templateUrl: 'static/js/app/nav-bar/nav-bar.template.html',
     bindings: {},
     controller: ['$scope', '$rootScope', 'Actor', 'SceneTag', 'Website', 'ActorTag', 'helperService', '$http', 'Playlist',
-        '$timeout', 'pagerService', 'ActorAlias',
+        '$timeout', 'pagerService', 'ActorAlias', '$window', '$mdSidenav',
         function NavBarController($scope, $rootScope, Actor, SceneTag, Website, ActorTag, helperService, $http, Playlist
-            , $timeout, pagerService, ActorAlias) {
+            , $timeout, pagerService, ActorAlias, $window, $mdSidenav) {
 
 
             var self = this;
             self.dynamicItmesNumOfItemsTemp = 0;
+
+
+            $rootScope.currentWidth = $window.innerWidth;
+            $rootScope.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 360);
+
+            var prevWidth = undefined;
+            var didReduceWidth = false;
+
+            $rootScope.updateWidth = function (componentId) {
+                if ($mdSidenav(componentId).isOpen()) {
+                    if (!didReduceWidth) {
+                        $rootScope.currentWidth = $rootScope.currentWidth - 650;
+                        didReduceWidth = true
+                    } else {
+                        $rootScope.$broadcast("widthChanged", "a");
+                        prevWidth = $rootScope.currentWidth;
+                    }
+
+                } else {
+                    $rootScope.currentWidth = $window.innerWidth;
+                    didReduceWidth = false;
+                }
+                if ((prevWidth == undefined) || (prevWidth != $rootScope.currentWidth)) {
+                    $rootScope.$broadcast("widthChanged", "a");
+                    prevWidth = $rootScope.currentWidth;
+                }
+
+
+            };
+
+            /**
+             * Window resize event handling
+             */
+            angular.element($window).bind('resize', function () {
+                console.log($window.innerWidth + "Items per row = " + Math.floor($window.innerWidth / 360));
+                $rootScope.currentWidth = $window.innerWidth;
+                $rootScope.updateWidth("right");
+                console.log("nav-bar-comp: widthChanged was triggered! ");
+                $rootScope.$broadcast("widthChanged", "a");
+
+            });
+
+
+            $rootScope.toggleLeft = buildToggler('left');
+            $rootScope.toggleRight = buildToggler('right');
+            $rootScope.closeLeft = buildCloser('left');
+            $rootScope.closeRight = buildCloser('right');
+
+            function buildToggler(componentId) {
+                return function () {
+                    $mdSidenav(componentId).toggle();
+                    $rootScope.updateWidth(componentId);
+
+                }
+            }
+
+            function buildCloser(componentId) {
+                return function () {
+                    $mdSidenav(componentId).close();
+                    $rootScope.updateWidth(componentId);
+
+                }
+            }
 
             // Global function to create new item
             $rootScope.createNewItem = function (typeOfItemToAdd, newItemName) {
@@ -269,6 +332,10 @@ angular.module('navBar', []).component('navBar', {
 
                 this.loadedItems = [[], []];
 
+                this.isGrid = false;
+
+                this.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 360);
+
                 /** @type {number} Total number of items. */
                 this.numItems = 0;
 
@@ -291,29 +358,47 @@ angular.module('navBar', []).component('navBar', {
             $rootScope.DynamicItems.prototype.reset = function (caller) {
                 this.loadedItems = [[], []];
                 this.numItems = 0;
+                self.dynamicItmesNumOfItemsTemp = 0;
                 console.log("DynamicItems reset was triggered by " + caller)
 
             };
-            
+
             $rootScope.DynamicItems.prototype.getLoadedItems = function () {
-              return this.loadedItems[0];  
+                return this.loadedItems[0];
             };
-            
+
             $rootScope.DynamicItems.prototype.setLoadedItems = function (loadedItemsToSet) {
-              this.loadedItems[0] = loadedItemsToSet;  
+                this.loadedItems[0] = loadedItemsToSet;
             };
-            
+
 
             // Required.
             $rootScope.DynamicItems.prototype.getItemAtIndex = function (index) {
                 this.numItems = self.dynamicItmesNumOfItemsTemp;
                 var pageNumber = Math.floor(index / this.PAGE_SIZE);
+                if (this.isGrid) {
+                    pageNumber = Math.floor((index * this.ITEMS_PER_ROW) / this.PAGE_SIZE);
+                }
+
+
                 var itemToReturn = this.loadedItems[0][index];
 
                 if (itemToReturn) {
                     return itemToReturn
-                } else if ((this.loadedItems[1][0] != 1) && (this.loadedItems[0].length != this.numItems)) {
-                    this.fetchPage_(pageNumber)
+                } else {
+                    if (this.isGrid) {
+                        if ((this.loadedItems[1][0] != 1) && ((this.loadedItems[0].length * this.ITEMS_PER_ROW) <= this.numItems)) {
+                            this.loadedItems[1][0] = 1;
+                            console.log("This numItems = " + this.numItems);
+                            this.fetchPage_(pageNumber)
+                        }
+
+                    } else {
+                        if ((this.loadedItems[1][0] != 1) && (this.loadedItems[0].length <= this.numItems)) {
+                            this.loadedItems[1][0] = 1;
+                            this.fetchPage_(pageNumber)
+                        }
+                    }
                 }
 
 
@@ -321,6 +406,10 @@ angular.module('navBar', []).component('navBar', {
 
             $rootScope.DynamicItems.prototype.getLength = function () {
                 this.numItems = self.dynamicItmesNumOfItemsTemp;
+                if (this.isGrid) {
+                    this.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 360);
+                    return Math.ceil(this.numItems / this.ITEMS_PER_ROW)
+                }
                 return this.numItems;
             };
 
@@ -332,6 +421,8 @@ angular.module('navBar', []).component('navBar', {
                 var loadedPages = this.loadedPages;
                 var lodeadItems = this.loadedItems;
                 self.dynamicItmesNumOfItemsTemp = this.numItems;
+                var isGrid = this.isGrid;
+                var ITEMS_PER_ROW = this.ITEMS_PER_ROW;
 
 
                 var input = {
@@ -367,8 +458,31 @@ angular.module('navBar', []).component('navBar', {
                             //     loadedPages[pageNumber].push(self.websites[i])
                             // }
 
+                            if (isGrid) {
+                                var tmp = [];
 
-                            lodeadItems[0] = lodeadItems[0].concat(itemsFormServer);
+                                if ((lodeadItems[0].length > 0) && (lodeadItems[0][lodeadItems[0].length - 1].length % ITEMS_PER_ROW != 0)) {
+                                    tmp = lodeadItems[0][lodeadItems[0].length - 1];
+                                    lodeadItems[0].splice(-1, 1);
+                                }
+
+                                for (var i = 0; i < itemsFormServer.length; i++) {
+                                    tmp.push(itemsFormServer[i]);
+                                    if (tmp.length % ITEMS_PER_ROW == 0 && tmp.length > 0) {
+                                        lodeadItems[0].push(tmp);
+                                        tmp = [];
+                                    }
+                                }
+                                if (tmp.length > 0) {
+                                    lodeadItems[0].push(tmp);
+                                }
+
+
+                            } else {
+                                lodeadItems[0] = lodeadItems[0].concat(itemsFormServer);
+                            }
+
+
                             this.loadedItems = lodeadItems;
 
                             // this.loadedPages = loadedPages;
@@ -376,7 +490,7 @@ angular.module('navBar', []).component('navBar', {
                         }
 
                         lodeadItems[1][0] = 0;
-                        this.loadedItems = lodeadItems;
+                        // this.loadedItems = lodeadItems;
 
 
                     });
@@ -403,17 +517,16 @@ angular.module('navBar', []).component('navBar', {
                 // For demo purposes, we simulate loading more items with a timed
                 // promise. In real code, this function would likely contain an
                 // $http request.
-                $timeout(angular.noop, 300).then(angular.bind(this, function () {
-                    this.loadedPages[pageNumber] = [];
-
-                    this.nextPage(pageNumber, true);
 
 
-                    // var pageOffset = pageNumber * this.PAGE_SIZE;
-                    // for (var i = pageOffset; i < pageOffset + this.PAGE_SIZE; i++) {
-                    //   this.loadedPages[pageNumber].push(i);
-                    // }
-                }));
+                this.nextPage(pageNumber, true);
+
+
+                // var pageOffset = pageNumber * this.PAGE_SIZE;
+                // for (var i = pageOffset; i < pageOffset + this.PAGE_SIZE; i++) {
+                //   this.loadedPages[pageNumber].push(i);
+                // }
+
             };
 
             $rootScope.DynamicItems.prototype.fetchNumItems_ = function () {
@@ -479,9 +592,9 @@ angular.module('navBar', []).component('navBar', {
                 }
 
                 return temp;
-                
+
             };
-            
+
             $rootScope.csvToArray = function (csv) {
                 var ans = [];
                 if (csv != '') {

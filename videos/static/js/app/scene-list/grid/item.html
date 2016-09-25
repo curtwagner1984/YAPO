@@ -1,0 +1,16 @@
+<div layout="column" layout-align="none" style="border: solid gray 0.5px">
+    <a href="#!/scene/{{ it.id }}">
+        <div layout="column" layout-align="start none" style="width: 360px ; height: 203px;"
+             ng-style="{'background-image':'url('+it.thumbnail+')','background-size': 'cover'}">
+            <span style="color: white; padding: 5px;"><strong>{{ it.name }}</strong></span>
+        </div>
+    </a>
+
+    <div layout="row" layout-align="start" style="height: 35px; color: white; background: rgb(43, 37, 37)">
+        <md-button class="md-icon-button md-primary" ng-click="$ctrl.playScene(it)">P</md-button>
+        <md-button class="md-icon-button md-primary" ng-click="">I</md-button>
+    </div>
+
+</div>
+
+

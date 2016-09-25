@@ -21,10 +21,10 @@ angular.module('websiteDetail').component('websiteDetail', {
                 $rootScope.title = res.name;
                 gotPromise = true;
                 
-                self.websiteAliasContainer = $rootScope.csvToArray(self.website.website_alias)
+                self.websiteAliasContainer = $rootScope.csvToArray(self.website.website_alias);
 
                 $timeout(angular.noop, 1000).then(function () {
-                        $scope.toggleRight();
+                        $rootScope.toggleRight();
                     });
                 
             });

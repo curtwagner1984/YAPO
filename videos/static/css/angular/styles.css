@@ -335,6 +335,12 @@ input:checked + .slider:before {
   max-width: 1900px;
 }
 
+.virtualRepeatdemoDeferredLoading-grid #vertical-container {
+  height: 850px;
+  width: 100%;
+  max-width: 1900px;
+}
+
 .virtualRepeatdemoDeferredLoading .repeated-item {
     /*border-bottom: 1px solid #ddd;*/
     /*box-sizing: border-box;*/
@@ -353,6 +359,13 @@ input:checked + .slider:before {
   box-sizing: border-box;
   height: 300px;
   padding-top: 60px;
+}
+
+.virtualRepeatdemoDeferredLoading-grid .repeated-item-scene-grid {
+  /*border-bottom: 1px solid #ddd;*/
+  /*box-sizing: border-box;*/
+  height: 240px;
+  /*padding-top: 60px;*/
 }
 
 .virtualRepeatdemoDeferredLoading .repeated-item-general {
@@ -380,6 +393,18 @@ input:checked + .slider:before {
 
 .virtualRepeatdemoDeferredLoading .md-virtual-repeat-container .md-virtual-repeat-offsetter div {
   padding-left: 16px; }
+
+.virtualRepeatdemoDeferredLoading-grid md-content {
+  margin: 16px;
+}
+
+.virtualRepeatdemoDeferredLoading-grid md-virtual-repeat-container {
+  /*border: solid 5px grey;*/
+}
+
+.virtualRepeatdemoDeferredLoading-grid .md-virtual-repeat-container .md-virtual-repeat-offsetter div {
+  /*padding-left: 16px;*/
+}
 
 /*Sidenav width size*/
 md-sidenav, md-sidenav.md-locked-open, md-sidenav.md-closed.md-locked-open-add-active {

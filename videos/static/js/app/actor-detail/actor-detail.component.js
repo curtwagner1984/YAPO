@@ -13,6 +13,7 @@ angular.module('actorDetail').component('actorDetail', {
         '$mdSidenav',
         '$timeout',
         '$location',
+        '$window',
         function ActorDetailController($routeParams,
                                        Actor,
                                        ActorAlias,
@@ -24,7 +25,8 @@ angular.module('actorDetail').component('actorDetail', {
                                        scopeWatchService,
                                        $mdSidenav,
                                        $timeout,
-                                       $location) {
+                                       $location,
+                                       $window) {
 
 
             var self = this;
@@ -33,14 +35,22 @@ angular.module('actorDetail').component('actorDetail', {
             var changingView = false;
 
 
-            $scope.toggleLeft = buildToggler('left');
-            $scope.toggleRight = buildToggler('right');
-
-            function buildToggler(componentId) {
-                return function () {
-                    $mdSidenav(componentId).toggle();
-                }
-            }
+            // $scope.toggleLeft = buildToggler('left');
+            // $scope.toggleRight = buildToggler('right');
+            //
+            // function buildToggler(componentId) {
+            //     return function () {
+            //         $mdSidenav(componentId).toggle();
+            //         var width = $window.innerWidth;
+            //         if ($mdSidenav(componentId).isOpen()){
+            //             $rootScope.currentWidth = $rootScope.currentWidth - 650;
+            //             $rootScope.$broadcast("widthChanged", width - 650);
+            //         }else{
+            //             $rootScope.currentWidth = $window.innerWidth;
+            //             $rootScope.$broadcast("widthChanged", width);
+            //         }
+            //     }
+            // }
 
             self.birthdate = null;
 
@@ -201,7 +211,7 @@ angular.module('actorDetail').component('actorDetail', {
                     self.links = [];
                     self.generateLinks();
                     $timeout(angular.noop, 1000).then(function () {
-                        $scope.toggleRight();
+                        $rootScope.toggleRight();
                     });
 
 

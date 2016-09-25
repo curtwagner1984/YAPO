@@ -28,9 +28,50 @@ angular.module('sceneList').component('sceneList', {
             var didSectionListWrapperLoad = false;
             var didSectionListWrapperLoadIsMainPage = false;
             var playlistLoaded = false;
-            
-            //for chip test
-            self.chipTest = ['blond','blue.eyes','oscar.winner','devil.advocate','prometheus','mad.max.fury.road'];
+
+            var isMainPage = false;
+
+
+            var whatIsLoaded = {
+
+                'actorLoaded': actorLoaded,
+                'sceneTagLoaded': sceneTagLoaded,
+                'websiteLoaded': websiteLoaded,
+                'folderLoaded': folderLoaded,
+                'didSectionListWrapperLoad': didSectionListWrapperLoad,
+                'didSectionListWrapperLoadIsMainPage': didSectionListWrapperLoadIsMainPage,
+                'playlistLoaded': playlistLoaded
+
+
+            };
+
+            var populateWhatLoaded = function () {
+                whatIsLoaded['actorLoaded'] = actorLoaded;
+                whatIsLoaded['sceneTagLoaded'] = sceneTagLoaded;
+                whatIsLoaded['websiteLoaded'] = websiteLoaded;
+                whatIsLoaded['folderLoaded'] = folderLoaded;
+                whatIsLoaded['didSectionListWrapperLoad'] = didSectionListWrapperLoad;
+                whatIsLoaded['didSectionListWrapperLoadIsMainPage'] = didSectionListWrapperLoadIsMainPage;
+                whatIsLoaded['playlistLoaded'] = playlistLoaded;
+
+            };
+
+            var isSomethingLoaded = function () {
+                var ans = actorLoaded || sceneTagLoaded || websiteLoaded || folderLoaded || didSectionListWrapperLoadIsMainPage || playlistLoaded;
+                // if (ans) {
+                //     populateWhatLoaded();
+                //     for (var property in whatIsLoaded) {
+                //         if (whatIsLoaded.hasOwnProperty(property)) {
+                //             console.log(property + ": " + whatIsLoaded[property])
+                //         }
+                //     }
+                // }
+                return ans
+
+            };
+
+
+
 
             self.sceneArray = [];
             self.scenesToAdd = [];
@@ -46,6 +87,13 @@ angular.module('sceneList').component('sceneList', {
 
             self.advSearchObject = {};
             self.advSearchString = undefined;
+
+            try{
+                $rootScope.closeRight();
+                $rootScope.updateWidth("right");
+            }catch (err){
+                console.log("Caught error")
+            }
 
 
             // Wrapper for the Dynamic Items object in nav-bar.component.
@@ -65,23 +113,49 @@ angular.module('sceneList').component('sceneList', {
                 this.dI.reset(caller);
             };
 
+            var gotItemAtIndex = false;
             DynamicItems.prototype.getItemAtIndex = function (index) {
-                return this.dI.getItemAtIndex(index)
+                this.updateQuery_();
+                if (isSomethingLoaded()) {
+
+                    var item = this.dI.getItemAtIndex(index);
+                    if (item != undefined && !gotItemAtIndex){
+                        gotItemAtIndex = true;
+                        $rootScope.updateWidth("right");
+
+
+                    }
+                    return item
+                }
+
             };
 
             DynamicItems.prototype.getLength = function () {
+                this.updateQuery_();
                 return this.dI.getLength()
             };
 
-            DynamicItems.prototype.nextPage = function (pageNumber, isCalledFromDynamicItems) {
+            DynamicItems.prototype.nextPage = function (pageNumber, isCalledFromDynamicItems, callOrigin) {
+                console.log("DynamicItems next page function was called from *" + callOrigin + "*");
                 this.updateQuery_();
-                this.dI.nextPage(pageNumber, isCalledFromDynamicItems)
+                if (isSomethingLoaded) {
+                    this.dI.nextPage(pageNumber, isCalledFromDynamicItems)
+                }
+
+            };
+
+            DynamicItems.prototype.getLoadedItems = function () {
+
+                return this.dI.getLoadedItems();
+            };
+
+            DynamicItems.prototype.setLoadedItems = function (loadedItemsToSet) {
+                this.dI.setLoadedItems(loadedItemsToSet)
             };
 
 
             this.dynamicItems = new DynamicItems();
             this.dynamicItems.updateQuery_();
-            
 
 
             // Toggle model for multiple tagging
@@ -95,12 +169,109 @@ angular.module('sceneList').component('sceneList', {
 
             };
 
+
             // Check if grid view option from setting and import it to this view.
             var checkGridOption = function () {
                 if ((helperService.getGridView() != undefined) && (helperService.getGridView()['scene'] != undefined)) {
                     self.gridView = helperService.getGridView()['scene']
                 }
+
+                if (self.gridView) {
+                    self.dynamicItems.dI.isGrid = true;
+                    list2Grid();
+                } else {
+                    self.dynamicItems.dI.isGrid = false;
+                    grid2List();
+                }
             };
+
+
+            var list2Grid = function () {
+
+                var currentItems = self.dynamicItems.getLoadedItems();
+                var itemsPerRow = $rootScope.ITEMS_PER_ROW;
+                var newItems = [];
+
+                var tmp = [];
+
+                for (var i = 0; i < currentItems.length; i++) {
+                    tmp.push(currentItems[i]);
+                    if (tmp.length % itemsPerRow == 0) {
+                        newItems.push(tmp);
+                        tmp = []
+                    }
+                }
+                if (tmp.length > 0) {
+                    newItems.push(tmp);
+                }
+
+                self.dynamicItems.setLoadedItems(newItems)
+
+            };
+
+
+            var grid2List = function () {
+
+                var currentItems = self.dynamicItems.getLoadedItems();
+                // var itemsPerRow = self.dynamicItems.dI.ITEMS_PER_ROW;
+                var newItems = [];
+
+                for (var i = 0; i < currentItems.length; i++) {
+                    for (var j = 0; j < currentItems[i].length; j++) {
+                        newItems.push(currentItems[i][j])
+                    }
+                }
+
+                self.dynamicItems.setLoadedItems(newItems)
+
+            };
+
+            var gridChangeNumberOfRows = function () {
+                if (self.gridView) {
+
+                    var currentItems = self.dynamicItems.getLoadedItems();
+                    var itemsPerRow = $rootScope.ITEMS_PER_ROW;
+                    var newItems = [];
+                    var tmp = [];
+
+                    for (var i = 0; i < currentItems.length; i++) {
+                        for (var j = 0; j < currentItems[i].length; j++) {
+                            tmp.push(currentItems[i][j]);
+                            if (tmp.length % itemsPerRow == 0) {
+                                newItems.push(tmp);
+                                tmp = []
+                            }
+                        }
+                    }
+                    if (tmp.length > 0) {
+                        newItems.push(tmp);
+                    }
+
+                }
+                self.dynamicItems.setLoadedItems(newItems)
+
+            };
+
+            var currentNumberOfItemsPerRow = undefined;
+
+            $scope.$on("widthChanged", function (event, width) {
+                $rootScope.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 360);
+                if ($rootScope.ITEMS_PER_ROW < 1){
+                    $rootScope.ITEMS_PER_ROW = 1;
+                }
+                if ((currentNumberOfItemsPerRow == undefined) ||
+                    (currentNumberOfItemsPerRow != $rootScope.ITEMS_PER_ROW) ||
+                     gotItemAtIndex) {
+
+                    // $scope.$apply();
+                    $timeout(function () {
+                        // anything you want can go here and will safely be run on the next digest.
+                        gridChangeNumberOfRows();
+                        currentNumberOfItemsPerRow = $rootScope.ITEMS_PER_ROW;
+                    })
+                }
+            });
+
 
             checkGridOption();
 
@@ -178,15 +349,16 @@ angular.module('sceneList').component('sceneList', {
 
             // Change in grid view
             $scope.$on("gridViewOptionChnaged", function (event, pageInfo) {
-                checkGridOption()
+                checkGridOption();
+
             });
 
 
             // Actor was loaded on actor detail page and now we can fetch scenes.
             $scope.$on("actorLoaded", function (event, actor) {
-                self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,'actors', actor, false);
+                self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject, 'actors', actor, false);
                 self.dynamicItems.reset("actorLoaded");
-                self.dynamicItems.nextPage(0, false);
+                self.dynamicItems.nextPage(0, false, "actorLoaded");
                 actorLoaded = true;
             });
 
@@ -199,9 +371,9 @@ angular.module('sceneList').component('sceneList', {
             }
 
             $scope.$on("playlistLoaded", function (event, playlist) {
-                self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,'playlists', playlist, false);
+                self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject, 'playlists', playlist, false);
                 self.dynamicItems.reset("playlistLoaded");
-                self.dynamicItems.nextPage(0, false);
+                self.dynamicItems.nextPage(0, false, "playlistLoaded");
                 playlistLoaded = true;
             });
 
@@ -211,9 +383,9 @@ angular.module('sceneList').component('sceneList', {
 
 
             $scope.$on("sceneTagLoaded", function (event, sceneTag) {
-                self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,'scene_tags', sceneTag, false);
+                self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject, 'scene_tags', sceneTag, false);
                 self.dynamicItems.reset("sceneTagLoaded");
-                self.dynamicItems.nextPage(0, false);
+                self.dynamicItems.nextPage(0, false, "sceneTagLoaded");
                 sceneTagLoaded = true;
             });
 
@@ -222,9 +394,9 @@ angular.module('sceneList').component('sceneList', {
             }
 
             $scope.$on("websiteLoaded", function (event, website) {
-                self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,'websites', website, false);
+                self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject, 'websites', website, false);
                 self.dynamicItems.reset('websiteLoaded');
-                self.dynamicItems.nextPage(0, false);
+                self.dynamicItems.nextPage(0, false, "websiteLoaded");
                 websiteLoaded = true
             });
 
@@ -236,9 +408,9 @@ angular.module('sceneList').component('sceneList', {
             $scope.$on("folderOpened", function (event, folder) {
                 console.log("scene-list: folderOpened broadcast was caught");
                 self.scenes = [];
-                self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,'folders_in_tree', folder['dir'], false);
+                self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject, 'folders_in_tree', folder['dir'], false);
                 self.dynamicItems.reset('folderOpened');
-                self.dynamicItems.nextPage(0, false);
+                self.dynamicItems.nextPage(0, false, "sceneTagLoaded");
                 folderLoaded = true;
             });
 
@@ -246,31 +418,6 @@ angular.module('sceneList').component('sceneList', {
                 scopeWatchService.didFolderLoad('a');
             }
 
-            $scope.$on("sortOrderChanged", function (event, sortOrder) {
-                if (sortOrder['sectionType'] == 'SceneList') {
-                    console.log("Sort Order Changed!");
-                    self.scenes = [];
-                    self.sortBy = sortOrder['sortBy'];
-                    if (self.dynamicItems != undefined) {
-                        self.dynamicItems.reset('sortOrderChanged');
-                    }
-
-                    if (sortOrder.mainPage == undefined || sortOrder.mainPage == true) {
-
-                        self.dynamicItems.nextPage(0, false);
-                        didSectionListWrapperLoadIsMainPage = true;
-
-                    }
-                    self.totalItems = 0;
-                    didSectionListWrapperLoad = true;
-
-                }
-
-            });
-
-            if (!didSectionListWrapperLoad) {
-                scopeWatchService.didSectionListWrapperLoaded('SceneList')
-            }
 
             $scope.$on("actorSelected", function (event, object) {
 
@@ -324,11 +471,11 @@ angular.module('sceneList').component('sceneList', {
 
                     var searchType = 'scene_properties_' + searchTerm['searchField'];
                     var searchTerm = searchTerm['searchTerm'];
-                    self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,searchType, searchTerm, true);
+                    self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject, searchType, searchTerm, true);
                     // self.nextPage(0);
                     // pageNumberForInfScroll = 0;
                     self.dynamicItems.reset('searchTermChanged');
-                    self.dynamicItems.nextPage(0, false);
+                    self.dynamicItems.nextPage(0, false, "searchTermChanged");
                     self.totalItems = 0;
                     // $scope.$emit('list:filtered');
                 }
@@ -351,12 +498,39 @@ angular.module('sceneList').component('sceneList', {
                         temp = ''
                     }
 
-                    self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject,'scene_properties_is_runner_up', temp, true);
+                    self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject, 'scene_properties_is_runner_up', temp, true);
                     self.dynamicItems.reset('runnerUpChanged');
-                    self.dynamicItems.nextPage(0, false);
+                    self.dynamicItems.nextPage(0, false, "searchTermChanged");
                 }
 
             });
+
+            $scope.$on("sortOrderChanged", function (event, sortOrder) {
+                if (sortOrder['sectionType'] == 'SceneList') {
+                    console.log("Sort Order Changed!");
+                    self.scenes = [];
+                    self.sortBy = sortOrder['sortBy'];
+                    if (self.dynamicItems != undefined) {
+                        self.dynamicItems.reset('sortOrderChanged');
+                    }
+
+                    if (sortOrder.mainPage == undefined || sortOrder.mainPage == true) {
+
+                        self.dynamicItems.nextPage(0, false, "sceneTagLoaded");
+                        didSectionListWrapperLoadIsMainPage = true;
+
+
+                    }
+                    self.totalItems = 0;
+                    didSectionListWrapperLoad = true;
+
+                }
+
+            });
+
+            if (!didSectionListWrapperLoad) {
+                scopeWatchService.didSectionListWrapperLoaded('SceneList')
+            }
 
 
             self.updateScenesOnRemove = function (scenes, itemToRemove, typeOfItemToRemove) {
@@ -755,7 +929,7 @@ angular.module('sceneList').component('sceneList', {
                 self.advSearchString = advSearchString;
 
                 self.dynamicItems.reset("submitAdvSearch");
-                self.dynamicItems.nextPage(0, false);
+                self.dynamicItems.nextPage(0, false, "searchTermChanged");
 
             };
 

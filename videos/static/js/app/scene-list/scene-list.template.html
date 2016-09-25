@@ -43,6 +43,24 @@
 
 <div ng-if="$ctrl.gridView">
 
+    <div class="virtualRepeatdemoDeferredLoading-grid">
+        <md-content layout="column">
+
+            <md-virtual-repeat-container id="vertical-container">
+                <div layout="column">
+                    <div md-virtual-repeat="item in $ctrl.dynamicItems" md-on-demand="" flex=""
+                         class="repeated-item-scene-grid">
+                        <div ng-include="'static/js/app/scene-list/grid/row.html'"></div>
+
+                    </div>
+
+
+                </div>
+            </md-virtual-repeat-container>
+
+
+        </md-content>
+    </div>
 
 
 </div>

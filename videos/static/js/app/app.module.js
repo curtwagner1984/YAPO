@@ -37,7 +37,8 @@ var app = angular.module('yapoApp', [
     'playlistList',
     'playlistDetail',
     'ngMaterial',
-    'infinite-scroll'
+    'infinite-scroll',
+    'td.tileview'
 
 
 ]);
