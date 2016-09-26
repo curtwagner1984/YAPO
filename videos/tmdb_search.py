@@ -135,6 +135,8 @@ def search_person_with_force_flag(actor_in_question, force):
 
 
 def main():
+
+
     # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "myproject.settings")
     actors = Actor.objects.all()
     for actor in actors:

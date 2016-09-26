@@ -24,7 +24,7 @@ angular.module('websiteDetail').component('websiteDetail', {
                 self.websiteAliasContainer = $rootScope.csvToArray(self.website.website_alias);
 
                 $timeout(angular.noop, 1000).then(function () {
-                        $rootScope.toggleRight();
+                        $rootScope.autoSideNavRight();
                     });
                 
             });

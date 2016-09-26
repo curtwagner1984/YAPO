@@ -8,7 +8,7 @@
 
     <div class="scene-image" layout="column" flex="none">
         <a href="/#!/scene/{{ scene.id }}">
-            <img src="{{ scene.thumbnail }}" style="width: 360px;border: solid 2px"/>
+            <img ng-src="{{ scene.thumbnail }}.360" style="width: 360px;border: solid 2px"/>
         </a>
 
     </div>
@@ -33,7 +33,7 @@
 
                     <md-item-template>
                                   <span class="item-title">
-                                    <img ng-src="{{ item.thumbnail }}" class="md-avatar" style="width: 32px">
+                                    <img ng-src="{{ item.thumbnail }}.64" class="md-avatar" style="width: 32px">
                                     <span md-highlight-text="searchText" md-highlight-flags="gi">{{ item.name }}</span>
                                   </span>
 
@@ -42,7 +42,7 @@
 
                 </md-autocomplete>
                 <md-chip-template>
-                    <img ng-src="{{$chip.thumbnail}}" style="width: 16px">
+                    <img ng-src="{{$chip.thumbnail}}.64" style="width: 16px">
                     <span>{{$chip.name}}</span>
                 </md-chip-template>
             </md-chips>

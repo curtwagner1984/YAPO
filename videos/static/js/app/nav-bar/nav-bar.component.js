@@ -11,6 +11,12 @@ angular.module('navBar', []).component('navBar', {
             var self = this;
             self.dynamicItmesNumOfItemsTemp = 0;
 
+            //Auto sidenav
+
+            if ($rootScope.$storage.autoFlyout == undefined) {
+                $rootScope.$storage.autoFlyout = true
+            }
+
 
             $rootScope.currentWidth = $window.innerWidth;
             $rootScope.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 360);
@@ -57,6 +63,19 @@ angular.module('navBar', []).component('navBar', {
             $rootScope.toggleRight = buildToggler('right');
             $rootScope.closeLeft = buildCloser('left');
             $rootScope.closeRight = buildCloser('right');
+
+            $rootScope.autoSideNavRight = autoSideNavToggler('right');
+
+            function autoSideNavToggler(componentId) {
+                return function () {
+                    if ($rootScope.$storage.autoFlyout){
+                        $mdSidenav(componentId).toggle();
+                        $rootScope.updateWidth(componentId);
+                    }
+                }
+
+            }
+
 
             function buildToggler(componentId) {
                 return function () {
@@ -387,7 +406,9 @@ angular.module('navBar', []).component('navBar', {
                     return itemToReturn
                 } else {
                     if (this.isGrid) {
-                        if ((this.loadedItems[1][0] != 1) && ((this.loadedItems[0].length * this.ITEMS_PER_ROW) <= this.numItems)) {
+                        if ((this.loadedItems[1][0] != 1) &&
+                            ((this.loadedItems[0].length * this.ITEMS_PER_ROW) <= this.numItems) &&
+                            (this.numItems > 0)) {
                             this.loadedItems[1][0] = 1;
                             console.log("This numItems = " + this.numItems);
                             this.fetchPage_(pageNumber)

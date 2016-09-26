@@ -8,8 +8,8 @@ Total Items {{ $ctrl.totalItems }}
                     <div layout="row">
                         <div flex="1">{{$index + 1}}</div>
                         <div flex="10">
-                            <a href="/#!/actor/{{ item.id }}"><img ng-src="{{ item.thumbnail }}"
-                                                                   style="width: 64px"></a>
+                            <a href="/#!/actor/{{ item.id }}"><img ng-src="{{ item.thumbnail }}.256"
+                                                                   style="width: 128px"></a>
 
                         </div>
                         <div flex="30"><a href="/#!/actor/{{ item.id }}">{{ item.name }}</a></div>

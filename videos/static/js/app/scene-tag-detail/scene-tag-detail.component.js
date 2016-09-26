@@ -24,7 +24,7 @@ angular.module('sceneTagDetail').component('sceneTagDetail', {
                 self.sceneTagAliasContainer = $rootScope.csvToArray(self.sceneTag.scene_tag_alias);
                 
                 $timeout(angular.noop, 1000).then(function () {
-                        $scope.toggleRight();
+                        $rootScope.autoSideNavRight();
                     });
             });
 

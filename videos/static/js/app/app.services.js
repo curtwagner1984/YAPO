@@ -7,6 +7,21 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
 
     var NUMBER_OF_QUERIES_TO_SAVE = 30;
 
+    //auto sidenav
+
+
+    // function getAutoSideNav() {
+    //     if ($rootScope.$storage.autoFlyout == undefined) {
+    //         $rootScope.$storage.autoFlyout = true
+    //     }
+    //     return $rootScope.$storage.autoFlyout
+    // }
+    //
+    // function setAutoSideNav(autoSideNavValue) {
+    //     $rootScope.$storage.autoFlyout = autoSideNavValue
+    // }
+
+
     // $rootScope.$storage.scArray ;
 
     function setNumberOfItemsPerPaige(numberOfItems) {
@@ -19,23 +34,23 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
 
     function saveAdvSearchQueries(query) {
 
-            var found = false;
-            for (var i = 0 ; i < $rootScope.$storage.advSearchQueries.length && !found ; i++ ){
-                if ($rootScope.$storage.advSearchQueries[i] == query) {
-                    found = true
-                }
+        var found = false;
+        for (var i = 0; i < $rootScope.$storage.advSearchQueries.length && !found; i++) {
+            if ($rootScope.$storage.advSearchQueries[i] == query) {
+                found = true
             }
-            if (!found){
-                if ($rootScope.$storage.advSearchQueries.length < NUMBER_OF_QUERIES_TO_SAVE) {
-                    $rootScope.$storage.advSearchQueries.unshift(query)
-                }else{
-                    $rootScope.$storage.advSearchQueries.splice(-1, 1);
-                    $rootScope.$storage.advSearchQueries.unshift(query)
-                }
-
+        }
+        if (!found) {
+            if ($rootScope.$storage.advSearchQueries.length < NUMBER_OF_QUERIES_TO_SAVE) {
+                $rootScope.$storage.advSearchQueries.unshift(query)
+            } else {
+                $rootScope.$storage.advSearchQueries.splice(-1, 1);
+                $rootScope.$storage.advSearchQueries.unshift(query)
             }
 
         }
+
+    }
 
 
     function getAdvSearchQueries() {
@@ -208,7 +223,9 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
         getSortByInSectionWrapper: getSortByInSectionWrapper,
         createNewItem: createNewItem,
         saveAdvSearchQueries: saveAdvSearchQueries,
-        getAdvSearchQueries: getAdvSearchQueries
+        getAdvSearchQueries: getAdvSearchQueries,
+        // getAutoSideNav: getAutoSideNav,
+        // setAutoSideNav: setAutoSideNav
     }
 
 });
@@ -519,7 +536,7 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
                     pageType: _pageType
 
                 })
-            }else if (_pageType == 'Playlist') {
+            } else if (_pageType == 'Playlist') {
                 itemsToAdd = Playlist.query({
                     offset: _pageOffset,
                     limit: _pageLimit,

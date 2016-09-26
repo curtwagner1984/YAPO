@@ -26,7 +26,7 @@ angular.module('actorTagDetail').component('actorTagDetail', {
                 gotPromise = true;
                 
                 $timeout(angular.noop, 1000).then(function () {
-                        $scope.toggleRight();
+                        $rootScope.autoSideNavRight();
                     });
 
                 // alert(self.actorPks)

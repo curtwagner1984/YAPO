@@ -1,15 +1,59 @@
 <div layout="column" layout-align="none" style="border: solid gray 0.5px">
     <a href="#!/scene/{{ it.id }}">
         <div layout="column" layout-align="start none" style="width: 360px ; height: 203px;"
-             ng-style="{'background-image':'url('+it.thumbnail+')','background-size': 'cover'}">
-            <span style="color: white; padding: 5px;"><strong>{{ it.name }}</strong></span>
+             ng-style="{'background-image':'url('+it.thumbnail+'.360)','background-size': 'cover'}">
+            <span style="color: ghostwhite; text-shadow:
+   -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+     1px 1px 0 #000; padding: 5px;"><strong>{{ it.name }}</strong></span>
         </div>
     </a>
 
-    <div layout="row" layout-align="start" style="height: 35px; color: white; background: rgb(43, 37, 37)">
-        <md-button class="md-icon-button md-primary" ng-click="$ctrl.playScene(it)">P</md-button>
-        <md-button class="md-icon-button md-primary" ng-click="">I</md-button>
-    </div>
+    <md-toolbar class="md-hue-2" style=" width: 360px; height:35px ; min-height:20px">
+        <div class="md-toolbar-tools">
+            <md-button class="md-icon-button" ng-click="$ctrl.playScene(it)">
+                <md-tooltip md-direction="bottom">
+                    Play {{ it.name }}
+                </md-tooltip>
+                <span class="glyphicon glyphicon-play"></span>
+            </md-button>
+            <span flex=""></span>
+            <md-button class="md-icon-button">
+                <md-tooltip md-direction="bottom">
+                    Runner Up
+                </md-tooltip>
+                <span class="glyphicon glyphicon-heart"></span>
+            </md-button>
+            <md-button class="md-icon-button" ng-click="$ctrl.gridListTag($event,it)">
+                <md-tooltip md-direction="bottom">
+                    Tag
+                </md-tooltip>
+                <span class="glyphicon glyphicon-pencil"></span>
+            </md-button>
+            <md-menu>
+                <md-button class="md-icon-button" ng-click="$ctrl.openMenu($mdOpenMenu, $event)">
+
+                    <md-tooltip md-direction="bottom">
+                        More
+                    </md-tooltip>
+                    <span class="glyphicon glyphicon-option-vertical"></span>
+
+                </md-button>
+                <md-menu-content width="2">
+
+
+                    <md-menu-item ng-repeat="item in $ctrl.actionList">
+                        <md-button
+                                ng-click="$ctrl.actionClicked($event, item, it, $ctrl.selectedScenes)">
+                            {{ item.name }}
+                        </md-button>
+                    </md-menu-item>
+
+                </md-menu-content>
+            </md-menu>
+        </div>
+    </md-toolbar>
 
 </div>
 

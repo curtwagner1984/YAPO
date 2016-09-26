@@ -210,8 +210,9 @@ angular.module('actorDetail').component('actorDetail', {
                     gotPromise = true;
                     self.links = [];
                     self.generateLinks();
+                    
                     $timeout(angular.noop, 1000).then(function () {
-                        $rootScope.toggleRight();
+                        $rootScope.autoSideNavRight();
                     });
 
 

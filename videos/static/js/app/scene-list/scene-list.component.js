@@ -71,8 +71,6 @@ angular.module('sceneList').component('sceneList', {
             };
 
 
-
-
             self.sceneArray = [];
             self.scenesToAdd = [];
             self.pageType = 'Scene';
@@ -88,10 +86,10 @@ angular.module('sceneList').component('sceneList', {
             self.advSearchObject = {};
             self.advSearchString = undefined;
 
-            try{
+            try {
                 $rootScope.closeRight();
                 $rootScope.updateWidth("right");
-            }catch (err){
+            } catch (err) {
                 console.log("Caught error")
             }
 
@@ -119,7 +117,7 @@ angular.module('sceneList').component('sceneList', {
                 if (isSomethingLoaded()) {
 
                     var item = this.dI.getItemAtIndex(index);
-                    if (item != undefined && !gotItemAtIndex){
+                    if (item != undefined && !gotItemAtIndex) {
                         gotItemAtIndex = true;
                         $rootScope.updateWidth("right");
 
@@ -177,18 +175,26 @@ angular.module('sceneList').component('sceneList', {
                 }
 
                 if (self.gridView) {
-                    self.dynamicItems.dI.isGrid = true;
-                    list2Grid();
+                    if (!self.dynamicItems.dI.isGrid) {
+                        self.dynamicItems.dI.isGrid = true;
+                        var tmp = list2Grid(self.dynamicItems.getLoadedItems());
+                        self.dynamicItems.setLoadedItems(tmp);
+                    }
+
                 } else {
-                    self.dynamicItems.dI.isGrid = false;
-                    grid2List();
+                    if (self.dynamicItems.dI.isGrid) {
+                        self.dynamicItems.dI.isGrid = false;
+                        var tmp = grid2List(self.dynamicItems.getLoadedItems());
+                        self.dynamicItems.setLoadedItems(tmp);
+                    }
+
                 }
             };
 
 
-            var list2Grid = function () {
+            var list2Grid = function (currentItems) {
 
-                var currentItems = self.dynamicItems.getLoadedItems();
+                // var currentItems = self.dynamicItems.getLoadedItems();
                 var itemsPerRow = $rootScope.ITEMS_PER_ROW;
                 var newItems = [];
 
@@ -205,14 +211,15 @@ angular.module('sceneList').component('sceneList', {
                     newItems.push(tmp);
                 }
 
-                self.dynamicItems.setLoadedItems(newItems)
+                return newItems;
+
 
             };
 
 
-            var grid2List = function () {
+            var grid2List = function (currentItems) {
 
-                var currentItems = self.dynamicItems.getLoadedItems();
+                // var currentItems = self.dynamicItems.getLoadedItems();
                 // var itemsPerRow = self.dynamicItems.dI.ITEMS_PER_ROW;
                 var newItems = [];
 
@@ -221,8 +228,8 @@ angular.module('sceneList').component('sceneList', {
                         newItems.push(currentItems[i][j])
                     }
                 }
+                return newItems;
 
-                self.dynamicItems.setLoadedItems(newItems)
 
             };
 
@@ -246,9 +253,9 @@ angular.module('sceneList').component('sceneList', {
                     if (tmp.length > 0) {
                         newItems.push(tmp);
                     }
-
+                    self.dynamicItems.setLoadedItems(newItems)
                 }
-                self.dynamicItems.setLoadedItems(newItems)
+
 
             };
 
@@ -256,12 +263,12 @@ angular.module('sceneList').component('sceneList', {
 
             $scope.$on("widthChanged", function (event, width) {
                 $rootScope.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 360);
-                if ($rootScope.ITEMS_PER_ROW < 1){
+                if ($rootScope.ITEMS_PER_ROW < 1) {
                     $rootScope.ITEMS_PER_ROW = 1;
                 }
                 if ((currentNumberOfItemsPerRow == undefined) ||
                     (currentNumberOfItemsPerRow != $rootScope.ITEMS_PER_ROW) ||
-                     gotItemAtIndex) {
+                    gotItemAtIndex) {
 
                     // $scope.$apply();
                     $timeout(function () {
@@ -277,11 +284,24 @@ angular.module('sceneList').component('sceneList', {
 
 
             self.selectAll = function () {
+                var sceneArray = null;
+
+                if (self.gridView){
+                    sceneArray = grid2List(self.dynamicItems.getLoadedItems())
+                }else{
+                    sceneArray = self.dynamicItems.getLoadedItems()
+                }
 
                 self.selectedScenes = [];
-                for (var i = 0; i < self.dynamicItems.dI.loadedItems[0].length; i++) {
-                    self.dynamicItems.dI.loadedItems[0][i].selected = true;
-                    self.selectedScenes.push(self.dynamicItems.dI.loadedItems[0][i])
+                for (var i = 0; i < sceneArray.length; i++) {
+                    sceneArray[i].selected = true;
+                    self.selectedScenes.push(sceneArray[i])
+                }
+
+                if (self.gridView){
+                    self.dynamicItems.setLoadedItems(list2Grid(sceneArray))
+                }else{
+                    self.dynamicItems.setLoadedItems(sceneArray)
                 }
 
             };
@@ -289,10 +309,26 @@ angular.module('sceneList').component('sceneList', {
 
             self.selectNone = function () {
 
-                for (var i = 0; i < self.dynamicItems.dI.loadedItems[0].length; i++) {
-                    self.dynamicItems.dI.loadedItems[0][i].selected = false;
+                var sceneArray = null;
+
+                if (self.gridView){
+                    sceneArray = grid2List(self.dynamicItems.getLoadedItems())
+                }else{
+                    sceneArray = self.dynamicItems.getLoadedItems()
+                }
+
+                for (var i = 0; i < sceneArray.length; i++) {
+                    sceneArray[i].selected = false;
                 }
                 self.selectedScenes = [];
+
+                if (self.gridView){
+                    self.dynamicItems.setLoadedItems(list2Grid(sceneArray))
+                }else{
+                    self.dynamicItems.setLoadedItems(sceneArray)
+                }
+
+
 
             };
 
@@ -595,14 +631,14 @@ angular.module('sceneList').component('sceneList', {
             ;
 
 
-            var updateSceneOnPageOnAdd = function (sceneIndex, typeOfItemToAdd, itemToAdd) {
-                self.dynamicItems.dI.loadedItems[0][sceneIndex] = $rootScope.addItemToScene(self.dynamicItems.dI.loadedItems[0][sceneIndex], itemToAdd, typeOfItemToAdd);
+            var updateSceneOnPageOnAdd = function (sceneIndex, typeOfItemToAdd, itemToAdd, sceneArray) {
+                sceneArray[sceneIndex] = $rootScope.addItemToScene(sceneArray[sceneIndex], itemToAdd, typeOfItemToAdd);
             };
 
-            var updateScenesOnPageOnAdd = function (itemToAdd, typeOfItemToAdd) {
+            var updateScenesOnPageOnAdd = function (itemToAdd, typeOfItemToAdd, sceneArray) {
                 for (var i = 0; i < self.selectedScenes.length; i++) {
-                    var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(self.selectedScenes[i], self.dynamicItems.dI.loadedItems[0]);
-                    updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, itemToAdd);
+                    var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(self.selectedScenes[i], sceneArray);
+                    updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, itemToAdd, sceneArray);
                 }
             };
 
@@ -617,8 +653,8 @@ angular.module('sceneList').component('sceneList', {
                 return found
             };
 
-            var addItemNew = function (itemToAdd, typeOfItemToAdd, scene) {
-                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, self.dynamicItems.dI.loadedItems[0]);
+            var addItemNew = function (itemToAdd, typeOfItemToAdd, scene, sceneArray) {
+                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, sceneArray);
                 var newItem = $rootScope.createNewItem(typeOfItemToAdd, itemToAdd.value);
                 newItem.$save().then(function (res) {
 
@@ -626,11 +662,11 @@ angular.module('sceneList').component('sceneList', {
                     patchData.push(res.id);
 
                     if (self.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
-                        updateScenesOnPageOnAdd(res, typeOfItemToAdd);
+                        updateScenesOnPageOnAdd(res, typeOfItemToAdd, sceneArray);
 
                         $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', true, false, self.selectedScenes)
                     } else {
-                        updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, res);
+                        updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, res, sceneArray);
 
                         $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', false, false, self.selectedScenes)
                     }
@@ -643,7 +679,19 @@ angular.module('sceneList').component('sceneList', {
 
                 // Find the scene in question in self.scenes
                 // var sceneIndex = findIndexOfSceneInList(scene.id);
-                var sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, self.dynamicItems.dI.loadedItems[0]);
+
+                var sceneIndex = undefined;
+                var sceneArray = null;
+
+                if (self.gridView) {
+                    sceneArray = grid2List(self.dynamicItems.getLoadedItems());
+                    sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, sceneArray);
+
+                } else {
+                    sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, self.dynamicItems.dI.loadedItems[0]);
+                    sceneArray = self.dynamicItems.getLoadedItems();
+                }
+
 
                 // if the type of item to add does not exist in the scene (EX: The websites array does not exist)
                 // create empty one.
@@ -659,17 +707,24 @@ angular.module('sceneList').component('sceneList', {
                     // If more than one scene is checked and if current scene is one of the checked scenes.
                     if (self.selectedScenes.length > 0 && checkIfSceneSelected(scene)) {
 
-                        updateScenesOnPageOnAdd(itemToAdd, typeOfItemToAdd);
+                        updateScenesOnPageOnAdd(itemToAdd, typeOfItemToAdd, sceneArray);
 
                         $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', true, false, self.selectedScenes);
                     } else {
-                        updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, itemToAdd);
+                        updateSceneOnPageOnAdd(sceneIndex, typeOfItemToAdd, itemToAdd, sceneArray);
                         $rootScope.patchEntity('scene', scene.id, typeOfItemToAdd, patchData, 'add', false, false, self.selectedScenes)
                     }
                 } else {
-                    addItemNew(itemToAdd, typeOfItemToAdd, scene);
+                    addItemNew(itemToAdd, typeOfItemToAdd, scene, sceneArray);
 
                 }
+
+                if (self.gridView){
+                    self.dynamicItems.setLoadedItems(list2Grid(sceneArray));
+                }else{
+                    self.dynamicItems.setLoadedItems(sceneArray);
+                }
+
 
 
             };
@@ -824,7 +879,9 @@ angular.module('sceneList').component('sceneList', {
                 // If it is an object, it's already a known chip
                 if (angular.isObject(chip)) {
                     if (chip.id == -1) {
-                        addItemNew(chip, typeOfItemToAdd, originalItem);
+                        // function (scene, itemToAdd, typeOfItemToAdd
+                        // addItemNew(chip, typeOfItemToAdd, originalItem);
+                        self.addItem(originalItem,chip,typeOfItemToAdd);
                         return null
                     }
                     return chip;
@@ -885,7 +942,7 @@ angular.module('sceneList').component('sceneList', {
                                 this.playlistAutocompleteNeeded = true;
                             } else if (this.item.name == "Add To Playlist") {
                                 this.greeting = 'Hello User! You clicked on \'' + this.item.name + '\' Please select a Playlist to add the ' +
-                                    'scene <b>' + this.scene.name + '</b> to: '
+                                    'scene <b>' + this.scene.name + '</b> to: ';
                                 this.playlistAutocompleteNeeded = true;
                             } else if (this.item.name == "Delete From Db" && this.isPartOfSelection()) {
                                 this.greeting = 'Hello User! Are you sure you want do remove the following scenes from the database ?'
@@ -1006,6 +1063,52 @@ angular.module('sceneList').component('sceneList', {
                     ,
                     controllerAs: 'dialog',
                     templateUrl: 'static/js/app/scene-list/dialog-templates/dialog-advanced-search.html',
+                    targetEvent: $event,
+                    parent: angular.element(document.body)
+                });
+            };
+            
+            
+            self.gridListTag = function ($event, item) {
+
+                $mdDialog.show({
+                    clickOutsideToClose: true,
+                    controller: function ($mdDialog) {
+
+
+                        this.greeting = "";
+                        this.it = item;
+                        
+                        this.chipOnAdd = function (chip,addedChipType,originalObject) {
+                            self.chipOnAdd(chip,addedChipType,originalObject)
+                        };
+                        
+                        this.chipOnRemove = function (chip,removedChipType, originalObject) {
+                            self.chipOnRemove(chip,removedChipType, originalObject)
+                        };
+                        
+                        this.transformChip = function (chip,typeofItemToAdd, originalItem) {
+                            self.transformChip(chip,typeofItemToAdd, originalItem)
+                        };
+
+
+
+                        this.cancel = function () {
+                            $mdDialog.cancel();
+                        };
+                        
+                        this.close = function () {
+                            $mdDialog.cancel();
+                        };
+                        this.submit = function () {
+                            $mdDialog.hide();
+                        };
+
+
+                    }
+                    ,
+                    controllerAs: 'dialog',
+                    templateUrl: 'static/js/app/scene-list/dialog-templates/dialog-gridview-tag.html',
                     targetEvent: $event,
                     parent: angular.element(document.body)
                 });

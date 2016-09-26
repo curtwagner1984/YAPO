@@ -26,7 +26,6 @@
     "ngstorage": "^0.3.11",
     "angular-bootstrap": "^2.0.1",
     "angular-img-cropper": "^1.1.0",
-    "angular-material": "^1.1.1",
-    "angular-tileview": "^0.7.0"
+    "angular-material": "^1.1.1"
   }
 }
