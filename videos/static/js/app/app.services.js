@@ -801,6 +801,48 @@ angular.module('scopeWatch', []).factory('scopeWatchService', function ($rootSco
         $rootScope.$broadcast("playlistLoaded", playlist);
 
     }
+    
+    function advSearch(pageType) {
+
+        console.log("app-service-scopeWatch: advSearch was triggered! ");
+        $rootScope.$broadcast("advSearch", pageType);
+
+    }
+    
+    function playRandom(pageType) {
+
+        console.log("app-service-scopeWatch: playRandom was triggered! ");
+        $rootScope.$broadcast("playRandom", pageType);
+
+    }
+    
+    function editMulti(pageType) {
+
+        console.log("app-service-scopeWatch: editMulti was triggered! ");
+        $rootScope.$broadcast("editMulti", pageType);
+
+    }
+    
+    function selectAll(pageType) {
+
+        console.log("app-service-scopeWatch: selectAll was triggered! ");
+        $rootScope.$broadcast("selectAll", pageType);
+
+    }
+    
+    function selectNone(pageType) {
+
+        console.log("app-service-scopeWatch: selectNone was triggered! ");
+        $rootScope.$broadcast("selectNone", pageType);
+
+    }
+    
+    function toggleSideNav(pageType) {
+
+        console.log("app-service-scopeWatch: toggleSideNav was triggered! ");
+        $rootScope.$broadcast("toggleSideNav", pageType);
+
+    }
 
 
     return {
@@ -836,7 +878,13 @@ angular.module('scopeWatch', []).factory('scopeWatchService', function ($rootSco
         didSectionListWrapperLoaded: didSectionListWrapperLoaded,
         didPlaylistLoad: didPlaylistLoad,
         playlistLoaded: playlistLoaded,
-        playlistSelected: playlistSelected
+        playlistSelected: playlistSelected,
+        advSearch:advSearch,
+        playRandom:playRandom,
+        editMulti: editMulti,
+        selectAll: selectAll,
+        selectNone: selectNone,
+        toggleSideNav: toggleSideNav
 
 
     }

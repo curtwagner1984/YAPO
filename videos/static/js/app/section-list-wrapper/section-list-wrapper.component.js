@@ -390,6 +390,31 @@ angular.module('sectionListWrapper').component('sectionListWrapper', {
                     }
 
                 });
+                
+                
+                self.advSearch = function () {
+                    scopeWatchService.advSearch(self.sectionType)
+                };
+                
+                self.playRandom = function () {
+                    scopeWatchService.playRandom(self.sectionType)
+                };
+                
+                self.editMulti = function () {
+                    scopeWatchService.editMulti(self.sectionType)
+                };
+                
+                self.selectAll = function () {
+                    scopeWatchService.selectAll(self.sectionType)  
+                };
+                
+                self.selectNone = function () {
+                    scopeWatchService.selectNone(self.sectionType)  
+                };
+                
+                // self.toggleSideNav = function () {
+                //     scopeWatchService.toggleSideNav(self.sectionType)
+                // }
 
 
             }

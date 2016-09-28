@@ -4,6 +4,7 @@ from videos import ffmpeg_process
 import django
 from videos import filename_parser
 import videos.const as const
+from videos import image_operations
 
 django.setup()
 
@@ -82,6 +83,8 @@ def create_scene(scene_path, make_sample_video):
                 print("Screenshot of scene {} taken...".format(
                     scene_in_db.name))
 
+                image_operations.process_single_scene(scene_in_db)
+
         if make_sample_video:
             video_filename_path = os.path.join(const.MEDIA_PATH, 'scenes', str(scene_in_db.id), 'sample',
                                                'sample.mp4')
@@ -117,10 +120,10 @@ def create_scene(scene_path, make_sample_video):
             websites = Website.objects.extra(select={'length': 'Length(name)'}).order_by('-length')
 
             filename_parser.parse_scene_all_metadata(current_scene, actors, actors_alias, scene_tags, websites)
+
+            image_operations.process_single_scene(current_scene)
         else:
             print("Failed to probe scene {}, skipping scene...".format(current_scene.name))
-
-
 
 
 def find_duplicates():

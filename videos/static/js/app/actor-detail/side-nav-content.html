@@ -1,6 +1,14 @@
 <md-toolbar class="md-theme-indigo">
-    <h1 class="md-toolbar-tools">{{ $ctrl.actor.name }} (Has {{ $ctrl.actor.scenes.length }} scenes in the
+    <span layout="row"  layout-align="start center">
+        <h1 class="md-toolbar-tools">{{ $ctrl.actor.name }} (Has {{ $ctrl.actor.scenes.length }} scenes in the
         database.)</h1>
+
+    <md-button class="md-icon-button" ng-click="$root.toggleRight()">
+                <span class="glyphicon glyphicon-remove"></span>
+            </md-button>
+
+    </span>
+
 </md-toolbar>
 
 <md-content layout-margin="">

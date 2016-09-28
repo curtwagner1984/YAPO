@@ -2,7 +2,7 @@
     <span>
         {{$index + 1}}
         <md-checkbox ng-if="$ctrl.tagMultiple" ng-model="scene.selected"
-                     ng-click="$ctrl.sceneSelectToggle(scene)" aria-label="Checkbox 1">
+                     ng-click="$ctrl.sceneSelectToggle(scene)">
         </md-checkbox>
     </span>
 
@@ -20,7 +20,7 @@
                       md-autocomplete-snap
                       md-on-add="$ctrl.chipOnAdd($chip,'actors',scene)"
                       md-on-remove="$ctrl.chipOnRemove($chip,'actors',scene)"
-                      md-on-select="$ctrl.chipOnSelect($chip,'actors')"
+
                       md-transform-chip="$ctrl.transformChip($chip,'actors',scene)">
                 <md-autocomplete
                         md-search-text="searchText"
@@ -43,7 +43,7 @@
                 </md-autocomplete>
                 <md-chip-template>
                     <img ng-src="{{$chip.thumbnail}}.64" style="width: 16px">
-                    <span>{{$chip.name}}</span>
+                    <a href="#!/actor/{{ $chip.id }}"><span>{{$chip.name}}</span></a>
                 </md-chip-template>
             </md-chips>
         </div>
@@ -53,7 +53,7 @@
                       md-autocomplete-snap
                       md-on-add="$ctrl.chipOnAdd($chip,'scene_tags',scene)"
                       md-on-remove="$ctrl.chipOnRemove($chip,'scene_tags',scene)"
-                      md-on-select="$ctrl.chipOnSelect($chip,'scene_tags')"
+
                       md-transform-chip="$ctrl.transformChip($chip,'scene_tags',scene)">
 
                 <md-autocomplete
@@ -67,7 +67,7 @@
                     <span md-highlight-text="searchText">{{ item.name }}</span>
                 </md-autocomplete>
                 <md-chip-template>
-                    <span>{{$chip.name}}</span>
+                    <a href="#!/scene-tag/{{ $chip.id }}"><span>{{$chip.name}}</span></a>
                 </md-chip-template>
             </md-chips>
         </div>
@@ -77,7 +77,7 @@
                       md-autocomplete-snap
                       md-on-add="$ctrl.chipOnAdd($chip,'websites',scene)"
                       md-on-remove="$ctrl.chipOnRemove($chip,'websites',scene)"
-                      md-on-select="$ctrl.chipOnSelect($chip,'websites')"
+
                       md-transform-chip="$ctrl.transformChip($chip,'websites',scene)">
                 <md-autocomplete
                         md-search-text="searchText"
@@ -91,7 +91,7 @@
                     <span md-highlight-text="searchText">{{ item.name }}</span>
                 </md-autocomplete>
                 <md-chip-template>
-                    <span>{{$chip.name}}</span>
+                    <a href="#!/website/{{ $chip.id }}"><span>{{$chip.name}}</span></a>
                 </md-chip-template>
             </md-chips>
         </div>

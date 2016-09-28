@@ -62,9 +62,14 @@
     </select>
 </div>
 
-<md-checkbox ng-model="$root.$storage.autoFlyout">
+<md-input-container>
+    <md-checkbox ng-model="$root.$storage.autoFlyout">
     Auto SideNav
 </md-checkbox>
+
+<md-button ng-click="$ctrl.generateImages()">Generate Smaller Images</md-button>
+</md-input-container>
+
 
 <h4><strong>Current Root Media Paths:</strong>
     <button

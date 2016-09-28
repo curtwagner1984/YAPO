@@ -568,6 +568,36 @@ angular.module('sceneList').component('sceneList', {
                 scopeWatchService.didSectionListWrapperLoaded('SceneList')
             }
 
+            $scope.$on("advSearch", function (event,sectionType) {
+               if (sectionType == 'SceneList'){
+                   self.advSearch()
+               }
+            });
+
+            $scope.$on("playRandom", function (event,sectionType) {
+               if (sectionType == 'SceneList'){
+                   self.playRandomScene()
+               }
+            });
+
+            $scope.$on("editMulti", function (event,sectionType) {
+               if (sectionType == 'SceneList'){
+                   self.multiTag()
+               }
+            });
+
+            $scope.$on("selectAll", function (event,sectionType) {
+               if (sectionType == 'SceneList'){
+                   self.selectAll();
+               }
+            });
+
+            $scope.$on("selectNone", function (event,sectionType) {
+               if (sectionType == 'SceneList'){
+                   self.selectNone();
+               }
+            });
+
 
             self.updateScenesOnRemove = function (scenes, itemToRemove, typeOfItemToRemove) {
 

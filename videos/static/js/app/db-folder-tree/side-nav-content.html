@@ -1,6 +1,18 @@
-<!--
-<div class="row">
-    <div class="col-md-4" id="left">
+<md-toolbar class="md-theme-indigo">
+    <span layout="row"  layout-align="start center">
+        <h1 class="md-toolbar-tools">{{ $ctrl.actor.name }} (Has {{ $ctrl.actor.scenes.length }} scenes in the
+        database.)</h1>
+
+    <md-button class="md-icon-button" ng-click="$root.toggleRight()">
+                <span class="glyphicon glyphicon-remove"></span>
+            </md-button>
+
+    </span>
+</md-toolbar>
+
+<md-content layout-margin="">
+
+    <md-content>
         <div class="well"><h3>
                 <span ng-repeat="n in $ctrl.nav"
 
@@ -27,30 +39,8 @@
                     <scene-list pk="folder.scenes"></scene-list>
                 </ul>
                 -->
-<!--
+
             </li>
         </ul>
-
-
-
-    </div>
-    <div class="col-md-8">
-
-        <div class="scene-list">
-
-
-        </div>
-
-    </div>
-
-
-</div>
--->
-
- <md-sidenav class="md-sidenav-right" md-component-id="right" md-disable-backdrop="" md-whiteframe="4">
-
-      <div ng-include="'static/js/app/db-folder-tree/side-nav-content.html'"></div>
-
-</md-sidenav>
-
-<section-list-wrapper main-page="false" section-type="'SceneList'"></section-list-wrapper>
+    </md-content>
+</md-content>

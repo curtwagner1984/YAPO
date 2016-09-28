@@ -61,6 +61,7 @@ angular.module('navBar', []).component('navBar', {
 
             $rootScope.toggleLeft = buildToggler('left');
             $rootScope.toggleRight = buildToggler('right');
+            $rootScope.toggleRightWrapper = buildToggler('right-wrapper');
             $rootScope.closeLeft = buildCloser('left');
             $rootScope.closeRight = buildCloser('right');
 
@@ -407,7 +408,7 @@ angular.module('navBar', []).component('navBar', {
                 } else {
                     if (this.isGrid) {
                         if ((this.loadedItems[1][0] != 1) &&
-                            ((this.loadedItems[0].length * this.ITEMS_PER_ROW) <= this.numItems) &&
+                            ((this.loadedItems[0].length * this.ITEMS_PER_ROW) < this.numItems) &&
                             (this.numItems > 0)) {
                             this.loadedItems[1][0] = 1;
                             console.log("This numItems = " + this.numItems);

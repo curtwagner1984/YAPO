@@ -8,8 +8,9 @@
     -1px 1px 0 #000,
      1px 1px 0 #000; padding: 5px;"><strong>{{ it.name }}</strong></span>
         </div>
-    </a>
 
+    </a>
+    <!-- Toolbar with tooltips
     <md-toolbar class="md-hue-2" style=" width: 360px; height:35px ; min-height:20px">
         <div class="md-toolbar-tools">
             <md-button class="md-icon-button" ng-click="$ctrl.playScene(it)">
@@ -54,6 +55,48 @@
             </md-menu>
         </div>
     </md-toolbar>
+    -->
+
+    <md-toolbar class="md-hue-2" style=" width: 360px; height:35px ; min-height:20px">
+        <div class="md-toolbar-tools">
+            <!--
+            <md-checkbox style="margin-top: 13px" ng-model="it.selected"
+                         ng-click="$ctrl.sceneSelectToggle(it)">
+            </md-checkbox>
+            -->
+            <md-button class="md-icon-button" ng-click="$ctrl.playScene(it)">
+
+                <span class="glyphicon glyphicon-play"></span>
+            </md-button>
+            <span flex=""></span>
+            <md-button class="md-icon-button">
+
+
+                <span class="glyphicon glyphicon-heart"></span>
+            </md-button>
+            <md-button class="md-icon-button" ng-click="$ctrl.gridListTag($event,it)">
+
+                <span class="glyphicon glyphicon-pencil"></span>
+            </md-button>
+            <md-button class="md-icon-button">
+
+                {{ it.rating }}
+            </md-button>
+
+        </div>
+    </md-toolbar>
+
+
+    <!--
+    <div layout="row" layout-align="center center" style="height: 33px ; background: cornflowerblue">
+        <md-button class="md-icon-button" ng-click="$ctrl.playScene(it)">
+            <md-tooltip md-direction="bottom">
+                Play
+            </md-tooltip>
+            <span class="glyphicon glyphicon-play"></span>
+        </md-button>
+    </div>
+    -->
 
 </div>
 

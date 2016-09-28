@@ -40,7 +40,7 @@ from random import shuffle
 import videos.const as const
 from django.utils.datastructures import MultiValueDictKeyError
 import threading
-
+from videos import image_operations
 
 # import pathlib
 
@@ -1200,6 +1200,12 @@ def settings(request):
                 all_folders = LocalSceneFolders.objects.all()
                 for folder in all_folders:
                     videos.addScenes.get_files(folder.name, False)
+
+        if 'generateImages' in request.query_params:
+            if request.query_params['generateImages']:
+                image_operations.process_all_scenes()
+                image_operations.process_all_actors_grid()
+                image_operations.process_all_actors_contact()
 
         return Response(status=200)
 

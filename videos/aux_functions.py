@@ -2,6 +2,7 @@ import os
 import videos.const
 import urllib.request
 from videos.models import Actor
+from videos import image_operations
 
 
 def save_actor_profile_image_from_web(image_link, actor, force):
@@ -19,6 +20,10 @@ def save_actor_profile_image_from_web(image_link, actor, force):
     as_uri = urllib.request.pathname2url(rel_path)
 
     actor.thumbnail = as_uri
+
+    image_operations.process_single_actor_contact(actor)
+    image_operations.process_single_actor_grid(actor)
+
 
 
 def actor_folder_from_name_to_id():

@@ -1,3 +1,95 @@
+<!--
+
+<md-button ng-click="$root.toggleRightWrapper()" class="md-raised">
+            Search Options
+          </md-button>
+
+<md-sidenav class="md-sidenav-right" md-component-id="right-wrapper" md-disable-backdrop="" md-whiteframe="4">
+
+      <div ng-include="'static/js/app/section-list-wrapper/side-nav-content.html'"></div>
+
+</md-sidenav>
+-->
+
+<md-toolbar>
+    <div class="md-toolbar-tools">
+        <md-input-container>
+            <md-select ng-model="$ctrl.searchField" ng-change="$ctrl.searchTermChanged()" placeholder="Search Field">
+                <md-option ng-repeat="(key,val) in $ctrl.searchInFields" value="{{ key }}">{{ val }}</md-option>
+            </md-select>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+            <input ng-model="$ctrl.searchTerm" ng-model-options="{debounce: 500}"
+                   ng-change="$ctrl.searchTermChanged()">
+        </md-input-container>
+
+        <md-input-container>
+            <md-select ng-model="$ctrl.sortBy" ng-change="$ctrl.sortOrderChanged()" placeholder="Sort By">
+                <md-option ng-repeat="(key,val) in $ctrl.orderFields" value="{{ key }}">{{ val }}</md-option>
+            </md-select>
+        </md-input-container>
+
+        <md-input-container>
+            <md-checkbox ng-if="$ctrl.sectionTypefunc('SceneList')" ng-model="$ctrl.sceneGridView"
+                         ng-change="$ctrl.saveGridView()">
+                Grid View
+            </md-checkbox>
+        </md-input-container>
+
+        <md-input-container>
+            <md-checkbox ng-model="$ctrl.runnerUp" ng-change="$ctrl.runnerUpFilterChange()">
+                Runner up
+            </md-checkbox>
+        </md-input-container>
+
+        <md-input-container>
+            <md-button class="md-accent" ng-click="$ctrl.editMulti()">
+                Edit Multiple
+            </md-button>
+        </md-input-container>
+
+        <md-input-container>
+            <md-button class="md-accent" ng-click="$ctrl.playRandom()">
+                Play Random
+            </md-button>
+        </md-input-container>
+
+        <md-input-container>
+            <md-button class="md-accent" ng-click="$ctrl.advSearch()">
+                Adv Search
+            </md-button>
+        </md-input-container>
+
+         <md-input-container>
+            <md-button class="md-accent" ng-click="$ctrl.selectAll()">
+                Select All
+            </md-button>
+        </md-input-container>
+
+         <md-input-container>
+            <md-button class="md-accent" ng-click="$ctrl.selectNone()">
+                Select None
+            </md-button>
+        </md-input-container>
+
+        <md-input-container>
+            <md-button class="md-accent" ng-click="$root.toggleRight()">
+                Toggle SideNav
+            </md-button>
+        </md-input-container>
+
+
+    </div>
+</md-toolbar>
+
+<div layout="row" flex-offset="5">
+
+
+</div>
+
+
+<!--
 <div>
     <label>Search Field:</label>
     <select ng-model="$ctrl.searchField" ng-change="$ctrl.searchTermChanged()">
@@ -27,8 +119,9 @@
 
 
 </div>
+-->
 
-<actor-list main-page="$ctrl.mainPage"  ng-if="$ctrl.sectionTypefunc('ActorList')"></actor-list>
+<actor-list main-page="$ctrl.mainPage" ng-if="$ctrl.sectionTypefunc('ActorList')"></actor-list>
 
 <scene-list main-page="$ctrl.mainPage" ng-if="$ctrl.sectionTypefunc('SceneList')"></scene-list>
 
@@ -38,7 +131,8 @@
 
 <scene-tag-list main-page="$ctrl.mainPage" ng-if="$ctrl.sectionTypefunc('SceneTagList')"></scene-tag-list>
 
-<db-folder-tree main-page="$ctrl.mainPage" route="$ctrl.routParam" ng-if="$ctrl.sectionTypefunc('DbFolder')"></db-folder-tree>
+<db-folder-tree main-page="$ctrl.mainPage" route="$ctrl.routParam"
+                ng-if="$ctrl.sectionTypefunc('DbFolder')"></db-folder-tree>
 
 <playlist-list main-page="$ctrl.mainPage" ng-if="$ctrl.sectionTypefunc('PlaylistList')"></playlist-list>
 
