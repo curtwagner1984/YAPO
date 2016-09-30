@@ -268,9 +268,9 @@ def get_q_object_from_literal(literal, sending_object):
 
     q = None
     for key in j:
-        if sending_object == 'scenes':
-            if key in ['actors', 'scene_tags', 'websites', 'playlists', 'folders_in_tree']:
-                q = get_q_object_for_related_field(key, j[key])
+        if (sending_object == 'scenes') and (
+                    key in ['actors', 'scene_tags', 'websites', 'playlists', 'folders_in_tree']):
+            q = get_q_object_for_related_field(key, j[key])
 
         elif 'scene_properties_' in key:
 

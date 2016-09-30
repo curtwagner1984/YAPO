@@ -20,6 +20,14 @@ angular.module('navBar', []).component('navBar', {
 
             $rootScope.currentWidth = $window.innerWidth;
             $rootScope.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 360);
+            
+            $rootScope.setItemsPerRowScene = function () {
+                $rootScope.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 360);    
+            };
+            
+            $rootScope.setItemsPerRowActor = function () {
+                $rootScope.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 256);    
+            };
 
             var prevWidth = undefined;
             var didReduceWidth = false;
@@ -357,7 +365,7 @@ angular.module('navBar', []).component('navBar', {
 
                 this.isGrid = false;
 
-                this.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 360);
+                this.ITEMS_PER_ROW = $rootScope.ITEMS_PER_ROW;
 
                 /** @type {number} Total number of items. */
                 this.numItems = 0;
@@ -432,7 +440,7 @@ angular.module('navBar', []).component('navBar', {
             $rootScope.DynamicItems.prototype.getLength = function () {
                 this.numItems = self.dynamicItmesNumOfItemsTemp[this.pageType];
                 if (this.isGrid) {
-                    this.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 360);
+                    this.ITEMS_PER_ROW = $rootScope.ITEMS_PER_ROW;
                     return Math.ceil(this.numItems / this.ITEMS_PER_ROW)
                 }
                 return this.numItems;

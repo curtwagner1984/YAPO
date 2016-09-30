@@ -62,7 +62,10 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
 
 
     function setGridView(data) {
-        $rootScope.$storage.gridView = data;
+        if ($rootScope.$storage.gridView == undefined){
+            $rootScope.$storage.gridView = {}
+        }
+        $rootScope.$storage.gridView[data[0]] = data[1];
 
         // console.log('helperService data1 is' + angular.toJson(savedData));
     }
@@ -206,6 +209,74 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
     }
 
 
+    function list2Grid(currentItems) {
+
+        // var currentItems = self.dynamicItems.getLoadedItems();
+        var itemsPerRow = $rootScope.ITEMS_PER_ROW;
+        var newItems = [];
+
+        var tmp = [];
+
+        for (var i = 0; i < currentItems.length; i++) {
+            tmp.push(currentItems[i]);
+            if (tmp.length % itemsPerRow == 0) {
+                newItems.push(tmp);
+                tmp = []
+            }
+        }
+        if (tmp.length > 0) {
+            newItems.push(tmp);
+        }
+
+        return newItems;
+
+
+    }
+
+
+    function grid2List(currentItems) {
+
+        // var currentItems = self.dynamicItems.getLoadedItems();
+        // var itemsPerRow = self.dynamicItems.dI.ITEMS_PER_ROW;
+        var newItems = [];
+
+        for (var i = 0; i < currentItems.length; i++) {
+            for (var j = 0; j < currentItems[i].length; j++) {
+                newItems.push(currentItems[i][j])
+            }
+        }
+        return newItems;
+
+
+    }
+
+    function gridChangeNumberOfRows(isGrid, currentItems) {
+        if (isGrid) {
+
+
+            var itemsPerRow = $rootScope.ITEMS_PER_ROW;
+            var newItems = [];
+            var tmp = [];
+
+            for (var i = 0; i < currentItems.length; i++) {
+                for (var j = 0; j < currentItems[i].length; j++) {
+                    tmp.push(currentItems[i][j]);
+                    if (tmp.length % itemsPerRow == 0) {
+                        newItems.push(tmp);
+                        tmp = []
+                    }
+                }
+            }
+            if (tmp.length > 0) {
+                newItems.push(tmp);
+            }
+            return newItems
+        }
+
+
+    }
+
+
     return {
         set: set,
         get: get,
@@ -224,6 +295,9 @@ angular.module('helper', []).factory('helperService', function ($rootScope, $loc
         createNewItem: createNewItem,
         saveAdvSearchQueries: saveAdvSearchQueries,
         getAdvSearchQueries: getAdvSearchQueries,
+        list2Grid: list2Grid,
+        grid2List: grid2List,
+        gridChangeNumberOfRows: gridChangeNumberOfRows
         // getAutoSideNav: getAutoSideNav,
         // setAutoSideNav: setAutoSideNav
     }
@@ -802,42 +876,42 @@ angular.module('scopeWatch', []).factory('scopeWatchService', function ($rootSco
         $rootScope.$broadcast("playlistLoaded", playlist);
 
     }
-    
+
     function advSearch(pageType) {
 
         console.log("app-service-scopeWatch: advSearch was triggered! ");
         $rootScope.$broadcast("advSearch", pageType);
 
     }
-    
+
     function playRandom(pageType) {
 
         console.log("app-service-scopeWatch: playRandom was triggered! ");
         $rootScope.$broadcast("playRandom", pageType);
 
     }
-    
+
     function editMulti(pageType) {
 
         console.log("app-service-scopeWatch: editMulti was triggered! ");
         $rootScope.$broadcast("editMulti", pageType);
 
     }
-    
+
     function selectAll(pageType) {
 
         console.log("app-service-scopeWatch: selectAll was triggered! ");
         $rootScope.$broadcast("selectAll", pageType);
 
     }
-    
+
     function selectNone(pageType) {
 
         console.log("app-service-scopeWatch: selectNone was triggered! ");
         $rootScope.$broadcast("selectNone", pageType);
 
     }
-    
+
     function toggleSideNav(pageType) {
 
         console.log("app-service-scopeWatch: toggleSideNav was triggered! ");
@@ -880,8 +954,8 @@ angular.module('scopeWatch', []).factory('scopeWatchService', function ($rootSco
         didPlaylistLoad: didPlaylistLoad,
         playlistLoaded: playlistLoaded,
         playlistSelected: playlistSelected,
-        advSearch:advSearch,
-        playRandom:playRandom,
+        advSearch: advSearch,
+        playRandom: playRandom,
         editMulti: editMulti,
         selectAll: selectAll,
         selectNone: selectNone,

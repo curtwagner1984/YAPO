@@ -44,6 +44,14 @@ angular.module('actorList').component('actorList', {
             self.advSearchString = undefined;
             self.advSearchObject = {};
 
+            $rootScope.setItemsPerRowActor();
+            try {
+                $rootScope.closeRight();
+                $rootScope.updateWidth("right");
+            } catch (err) {
+                console.log("Caught error")
+            }
+
 
             // Wrapper for the Dynamic Items object in nav-bar.component.
             // It's responsible for the infinite scroll.
@@ -75,6 +83,15 @@ angular.module('actorList').component('actorList', {
                 this.dI.nextPage(pageNumber, isCalledFromDynamicItems)
             };
 
+            DynamicItems.prototype.getLoadedItems = function () {
+
+                return this.dI.getLoadedItems();
+            };
+
+            DynamicItems.prototype.setLoadedItems = function (loadedItemsToSet) {
+                this.dI.setLoadedItems(loadedItemsToSet)
+            };
+
 
             this.dynamicItems = new DynamicItems();
             this.dynamicItems.updateQuery_();
@@ -84,12 +101,48 @@ angular.module('actorList').component('actorList', {
                 if ((helperService.getGridView() != undefined) && (helperService.getGridView()['actor'] != undefined)) {
                     self.gridView = helperService.getGridView()['actor']
                 }
+
+                if (self.gridView) {
+                    if (!self.dynamicItems.dI.isGrid) {
+                        self.dynamicItems.dI.isGrid = true;
+                        var tmp = helperService.list2Grid(self.dynamicItems.getLoadedItems());
+                        self.dynamicItems.setLoadedItems(tmp);
+                    }
+
+                } else {
+                    if (self.dynamicItems.dI.isGrid) {
+                        self.dynamicItems.dI.isGrid = false;
+                        var tmp = helperService.grid2List(self.dynamicItems.getLoadedItems());
+                        self.dynamicItems.setLoadedItems(tmp);
+                    }
+
+                }
             };
 
             checkGridOption();
 
             $scope.$on("gridViewOptionChnaged", function (event, pageInfo) {
                 checkGridOption()
+            });
+
+            var currentNumberOfItemsPerRow = undefined;
+
+            $scope.$on("widthChanged", function (event, width) {
+                $rootScope.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 256);
+                if ($rootScope.ITEMS_PER_ROW < 1) {
+                    $rootScope.ITEMS_PER_ROW = 1;
+                }
+                if ((currentNumberOfItemsPerRow == undefined) ||
+                    (currentNumberOfItemsPerRow != $rootScope.ITEMS_PER_ROW) ||
+                    gotItemAtIndex) {
+
+                    // $scope.$apply();
+                    $timeout(function () {
+                        // anything you want can go here and will safely be run on the next digest.
+                        self.dynamicItems.setLoadedItems(helperService.gridChangeNumberOfRows(self.gridView,self.dynamicItems.getLoadedItems()));
+                        currentNumberOfItemsPerRow = $rootScope.ITEMS_PER_ROW;
+                    })
+                }
             });
 
 

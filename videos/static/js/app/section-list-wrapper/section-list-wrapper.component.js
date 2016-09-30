@@ -26,29 +26,40 @@ angular.module('sectionListWrapper').component('sectionListWrapper', {
 
 
                 if (helperService.getGridView() != undefined) {
-                    if (helperService.getGridView()['actor'] == undefined) {
-                        self.actorGridView = false;
-                    } else {
-                        self.actorGridView = helperService.getGridView()['actor']
+
+                    var currentPage = "";
+
+                    if (self.sectionType == "ActorList"){
+                        currentPage = 'actor'
+                    }else if (self.sectionType == "SceneList"){
+                        currentPage = 'scene'
                     }
 
-                    if (helperService.getGridView()['scene'] == undefined) {
-                        self.sceneGridView = false;
+                    if (helperService.getGridView()[currentPage] == undefined) {
+                        self.gridView = false;
                     } else {
-                        self.sceneGridView = helperService.getGridView()['scene']
+                        self.gridView = helperService.getGridView()[currentPage]
                     }
+
+
                 } else {
-                    self.actorGridView = false;
-                    self.sceneGridView = false;
+                    self.gridView = false;
+
                 }
 
 
                 self.saveGridView = function () {
+                    
+                    if (self.sectionType == "ActorList"){
+                        currentPage = 'actor'
+                    }else if (self.sectionType == "SceneList"){
+                        currentPage = 'scene'
+                    }
 
 
                     // self.mainPage = false;
-
-                    helperService.setGridView({'actor': self.actorGridView, 'scene': self.sceneGridView});
+                    
+                    helperService.setGridView([currentPage, self.gridView]);
 
                     scopeWatchService.gridViewOptionChnaged("a");
 

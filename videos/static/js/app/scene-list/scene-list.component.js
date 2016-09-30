@@ -177,14 +177,14 @@ angular.module('sceneList').component('sceneList', {
                 if (self.gridView) {
                     if (!self.dynamicItems.dI.isGrid) {
                         self.dynamicItems.dI.isGrid = true;
-                        var tmp = list2Grid(self.dynamicItems.getLoadedItems());
+                        var tmp = helperService.list2Grid(self.dynamicItems.getLoadedItems());
                         self.dynamicItems.setLoadedItems(tmp);
                     }
 
                 } else {
                     if (self.dynamicItems.dI.isGrid) {
                         self.dynamicItems.dI.isGrid = false;
-                        var tmp = grid2List(self.dynamicItems.getLoadedItems());
+                        var tmp = helperService.grid2List(self.dynamicItems.getLoadedItems());
                         self.dynamicItems.setLoadedItems(tmp);
                     }
 
@@ -192,72 +192,7 @@ angular.module('sceneList').component('sceneList', {
             };
 
 
-            var list2Grid = function (currentItems) {
-
-                // var currentItems = self.dynamicItems.getLoadedItems();
-                var itemsPerRow = $rootScope.ITEMS_PER_ROW;
-                var newItems = [];
-
-                var tmp = [];
-
-                for (var i = 0; i < currentItems.length; i++) {
-                    tmp.push(currentItems[i]);
-                    if (tmp.length % itemsPerRow == 0) {
-                        newItems.push(tmp);
-                        tmp = []
-                    }
-                }
-                if (tmp.length > 0) {
-                    newItems.push(tmp);
-                }
-
-                return newItems;
-
-
-            };
-
-
-            var grid2List = function (currentItems) {
-
-                // var currentItems = self.dynamicItems.getLoadedItems();
-                // var itemsPerRow = self.dynamicItems.dI.ITEMS_PER_ROW;
-                var newItems = [];
-
-                for (var i = 0; i < currentItems.length; i++) {
-                    for (var j = 0; j < currentItems[i].length; j++) {
-                        newItems.push(currentItems[i][j])
-                    }
-                }
-                return newItems;
-
-
-            };
-
-            var gridChangeNumberOfRows = function () {
-                if (self.gridView) {
-
-                    var currentItems = self.dynamicItems.getLoadedItems();
-                    var itemsPerRow = $rootScope.ITEMS_PER_ROW;
-                    var newItems = [];
-                    var tmp = [];
-
-                    for (var i = 0; i < currentItems.length; i++) {
-                        for (var j = 0; j < currentItems[i].length; j++) {
-                            tmp.push(currentItems[i][j]);
-                            if (tmp.length % itemsPerRow == 0) {
-                                newItems.push(tmp);
-                                tmp = []
-                            }
-                        }
-                    }
-                    if (tmp.length > 0) {
-                        newItems.push(tmp);
-                    }
-                    self.dynamicItems.setLoadedItems(newItems)
-                }
-
-
-            };
+            
 
             var currentNumberOfItemsPerRow = undefined;
 
@@ -273,7 +208,7 @@ angular.module('sceneList').component('sceneList', {
                     // $scope.$apply();
                     $timeout(function () {
                         // anything you want can go here and will safely be run on the next digest.
-                        gridChangeNumberOfRows();
+                        self.dynamicItems.setLoadedItems(helperService.gridChangeNumberOfRows(self.gridView,self.dynamicItems.getLoadedItems()));
                         currentNumberOfItemsPerRow = $rootScope.ITEMS_PER_ROW;
                     })
                 }
@@ -287,7 +222,7 @@ angular.module('sceneList').component('sceneList', {
                 var sceneArray = null;
 
                 if (self.gridView){
-                    sceneArray = grid2List(self.dynamicItems.getLoadedItems())
+                    sceneArray = helperService.grid2List(self.dynamicItems.getLoadedItems())
                 }else{
                     sceneArray = self.dynamicItems.getLoadedItems()
                 }
@@ -299,7 +234,7 @@ angular.module('sceneList').component('sceneList', {
                 }
 
                 if (self.gridView){
-                    self.dynamicItems.setLoadedItems(list2Grid(sceneArray))
+                    self.dynamicItems.setLoadedItems(helperService.list2Grid(sceneArray))
                 }else{
                     self.dynamicItems.setLoadedItems(sceneArray)
                 }
@@ -312,7 +247,7 @@ angular.module('sceneList').component('sceneList', {
                 var sceneArray = null;
 
                 if (self.gridView){
-                    sceneArray = grid2List(self.dynamicItems.getLoadedItems())
+                    sceneArray = helperService.grid2List(self.dynamicItems.getLoadedItems())
                 }else{
                     sceneArray = self.dynamicItems.getLoadedItems()
                 }
@@ -323,7 +258,7 @@ angular.module('sceneList').component('sceneList', {
                 self.selectedScenes = [];
 
                 if (self.gridView){
-                    self.dynamicItems.setLoadedItems(list2Grid(sceneArray))
+                    self.dynamicItems.setLoadedItems(helperService.list2Grid(sceneArray))
                 }else{
                     self.dynamicItems.setLoadedItems(sceneArray)
                 }
@@ -714,7 +649,7 @@ angular.module('sceneList').component('sceneList', {
                 var sceneArray = null;
 
                 if (self.gridView) {
-                    sceneArray = grid2List(self.dynamicItems.getLoadedItems());
+                    sceneArray = helperService.grid2List(self.dynamicItems.getLoadedItems());
                     sceneIndex = helperService.getObjectIndexFromArrayOfObjects(scene.id, sceneArray);
 
                 } else {
@@ -750,7 +685,7 @@ angular.module('sceneList').component('sceneList', {
                 }
 
                 if (self.gridView){
-                    self.dynamicItems.setLoadedItems(list2Grid(sceneArray));
+                    self.dynamicItems.setLoadedItems(helperService.list2Grid(sceneArray));
                 }else{
                     self.dynamicItems.setLoadedItems(sceneArray);
                 }

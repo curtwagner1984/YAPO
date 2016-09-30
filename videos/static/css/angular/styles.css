@@ -383,6 +383,13 @@ input:checked + .slider:before {
   /*padding-top: 60px;*/
 }
 
+.virtualRepeatdemoDeferredLoading-grid .repeated-item-actor-grid {
+  /*border-bottom: 1px solid #ddd;*/
+  /*box-sizing: border-box;*/
+  height: 400px;
+  /*padding-top: 60px;*/
+}
+
 .virtualRepeatdemoDeferredLoading .repeated-item-general {
   border-bottom: 2px solid #ddd;
   box-sizing: border-box;

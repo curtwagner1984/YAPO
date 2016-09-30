@@ -1,0 +1,23 @@
+<div layout="row" layout-align="">
+    <div style="border: solid 2px" ng-repeat="it in item">
+        <a href="#!/actor/{{ it.id }}">
+            <div layout="column" layout-align="end center"
+                 style="width: 256px ; height: 398px;"
+                 ng-style="{'background-image':'url('+it.thumbnail+'.256)','background-size': 'cover'}">
+                <md-toolbar class="md-hue-2" style=" width: 256px; height:35px ; min-height:20px">
+                    <div class="md-toolbar-tools">
+                        <!--
+                        <md-checkbox style="margin-top: 13px" ng-model="it.selected"
+                                     ng-click="$ctrl.sceneSelectToggle(it)">
+                        </md-checkbox>
+                        -->
+                        <span flex-offset="5">  {{ it.name }}</span>
+                    </div>
+                </md-toolbar>
+
+            </div>
+        </a>
+
+
+    </div>
+</div>
