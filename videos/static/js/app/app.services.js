@@ -528,11 +528,12 @@ angular.module('pager', []).factory('pagerService', function (Actor, ActorAlias,
                 itemsToAdd = DbFolder.query({
                     offset: _pageOffset,
                     limit: _pageLimit,
-                    parent: _parent,
-                    search: _searchTerm,
-                    searchField: _searchField,
+                    // parent: _parent,
+                    // search: _searchTerm,
+                    // searchField: _searchField,
                     sortBy: _sortBy,
-                    is_runner_up: _runnerUp,
+                    // is_runner_up: _runnerUp,
+                    advSearch: _advSearch,
                     pageType: _pageType
 
                 })

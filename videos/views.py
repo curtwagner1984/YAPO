@@ -42,6 +42,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 import threading
 from videos import image_operations
 
+
 # import pathlib
 
 
@@ -267,8 +268,9 @@ def get_q_object_from_literal(literal, sending_object):
 
     q = None
     for key in j:
-        if key in ['actors', 'scene_tags', 'websites', 'playlists', 'folders_in_tree']:
-            q = get_q_object_for_related_field(key, j[key])
+        if sending_object == 'scenes':
+            if key in ['actors', 'scene_tags', 'websites', 'playlists', 'folders_in_tree']:
+                q = get_q_object_for_related_field(key, j[key])
 
         elif 'scene_properties_' in key:
 
@@ -424,6 +426,20 @@ def get_q_object_from_literal(literal, sending_object):
             temp = ""
 
             reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'playlists', key_new, j[key],
+                                                                  int_fields, str_fields, other_fields)
+
+            q = Q(**reverse_keyarg_dict)
+
+        elif 'folder_properties_' in key:
+            int_fields = ['level', 'date_added', 'parent']
+
+            str_fields = ['name', 'last_folder_name_only']
+
+            other_fields = ['scenes']
+
+            key_new = key.replace('folder_properties_', '')
+
+            reverse_keyarg_dict = get_reverse_keyarg_dict_for_key(sending_object, 'folders', key_new, j[key],
                                                                   int_fields, str_fields, other_fields)
 
             q = Q(**reverse_keyarg_dict)
@@ -1534,6 +1550,12 @@ class LocalSceneFoldersViewSet(viewsets.ModelViewSet):
 class FolderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Folder.objects.all()
+        sending_object = 'folders'
+        if 'advSearch' in self.request.query_params:
+            if self.request.query_params['advSearch'] != '':
+                adv_search_string = self.request.query_params['advSearch']
+                print("Adv search string is {}".format(adv_search_string))
+                queryset = advanced_search_recursive(adv_search_string, queryset, sending_object)
 
         return search_in_get_queryset(queryset, self.request)
 

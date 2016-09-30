@@ -378,7 +378,9 @@ angular.module('sectionListWrapper').component('sectionListWrapper', {
                     self.sortBy = getSortBy('Playlist');
                     self.mainPageInit();
 
-                }   
+                }
+                
+                
 
                 sectionListWrapperLoaded = true;
 

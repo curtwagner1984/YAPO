@@ -335,6 +335,21 @@ input:checked + .slider:before {
   max-width: 1900px;
 }
 
+.virtualRepeatdemoDeferredLoading-folders #vertical-container {
+  height: 600px;
+  width: 100%;
+  max-width: 400px;
+    border: solid black 2px;
+}
+
+.virtualRepeatdemoDeferredLoading-folders .repeated-item {
+  border-bottom: 2px solid #ddd;
+  box-sizing: border-box;
+  height: 40px;
+  padding-top: 10px;
+    background: gray;
+}
+
 .virtualRepeatdemoDeferredLoading-grid #vertical-container {
   height: 950px;
   width: 100%;

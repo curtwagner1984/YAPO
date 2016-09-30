@@ -1,5 +1,5 @@
 <md-toolbar class="md-theme-indigo">
-    <span layout="row"  layout-align="start center">
+    <span layout="row" layout-align="start center">
         <h1 class="md-toolbar-tools">{{ $ctrl.actor.name }} (Has {{ $ctrl.actor.scenes.length }} scenes in the
         database.)</h1>
 
@@ -13,6 +13,26 @@
 <md-content layout-margin="">
 
     <md-content>
+
+         <span ng-repeat="folder in $ctrl.nav">
+            <span ng-click="$ctrl.navClick(folder)"  class="on-hover-red-cursor-pointer" >{{ folder.name }}</span>
+        </span>
+
+        <div class="virtualRepeatdemoDeferredLoading-folders">
+            <md-content layout="column">
+
+                <md-virtual-repeat-container id="vertical-container">
+                    <div layout="column">
+                        <div md-virtual-repeat="item in $ctrl.dynamicItems" md-on-demand="" flex
+                             class="repeated-item">
+                            <span ng-click="$ctrl.folderClick(item)">{{ $index + 1 }} {{ item.last_folder_name_only }}</span>
+                        </div>
+                    </div>
+                </md-virtual-repeat-container>
+            </md-content>
+        </div>
+
+<!--
         <div class="well"><h3>
                 <span ng-repeat="n in $ctrl.nav"
 
@@ -39,8 +59,9 @@
                     <scene-list pk="folder.scenes"></scene-list>
                 </ul>
                 -->
-
+<!--
             </li>
         </ul>
+        -->
     </md-content>
 </md-content>

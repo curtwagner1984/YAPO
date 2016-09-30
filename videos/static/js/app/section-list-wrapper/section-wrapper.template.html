@@ -12,7 +12,7 @@
 -->
 
 <md-toolbar>
-    <div class="md-toolbar-tools">
+    <div class="md-toolbar-tools" ng-hide="$ctrl.sectionType == 'DbFolder'">
         <md-input-container>
             <md-select ng-model="$ctrl.searchField" ng-change="$ctrl.searchTermChanged()" placeholder="Search Field">
                 <md-option ng-repeat="(key,val) in $ctrl.searchInFields" value="{{ key }}">{{ val }}</md-option>

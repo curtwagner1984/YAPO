@@ -9,7 +9,7 @@ angular.module('navBar', []).component('navBar', {
 
 
             var self = this;
-            self.dynamicItmesNumOfItemsTemp = 0;
+            self.dynamicItmesNumOfItemsTemp = {};
 
             //Auto sidenav
 
@@ -71,7 +71,9 @@ angular.module('navBar', []).component('navBar', {
                 return function () {
                     if ($rootScope.$storage.autoFlyout){
                         $mdSidenav(componentId).toggle();
+                        angular.element(window).triggerHandler('resize');
                         $rootScope.updateWidth(componentId);
+
                     }
                 }
 
@@ -81,6 +83,7 @@ angular.module('navBar', []).component('navBar', {
             function buildToggler(componentId) {
                 return function () {
                     $mdSidenav(componentId).toggle();
+                    angular.element(window).triggerHandler('resize');
                     $rootScope.updateWidth(componentId);
 
                 }
@@ -378,7 +381,7 @@ angular.module('navBar', []).component('navBar', {
             $rootScope.DynamicItems.prototype.reset = function (caller) {
                 this.loadedItems = [[], []];
                 this.numItems = 0;
-                self.dynamicItmesNumOfItemsTemp = 0;
+                self.dynamicItmesNumOfItemsTemp[this.pageType] = 0;
                 console.log("DynamicItems reset was triggered by " + caller)
 
             };
@@ -394,7 +397,7 @@ angular.module('navBar', []).component('navBar', {
 
             // Required.
             $rootScope.DynamicItems.prototype.getItemAtIndex = function (index) {
-                this.numItems = self.dynamicItmesNumOfItemsTemp;
+                this.numItems = self.dynamicItmesNumOfItemsTemp[this.pageType];
                 var pageNumber = Math.floor(index / this.PAGE_SIZE);
                 if (this.isGrid) {
                     pageNumber = Math.floor((index * this.ITEMS_PER_ROW) / this.PAGE_SIZE);
@@ -416,7 +419,7 @@ angular.module('navBar', []).component('navBar', {
                         }
 
                     } else {
-                        if ((this.loadedItems[1][0] != 1) && (this.loadedItems[0].length <= this.numItems)) {
+                        if ((this.loadedItems[1][0] != 1) && (this.loadedItems[0].length < this.numItems)) {
                             this.loadedItems[1][0] = 1;
                             this.fetchPage_(pageNumber)
                         }
@@ -427,7 +430,7 @@ angular.module('navBar', []).component('navBar', {
             };
 
             $rootScope.DynamicItems.prototype.getLength = function () {
-                this.numItems = self.dynamicItmesNumOfItemsTemp;
+                this.numItems = self.dynamicItmesNumOfItemsTemp[this.pageType];
                 if (this.isGrid) {
                     this.ITEMS_PER_ROW = Math.floor($rootScope.currentWidth / 360);
                     return Math.ceil(this.numItems / this.ITEMS_PER_ROW)
@@ -442,9 +445,10 @@ angular.module('navBar', []).component('navBar', {
 
                 var loadedPages = this.loadedPages;
                 var lodeadItems = this.loadedItems;
-                self.dynamicItmesNumOfItemsTemp = this.numItems;
+                self.dynamicItmesNumOfItemsTemp[this.pageType] = this.numItems;
                 var isGrid = this.isGrid;
                 var ITEMS_PER_ROW = this.ITEMS_PER_ROW;
+                var pageType = this.pageType;
 
 
                 var input = {
@@ -466,13 +470,13 @@ angular.module('navBar', []).component('navBar', {
                             pageInfo: res[1]
                         };
 
-                        self.dynamicItmesNumOfItemsTemp = parseInt(paginationInfo.pageInfo.replace(/.*<(\d+)>; rel="count".*/, '$1'));
+                        self.dynamicItmesNumOfItemsTemp[pageType] = parseInt(paginationInfo.pageInfo.replace(/.*<(\d+)>; rel="count".*/, '$1'));
 
 
                         var itemsFormServer = helperService.resourceToArray(res[0]);
 
-                        if (self.dynamicItmesNumOfItemsTemp == -6) {
-                            self.dynamicItmesNumOfItemsTemp = itemsFormServer.length;
+                        if (self.dynamicItmesNumOfItemsTemp[pageType] == -6) {
+                            self.dynamicItmesNumOfItemsTemp[pageType] = itemsFormServer.length;
                         }
 
                         if (wasCalledFromDynamicItems) {

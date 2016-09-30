@@ -1,4 +1,34 @@
+
+
 <!--
+
+<div class="virtualRepeatdemoDeferredLoading">
+    <md-content layout="column">
+
+        <md-virtual-repeat-container id="vertical-container">
+            <div layout="column">
+                <div md-virtual-repeat="item in $ctrl.dynamicItems" md-on-demand="" flex class="repeated-item-general">
+                    <div layout="row"  >
+                        <div flex="1">{{$index + 1}}</div>
+                        <div flex="30" ><a href="/#!/{{ $ctrl.linkAid }}/{{ item.id }}">{{ item.name }}</a></div>
+                        <div flex="20" layout="column">
+                            <div flex><b>Uses:</b> {{ item.usage_count }}</div>
+                            <div flex>Play Count: {{ item.play_count }}</div>
+                            <div flex>Date Added: {{ item.date_added | date:'dd MMMM yyyy':'z'}}</div>
+
+                        </div>
+                       <md-button ng-click="$ctrl.deleteFromDb(item)">Delete</md-button>
+                    </div>
+                </div>
+
+
+            </div>
+        </md-virtual-repeat-container>
+
+
+    </md-content>
+</div>
+
 <div class="row">
     <div class="col-md-4" id="left">
         <div class="well"><h3>
