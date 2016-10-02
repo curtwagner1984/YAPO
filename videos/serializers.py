@@ -172,7 +172,7 @@ class ActorSerializer(serializers.ModelSerializer):
                   'is_runner_up', 'rating', 'description', 'thumbnail', 'gender', 'imdb_id', 'tmdb_id',
                   'official_pages', 'actor_tags', 'ethnicity', 'weight', 'country_of_origin', 'tattoos', 'height',
                   'measurements', 'extra_text', 'last_lookup', 'is_exempt_from_one_word_search', 'actor_aliases',
-                  'scenes']
+                  'scenes', 'is_mainstream']
 
         # exclude = ['actor_tags']
         # fields = ('url', 'name', 'actor_aliases', 'date_added')

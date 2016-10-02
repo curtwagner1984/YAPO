@@ -13,10 +13,11 @@ from videos.models import *
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "YAPO.settings")
 
 ACCEPTED_VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".flv", ".rm", ".wmv", ".mov", ".m4v", ".mpg", ".mpeg", ".mkv"}
+ACCEPTED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".gif", ".png"}
 TEST_PATH = "Z:\\XBMC\\PR\\19062016"
 
 
-def get_files(walk_dir, make_video_sample):
+def get_files(walk_dir, make_video_sample, import_images):
     # norm_path = os.path.normpath(path)
     # files_in_dir = os.listdir(norm_path)
 
@@ -40,12 +41,17 @@ def get_files(walk_dir, make_video_sample):
         for filename in files:
             file_path = os.path.join(root, filename)
             filename_extension = os.path.splitext(file_path)[1]
-            for filename_extension_to_test in ACCEPTED_VIDEO_EXTENSIONS:
-                if filename_extension_to_test == filename_extension:
-                    output_string = "Filename is %s and the extension is %s" % (file_path, filename_extension,)
-                    print(output_string.encode('utf-8'))
-                    create_scene(file_path, make_video_sample)
-                    break
+            if not import_images and (filename_extension in ACCEPTED_VIDEO_EXTENSIONS):
+                output_string = "Filename is %s and the extension is %s" % (file_path, filename_extension,)
+                print(output_string.encode('utf-8'))
+                create_scene(file_path, make_video_sample)
+                break
+
+            if import_images and (filename_extension in ACCEPTED_IMAGE_EXTENSIONS):
+                output_string = "Filename is %s and the extension is %s" % (file_path, filename_extension,)
+                print(output_string.encode('utf-8'))
+                create_picture(file_path)
+                break
 
 
 def create_sample_video(scene):
@@ -56,6 +62,55 @@ def create_sample_video(scene):
     else:
         print(
             "Something went wrong while trying to create video sample for scene: {}".format(scene.name))
+
+
+def create_picture(picture_path):
+    current_picture = Picture()
+    current_picture.path_to_file = picture_path
+    path_to_dir, filename = os.path.split(picture_path)
+    current_picture.name = os.path.splitext(filename)[0]
+    current_picture.path_to_dir = path_to_dir
+
+    print("Scene Name: %s\nPath to Dir: %s\nPath to File: %s" % (
+        current_picture.name, current_picture.path_to_dir, current_picture.path_to_file))
+
+    if Picture.objects.filter(path_to_file=current_picture.path_to_file):
+        print("Picture Already Exists!")
+    else:
+
+        pic_dir = os.path.join(const.MEDIA_PATH, 'Pictures')
+        if not os.path.exists(pic_dir):
+            os.makedirs(pic_dir)
+
+        path = os.path.normpath(current_picture.path_to_file)
+        a = path.split(os.sep)
+        filename = a[-1]
+        dirs_in_way = a[1: -1]
+
+        for dir in dirs_in_way:
+            pic_dir = os.path.join(pic_dir, dir)
+
+        pic_dir = os.path.abspath(pic_dir)
+
+        if not os.path.exists(pic_dir):
+            os.makedirs(pic_dir)
+
+        symlink_path = os.path.join(pic_dir, filename)
+
+        os.link(current_picture.path_to_file, symlink_path)
+
+        current_picture.thumbnail = symlink_path
+
+        current_picture.save()
+
+        actors = list(Actor.objects.extra(select={'length': 'Length(name)'}).order_by('-length'))
+        actors_alias = list(ActorAlias.objects.extra(select={'length': 'Length(name)'}).order_by('-length'))
+        picture_tags = PictureTag.objects.extra(select={'length': 'Length(name)'}).order_by('-length')
+        websites = Website.objects.extra(select={'length': 'Length(name)'}).order_by('-length')
+
+        filename_parser.parse_scene_all_metadata(current_picture, actors, actors_alias, picture_tags, websites)
+
+        image_operations.process_single_scene(current_picture, False)
 
 
 def create_scene(scene_path, make_sample_video):
@@ -83,7 +138,7 @@ def create_scene(scene_path, make_sample_video):
                 print("Screenshot of scene {} taken...".format(
                     scene_in_db.name))
 
-                image_operations.process_single_scene(scene_in_db)
+                image_operations.process_single_scene(scene_in_db, False)
 
         if make_sample_video:
             video_filename_path = os.path.join(const.MEDIA_PATH, 'scenes', str(scene_in_db.id), 'sample',
@@ -121,7 +176,7 @@ def create_scene(scene_path, make_sample_video):
 
             filename_parser.parse_scene_all_metadata(current_scene, actors, actors_alias, scene_tags, websites)
 
-            image_operations.process_single_scene(current_scene)
+            image_operations.process_single_scene(current_scene, False)
         else:
             print("Failed to probe scene {}, skipping scene...".format(current_scene.name))
 

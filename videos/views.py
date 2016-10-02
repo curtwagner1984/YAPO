@@ -48,6 +48,16 @@ from videos import image_operations
 
 # Aux Functions
 
+
+def js_2_python_boolean(bool_input):
+    if bool_input.lower() == 'false':
+        return False
+    elif bool_input.lower() == 'true':
+        return True
+    else:
+        raise ValueError("...")
+
+
 def get_scenes_in_folder_recursive(folder, scene_list):
     scenes = list(folder.scenes.all())
     scene_list = list(chain(scene_list, scenes))
@@ -1211,7 +1221,7 @@ def settings(request):
         if 'folderToScan' in request.query_params:
             if request.query_params['folderToScan'] != "":
                 local_folder = LocalSceneFolders.objects.get(id=int(request.query_params['folderToScan']))
-                videos.addScenes.get_files(local_folder.name, False)
+                videos.addScenes.get_files(local_folder.name, False, False)
             else:
                 all_folders = LocalSceneFolders.objects.all()
                 for folder in all_folders:
@@ -1219,9 +1229,9 @@ def settings(request):
 
         if 'generateImages' in request.query_params:
             if request.query_params['generateImages']:
-                image_operations.process_all_scenes()
-                image_operations.process_all_actors_grid()
-                image_operations.process_all_actors_contact()
+                image_operations.process_all_scenes(False)
+                image_operations.process_all_actors_grid(False)
+                image_operations.process_all_actors_contact(False)
 
         return Response(status=200)
 
@@ -1250,19 +1260,20 @@ def ffmpeg(request):
                     return Response(status=500)
 
 
-def add_comma_seperated_items_to_db(string_of_comma_seperated_items, type_of_item):
+def add_comma_seperated_items_to_db(string_of_comma_seperated_items, type_of_item, is_mainstream):
     for x in string_of_comma_seperated_items.split(','):
 
         if type_of_item == 'actor':
             object_to_insert = Actor()
+            if is_mainstream:
+                object_to_insert.is_mainstream = True
             object_to_insert.thumbnail = const.UNKNOWN_PERSON_IMAGE_PATH
         elif type_of_item == 'scene tag':
             object_to_insert = SceneTag()
         elif type_of_item == 'website':
             object_to_insert = Website()
 
-        object_to_insert.strip = x.strip()
-        object_to_insert.name = object_to_insert.strip
+        object_to_insert.name = (x.strip()).title()
 
         try:
             if type_of_item == 'actor':
@@ -1287,15 +1298,28 @@ class AddItems(views.APIView):
             for folder_to_add_path in folders_to_add_path.split(','):
                 folder_to_add_path_stripped = folder_to_add_path.strip()
                 if os.path.isdir(folder_to_add_path_stripped):
-                    # if the second argument is true - tries to make a sample video when inserting scene to db.
-                    if request.query_params['createSampleVideo'] == 'true':
-                        videos.addScenes.get_files(folder_to_add_path_stripped, True)
-                    else:
-                        videos.addScenes.get_files(folder_to_add_path_stripped, False)
+                    if js_2_python_boolean(request.query_params['isScene']):
+
+                        # if the second argument is true - tries to make a sample video when inserting scene to db.
+                        if js_2_python_boolean(request.query_params['createSampleVideo']):
+                            videos.addScenes.get_files(folder_to_add_path_stripped, True, False)
+                        else:
+                            videos.addScenes.get_files(folder_to_add_path_stripped, False, False)
+
+                    if js_2_python_boolean(request.query_params['isPicture']):
+                        videos.addScenes.get_files(folder_to_add_path_stripped, False, True)
 
                     temp = os.path.abspath(folder_to_add_path_stripped)
                     try:
                         local_scene_folder = LocalSceneFolders(name=temp)
+                        if js_2_python_boolean(request.query_params['isPicture']) and js_2_python_boolean(request.query_params['isScene']):
+                            local_scene_folder.type = "both"
+                        elif js_2_python_boolean(request.query_params['isPicture']):
+                            local_scene_folder.type = "pictures"
+                        elif js_2_python_boolean(request.query_params['isScene']):
+                            local_scene_folder.type = "videos"
+                        else:
+                            break
                         local_scene_folder.save()
                     except django.db.IntegrityError as e:
                         print("{} while trying to add {} to folder list".format(e, local_scene_folder.name))
@@ -1305,13 +1329,14 @@ class AddItems(views.APIView):
                     return Response(content, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         if request.query_params['actorsToAdd'] != "":
-            add_comma_seperated_items_to_db(request.query_params['actorsToAdd'], 'actor')
+            add_comma_seperated_items_to_db(request.query_params['actorsToAdd'], 'actor',
+                                            request.query_params['isMainStream'])
 
         if request.query_params['sceneTagsToAdd'] != "":
-            add_comma_seperated_items_to_db(request.query_params['sceneTagsToAdd'], 'scene tag')
+            add_comma_seperated_items_to_db(request.query_params['sceneTagsToAdd'], 'scene tag', None)
 
         if request.query_params['websitesToAdd'] != "":
-            add_comma_seperated_items_to_db(request.query_params['websitesToAdd'], 'website')
+            add_comma_seperated_items_to_db(request.query_params['websitesToAdd'], 'website', None)
 
         return Response(status=200)
 

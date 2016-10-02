@@ -18,15 +18,22 @@ angular.module('addItems').component('addItems', {
 
             var websitesToAdd = "";
 
+            self.isMainStream = false;
+            self.isPicture = false;
+            self.isScene = true;
+
             self.createSampleVideo = false;
 
             var httpRequest = function () {
                 return $http.get('add-items/', {
                     params: {
                         actorsToAdd: actorsToAdd,
+                        isMainStream: self.isMainStream,
                         sceneTagsToAdd: sceneTagsToAdd,
-                        websitesToAdd:  websitesToAdd,
+                        websitesToAdd: websitesToAdd,
                         folderToAddPath: foldersToAdd,
+                        isPicture: self.isPicture,
+                        isScene: self.isScene,
                         createSampleVideo: self.createSampleVideo
 
                     }
@@ -62,18 +69,18 @@ angular.module('addItems').component('addItems', {
                 httpRequest();
 
             };
-            
+
             self.addSceneTagsClicked = function () {
                 clearFields();
                 sceneTagsToAdd = self.textareaInputContent;
                 httpRequest();
             };
-            
+
             self.websitesToAddClicked = function () {
                 clearFields();
                 websitesToAdd = self.textareaInputContent;
                 httpRequest();
-            } 
+            }
         }
     ]
 });

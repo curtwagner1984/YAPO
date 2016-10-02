@@ -96,6 +96,7 @@ class Actor(models.Model):
     is_exempt_from_one_word_search = models.BooleanField(default=False)
     actor_aliases = models.ManyToManyField(ActorAlias, null=True, blank=True, related_name='actors')
     modified_date = models.DateTimeField(auto_now=True)
+    is_mainstream = models.BooleanField(default=False)
 
     def get_absolute_url(self):
         return reverse('videos:actor-details', kwargs={'pk': self.pk})
@@ -181,6 +182,7 @@ class Folder(MPTTModel):
 class LocalSceneFolders(models.Model):
     name = models.CharField(max_length=500, unique=True)
     date_added = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(max_length=500, null=True, blank=True)
 
 
 class Playlist(models.Model):
@@ -192,6 +194,28 @@ class Playlist(models.Model):
     def __str__(self):
         return "%s " % (self.name,)
 
+
+class PictureTag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    date_added = models.DateTimeField(auto_now_add=True)
+    rating = models.IntegerField(default=0)
+    thumbnail = models.CharField(max_length=500, null=True, blank=True)
+    play_count = models.IntegerField(default=0)
+    is_fav = models.BooleanField(default=False)
+    is_runner_up = models.BooleanField(default=False)
+    picture_tag_alias = models.TextField(default="", blank=True)
+
+
+class Picture(models.Model):
+    name = models.CharField(max_length=50)
+    date_added = models.DateTimeField(auto_now_add=True)
+    rating = models.IntegerField(default=0)
+    thumbnail = models.CharField(max_length=500, null=True, blank=True)
+    actors = models.ManyToManyField(Actor, null=True, blank=True, related_name='pictures')
+    picture_tags = models.ManyToManyField(PictureTag, null=True, blank=True, related_name='pictures')
+    websites = models.ManyToManyField(Website, null=True, blank=True, related_name='pictures')
+    path_to_file = models.CharField(max_length=500, unique=True)
+    path_to_dir = models.CharField(max_length=500, null=True, blank=True)
 
 
 @receiver(signals.post_save, sender=ActorTag)

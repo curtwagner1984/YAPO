@@ -23,6 +23,7 @@ from videos.models import Actor, ActorAlias, ActorTag
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "YAPO.settings")
 
+
 # MEDIA_PATH = "videos\\media"
 
 
@@ -108,23 +109,25 @@ def search_freeones(actor_to_search, alias, force):
 
         if has_image:
             images_page = profile_thumb_parent['href']
+            try:
+                r = requests.get(images_page)
+                soup = BeautifulSoup(r.content)
 
-            r = requests.get(images_page)
-            soup = BeautifulSoup(r.content)
+                if actor_to_search.thumbnail == const.UNKNOWN_PERSON_IMAGE_PATH or force:
+                    if soup.find("div", {'id': 'PictureList'}):
 
-            if actor_to_search.thumbnail == const.UNKNOWN_PERSON_IMAGE_PATH or force:
-                if soup.find("div", {'id': 'PictureList'}):
+                        picture_list = soup.find("div", {'id': 'PictureList'})
 
-                    picture_list = soup.find("div", {'id': 'PictureList'})
+                        if picture_list.find("a"):
+                            first_picture = picture_list.find("a")
 
-                    if picture_list.find("a"):
-                        first_picture = picture_list.find("a")
+                            if first_picture['href']:
+                                first_picture_link = first_picture['href']
 
-                        if first_picture['href']:
-                            first_picture_link = first_picture['href']
-
-                            print(first_picture_link)
-                            aux.save_actor_profile_image_from_web(first_picture_link, actor_to_search,force)
+                                print(first_picture_link)
+                                aux.save_actor_profile_image_from_web(first_picture_link, actor_to_search, force)
+            except Exception as e:
+                print("A Connection error occurred while trying to access '{}' Error info: {}".format(images_page,e.strerror))
 
         r = requests.get(biography_page)
 

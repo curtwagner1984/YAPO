@@ -181,8 +181,13 @@ def parse_scene_all_metadata(scene, actors, actors_alias, scene_tags, websites):
     print("Looking for actors and aliases...")
     scene_path = parse_actors_in_scene(scene, scene_path, actors, actors_alias)
 
-    print("Looking for scene tags...")
-    scene_path = parse_scene_tags_in_scene(scene, scene_path, scene_tags)
+    if type(scene) == 'videos.models.Scene':
+        print("Looking for scene tags...")
+        scene_path = parse_scene_tags_in_scene(scene, scene_path, scene_tags)
+    elif type(scene) == 'videos.models.Picture':
+        print("Looking for picture tags...")
+        scene_path = parse_picture_tags_in_scene(scene, scene_path, scene_tags)
+
 
     scene.last_filename_tag_lookup = datetime.datetime.now()
 
@@ -436,6 +441,32 @@ def parse_scene_tags_in_scene(scene, scene_path, scene_tags):
                     if not scene.scene_tags.filter(name=scene_tag.name):
                         print("Adding Tag: '{}' to the scene {}".format(scene_tag.name, scene.name))
                         scene.scene_tags.add(scene_tag)
+    return scene_path
+
+
+def parse_picture_tags_in_scene(scene, scene_path, picture_tags):
+    for picture_tag in picture_tags:
+        regex_search_term = get_regex_search_term(picture_tag.name, '.')
+
+        if re.search(regex_search_term, scene_path, re.IGNORECASE) is not None:
+            scene_path = re.sub(regex_search_term, '', scene_path, flags=re.IGNORECASE)
+            if not scene.picture_tags.filter(name=picture_tag.name):
+                print("Adding Tag: {} to the scene {}".format(picture_tag.name, scene.name))
+                # print("Adding " + scene_tag.name + " to scene" + scene.name + "\n")
+                scene.picture_tag.add(picture_tag)
+            else:
+                print("Tag: {} is already in {}".format(picture_tag.name, scene.name))
+
+        if picture_tag.picture_tag_alias != "":
+            for picture_tag_alias in picture_tag.picture_tag_alias.split(','):
+                picture_tag_alias_tripped = picture_tag_alias.strip()
+                regex_search_term = get_regex_search_term(picture_tag_alias_tripped, '.')
+
+                if re.search(regex_search_term, scene_path, re.IGNORECASE) is not None:
+                    scene_path = re.sub(regex_search_term, '', scene_path, flags=re.IGNORECASE)
+                    if not scene.picture_tags.filter(name=picture_tag.name):
+                        print("Adding Tag: '{}' to the scene {}".format(picture_tag.name, scene.name))
+                        scene.picture_tag.add(picture_tag)
     return scene_path
 
 

@@ -23,10 +23,14 @@ angular.module('dbFolderTree').component('dbFolderTree', {
             self.sortBy = 'name';
             self.advSearchObject = {};
             self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject, 'folder_properties_level', '0', true);
-            
+
             if (self.routParam != undefined){
                 self.advSearchString = $rootScope.generateAdvSearchString(self.advSearchObject, 'folder_properties_parent', self.routParam, false);
+                self.currentDir = {id: self.routParam};
+                scopeWatchService.folderOpened({'dir': self.currentDir, 'recursive': self.recursive});
             }
+            
+
 
 
             // Wrapper for the Dynamic Items object in nav-bar.component.
@@ -103,6 +107,8 @@ angular.module('dbFolderTree').component('dbFolderTree', {
             //
             //
             // };
+
+
             
             var loadFolder = function (clickedFolder) {
                 scopeWatchService.folderOpened({'dir': clickedFolder, 'recursive': self.recursive});
@@ -263,9 +269,9 @@ angular.module('dbFolderTree').component('dbFolderTree', {
 
 
             $scope.$on("didFolderLoad", function (event, pageInfo) {
-                if (gotPromise) {
+
                     scopeWatchService.folderOpened({'dir': self.currentDir, 'recursive': self.recursive});
-                }
+                
             });
 
 

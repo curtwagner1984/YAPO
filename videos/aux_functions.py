@@ -21,9 +21,8 @@ def save_actor_profile_image_from_web(image_link, actor, force):
 
     actor.thumbnail = as_uri
 
-    image_operations.process_single_actor_contact(actor)
-    image_operations.process_single_actor_grid(actor)
-
+    image_operations.process_single_actor_contact(actor, force)
+    image_operations.process_single_actor_grid(actor, force)
 
 
 def actor_folder_from_name_to_id():
